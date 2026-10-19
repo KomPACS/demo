@@ -618,6 +618,10 @@ export interface components {
             diagnoses: components["schemas"]["Diagnosis"][];
             /** Index Date */
             index_date: string | null;
+            /** Name */
+            name?: string | null;
+            /** Rc */
+            rc?: string | null;
         };
         /** RejudgeRequest */
         RejudgeRequest: {

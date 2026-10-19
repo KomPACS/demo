@@ -11,3 +11,9 @@ pnpm build
 
 - API contract: `contract/openapi.json` → `src/api.d.ts` (`pnpm api`). The mock answers it in the browser.
 - Terms: `CONTEXT.md`. Rules: `.claude/skills/app-dev`, `.claude/skills/ux-design`.
+
+`pnpm test` runs the mock tests (`node --test`).
+
+## Contract changes
+
+- 2026-10-19: `Patient.name`, `Patient.rc` (optional).
