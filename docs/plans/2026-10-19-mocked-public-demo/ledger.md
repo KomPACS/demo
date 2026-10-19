@@ -23,7 +23,7 @@
 | T11 | Scenarios 3–5 | dev | COMPLETED | 0 | - |
 | T12 | Scenarios 6–8 | dev | COMPLETED | 0 | - |
 | T13 | Scenarios 9–10 and filler 11 | dev | COMPLETED | 0 | - |
-| T14 | Fillers 12–14 | dev | PENDING | 0 | - |
+| T14 | Fillers 12–14 | dev | COMPLETED | 0 | - |
 | T15 | Tour stops and global seed checks | inline | PENDING | 0 | - |
 
 ## Cost
