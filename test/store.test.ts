@@ -569,7 +569,7 @@ test('reset(): returns the fixture start state', () => {
   assert.deepEqual(after, before)
 })
 
-// --- T6 — Store mutations -------------------------------------------------
+// --- Store mutations -------------------------------------------------
 
 function buildMutationFixtures() {
   const patientM: Patient = {
@@ -1077,7 +1077,7 @@ test('createTrigger(): for the live patient, creates the templated trigger; a se
   assert.throws(() => store.getCase(fx.triggerLiveId), NotFound)
 })
 
-test('createTrigger(): for a patient without live, copies the latest trigger\'s candidates with fresh ids and no decisions (Q1)', () => {
+test('createTrigger(): for a patient without live, copies the latest trigger\'s candidates with fresh ids and no decisions', () => {
   const { store, fx } = makeMutationStore()
   const body: TriggerCreate = { patient_id: fx.patientEId, kind: 'exam', modality: 'MR', date: '2026-10-23' }
   const summary = store.createTrigger(body)
