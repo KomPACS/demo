@@ -1,5 +1,6 @@
 import type { components } from '@/api.ts'
 import type { Scenario, ScenarioTrigger } from './types.ts'
+import { llmTrace } from './trace.ts'
 
 type Patient = components['schemas']['Patient']
 type Candidate = components['schemas']['Candidate']
@@ -12,6 +13,7 @@ type DatasetStats = components['schemas']['DatasetStats']
 type VerdictVersion = components['schemas']['VerdictVersion']
 type PacsCount = components['schemas']['PacsCount']
 type StatusCounts = components['schemas']['StatusCounts']
+type LlmCall = components['schemas']['LlmCall']
 
 type RawCandidate = Omit<Candidate, 'request_id' | 'request_state'>
 type RawRequest = Omit<RequestItem, 'contact'>
@@ -27,6 +29,7 @@ export interface Store {
   stats(): DatasetStats
   verdicts(triggerId: string, candidateId: string): VerdictVersion[]
   lookupContact(orgId: string): Contact | null
+  llmTrace(triggerId: string): LlmCall[]
   reset(): void
 }
 
@@ -184,6 +187,11 @@ export function createStore(scenarios: Scenario[]): Store {
 
     lookupContact(orgId: string): Contact | null {
       return allContacts()[orgId] ?? null
+    },
+
+    llmTrace(triggerId: string): LlmCall[] {
+      const { scenario, st } = findScenarioTrigger(triggerId)
+      return llmTrace(scenario.patient, st.trigger, st.candidates, scenario.reports)
     },
 
     reset(): void {
