@@ -20,7 +20,7 @@
 | T8 | Wire the mock into the API client | inline | COMPLETED | 0 | - |
 | T9 | Show name and RČ, Fiktivní data badge, insurer label | inline | COMPLETED | 0 | - |
 | T10 | Seed invariants test, scenarios 1–2 | dev | COMPLETED | 0 | - |
-| T11 | Scenarios 3–5 | dev | PENDING | 0 | - |
+| T11 | Scenarios 3–5 | dev | COMPLETED | 0 | - |
 | T12 | Scenarios 6–8 | dev | PENDING | 0 | - |
 | T13 | Scenarios 9–10 and filler 11 | dev | PENDING | 0 | - |
 | T14 | Fillers 12–14 | dev | PENDING | 0 | - |
