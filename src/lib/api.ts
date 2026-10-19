@@ -1,5 +1,6 @@
 import createClient from 'openapi-fetch'
 import type { components, paths } from '@/api'
+import { mockFetch } from '@/mock'
 
 export type Schemas = components['schemas']
 export type Case = Schemas['Case']
@@ -11,7 +12,7 @@ export type RequestItem = Schemas['RequestItem']
 export type TimelineEvent = Schemas['TimelineEvent']
 export type TriggerSummary = Schemas['TriggerSummary']
 
-export const api = createClient<paths>()
+export const api = createClient<paths>({ fetch: mockFetch })
 
 export async function data<T>(call: Promise<{ data?: T; error?: unknown }>): Promise<T> {
   const { data, error } = await call
@@ -26,19 +27,12 @@ export async function decide(
   reason: string | null,
   role: 'doctor' | 'collector',
 ): Promise<Case> {
-  const updated = await data(
+  return data(
     api.PATCH('/api/triggers/{trigger_id}/candidates/{candidate_id}', {
       params: { path: { trigger_id: triggerId, candidate_id: candidateId } },
       body: { decision, reason, role },
     }),
   )
-  // shortcut: T1 stubs return the case unchanged, so apply the decision here; drop after T7 (#21).
-  return {
-    ...updated,
-    candidates: updated.candidates.map((c) =>
-      c.id === candidateId ? { ...c, decision, decision_reason: reason } : c,
-    ),
-  }
 }
 
 export type Action = 'approve' | 'requested' | 'not-found' | 'deliver'
