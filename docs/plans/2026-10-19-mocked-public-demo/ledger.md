@@ -19,7 +19,7 @@
 | T7 | Mock fetch router | dev | COMPLETED | 0 | - |
 | T8 | Wire the mock into the API client | inline | COMPLETED | 0 | - |
 | T9 | Show name and RČ, Fiktivní data badge, insurer label | inline | COMPLETED | 0 | - |
-| T10 | Seed invariants test, scenarios 1–2 | dev | PENDING | 0 | - |
+| T10 | Seed invariants test, scenarios 1–2 | dev | COMPLETED | 0 | - |
 | T11 | Scenarios 3–5 | dev | PENDING | 0 | - |
 | T12 | Scenarios 6–8 | dev | PENDING | 0 | - |
 | T13 | Scenarios 9–10 and filler 11 | dev | PENDING | 0 | - |
@@ -36,6 +36,8 @@
 - Decision: real Modrá kniha quotes from linkos.cz PDF, not committed - Q3
 - Decision: PACS viewer images are synthetic, keep - Q4
 - Decision: insurer label changed in P1 (T9) - Q5
+
+- G2 review: FAIL (plan refs in comments), fixed inline 18afeaf. Non-blocking: default verdict-version literal repeated 3x in store.ts.
 
 ## Warnings & Blockers
 - None.
