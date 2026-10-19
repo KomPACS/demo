@@ -287,7 +287,6 @@ export function createStore(scenarios: Scenario[]): Store {
         return buildSummary(scenario, st)
       }
 
-      // Q1: no live trigger seeded — copy the latest trigger's candidates with fresh ids, no decisions.
       const latest = [...scenario.triggers].sort((a, b) => Date.parse(b.trigger.date) - Date.parse(a.trigger.date))[0]
       const newId = `live-${++liveSeq}`
       const candidates: RawCandidate[] = (latest?.candidates ?? []).map((c, i) => ({
