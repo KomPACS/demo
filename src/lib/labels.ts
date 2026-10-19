@@ -40,7 +40,7 @@ export const channelLabel: Record<Schemas['RequestItem']['channel'], string> = {
 export const sourceLabel: Record<Candidate['source'], string> = {
   nis_record: 'záznam v NIS',
   report_text: 'zmínka ve zprávě',
-  insurer: 'zdravotní pojišťovna',
+  insurer: 'Výpis pojištěnce (souhlas pacienta)',
   collector: 'přidal/a koordinátor/ka',
 }
 

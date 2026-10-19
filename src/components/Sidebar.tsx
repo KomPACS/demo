@@ -1,5 +1,6 @@
 import { ChartColumn, ExternalLink, List, UserRound } from 'lucide-react'
 import type { ReactNode } from 'react'
+import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 
 export type Role = 'doctor' | 'collector'
@@ -86,7 +87,10 @@ export function Sidebar({
       ))}
       <div className="mt-auto flex flex-col gap-3 pt-6">
         {newCheck}
-        <div className="px-1.5 text-[13px] text-subtle">Prototyp, není zdravotnický prostředek</div>
+        <div className="flex flex-wrap items-center gap-2 px-1.5 text-[13px] text-subtle">
+          <Badge variant="outline">Fiktivní data</Badge>
+          Prototyp, není zdravotnický prostředek
+        </div>
       </div>
     </nav>
   )

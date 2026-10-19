@@ -33,7 +33,8 @@ export function PatientBar({
       <button type="button" onClick={onBack} className="basis-full text-left text-[15px] font-bold text-bar-muted hover:text-white">
         ‹ {backLabel}
       </button>
-      <div className="text-[26px] font-extrabold tracking-tight">{patient.id}</div>
+      <div className="text-[26px] font-extrabold tracking-tight">{patient.name ?? patient.id}</div>
+      {patient.rc && <Item label="RČ">{patient.rc}</Item>}
       <Item label="Pacient">{[sexLabel[patient.sex], age(patient)].filter(Boolean).join(', ')}</Item>
       {dx && (
         <Item label="Diagnóza">
