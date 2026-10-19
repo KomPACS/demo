@@ -84,7 +84,7 @@ export function Queue({
   const needle = q.trim().toLowerCase()
   const shown = rows.filter(
     ({ t, state: s }) =>
-      (!needle || t.patient.id.toLowerCase().includes(needle)) &&
+      (!needle || [t.patient.id, t.patient.name, t.patient.rc].some((v) => v?.toLowerCase().includes(needle))) &&
       (kind === 'all' || (kind === 'mdt' ? t.trigger.kind === 'mdt' : t.trigger.modality === kind)) &&
       (!collector || state === 'all' || s === state) &&
       (!urgent || (isSoon(t.trigger.date) && (t.to_decide > 0 || t.open_requests > 0))) &&
@@ -113,7 +113,7 @@ export function Queue({
       <section aria-label="Filtry" className={cn(panel, 'flex flex-wrap items-end gap-4 px-5 py-4.5')}>
         <div className="flex flex-[2_1_240px] flex-col gap-2">
           <Label htmlFor="f-patient" className="text-sm font-bold text-text">Pacient</Label>
-          <Input id="f-patient" placeholder="ID pacienta" value={q} onChange={(e) => setQ(e.target.value)} />
+          <Input id="f-patient" placeholder="Jméno nebo RČ" value={q} onChange={(e) => setQ(e.target.value)} />
         </div>
         <FilterSelect label="Spouštěč" value={kind} onChange={(v) => setKind(v as Kind)} options={{ all: 'Vše', CT: 'CT', MR: 'MR', PT: 'PET', mdt: 'MDT' }} />
         {collector && (
@@ -231,7 +231,7 @@ function TriggerCard({
     >
       <div className="flex w-full flex-wrap items-center gap-4">
         <div className="min-w-0 flex-[1_1_240px]">
-          <div className="text-[21px] font-extrabold">{patient.id}</div>
+          <div className="text-[21px] font-extrabold">{patient.name ?? patient.id}</div>
           <div className="text-[15px] text-muted-foreground">
             {[sexLabel[patient.sex], age(patient)].filter(Boolean).join(', ')}
             {dx && ` · ${[dx.code, dx.display].filter(Boolean).join(' ')}`}

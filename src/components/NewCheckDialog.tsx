@@ -64,7 +64,7 @@ export function NewCheckDialog({ onCreated }: { onCreated: (t: TriggerSummary) =
         </DialogHeader>
         <div className="grid gap-1">
           <Label htmlFor="patient-q">Pacient</Label>
-          <Input id="patient-q" placeholder="Hledat podle ID" value={q} onChange={(e) => setQ(e.target.value)} />
+          <Input id="patient-q" placeholder="Jméno nebo RČ" value={q} onChange={(e) => setQ(e.target.value)} />
           <ul className="max-h-40 overflow-auto rounded-md border">
             {patients.map((p) => (
               <li key={p.id}>
@@ -73,7 +73,7 @@ export function NewCheckDialog({ onCreated }: { onCreated: (t: TriggerSummary) =
                   onClick={() => setPatientId(p.id)}
                   className={`w-full px-3 py-1.5 text-left text-sm hover:bg-accent ${p.id === patientId ? 'bg-accent font-medium' : ''}`}
                 >
-                  {p.id} · {p.diagnoses.map((d) => d.code).join(', ')}
+                  {p.name ?? p.id}{p.rc && ` · ${p.rc}`} · {p.diagnoses.map((d) => d.code).join(', ')}
                 </button>
               </li>
             ))}

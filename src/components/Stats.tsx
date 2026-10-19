@@ -220,7 +220,7 @@ export function Stats({ triggers, onOpen }: { triggers: TriggerSummary[]; onOpen
             {active.cases.map((t) => (
               <li key={t.trigger.id}>
                 <button type="button" onClick={() => onOpen(t.trigger.id)} className="rounded-full border bg-background px-3.5 py-1.5 text-sm font-semibold text-text hover:border-primary hover:text-primary">
-                  {triggerTitle(t.trigger)} · {weekdayDate(t.trigger.date)} · {t.patient.id}
+                  {triggerTitle(t.trigger)} · {weekdayDate(t.trigger.date)} · {t.patient.name ?? t.patient.id}
                 </button>
               </li>
             ))}
