@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { createStore, NotFound, type Store } from '../src/mock/store.ts'
+import { createStore, NotFound, Conflict, type Store } from '../src/mock/store.ts'
 import { birthNumber } from '../src/mock/rc.ts'
 import type { components } from '@/api.ts'
 
@@ -14,6 +14,12 @@ type Contact = components['schemas']['Contact']
 type TimelineEvent = components['schemas']['TimelineEvent']
 type DatasetStats = components['schemas']['DatasetStats']
 type VerdictVersion = components['schemas']['VerdictVersion']
+type Verdict = components['schemas']['Verdict']
+type CandidateCreate = components['schemas']['CandidateCreate']
+type DecisionUpdate = components['schemas']['DecisionUpdate']
+type TriggerCreate = components['schemas']['TriggerCreate']
+type ContactUpdate = components['schemas']['ContactUpdate']
+type PacsFeedResult = components['schemas']['PacsFeedResult']
 
 function buildFixtures() {
   const rcA = birthNumber('1958-09-12', 'female', 7)
@@ -561,4 +567,543 @@ test('reset(): returns the fixture start state', () => {
   store.reset()
   const after = store.getCase(fx.triggerAId)
   assert.deepEqual(after, before)
+})
+
+// --- T6 — Store mutations -------------------------------------------------
+
+function buildMutationFixtures() {
+  const patientM: Patient = {
+    id: 'pac-store-m',
+    sex: 'male',
+    birth_year: 1980,
+    diagnoses: [{ code: 'C34', display: 'Zhoubný novotvar průdušky a plíce' }],
+    index_date: '2026-09-01',
+    name: 'Milan Novák',
+    rc: birthNumber('1980-04-10', 'male', 11),
+  }
+
+  const triggerM: Trigger = {
+    id: 'trig-store-m',
+    patient_id: patientM.id,
+    kind: 'exam',
+    modality: 'CT',
+    date: '2026-10-20',
+    simulated: false,
+  }
+
+  type RawCandidate = Omit<Candidate, 'request_id' | 'request_state'>
+  type RawRequest = Omit<RequestItem, 'contact'>
+
+  const relevantVerdict = (reason: string): Verdict => ({
+    label: 'relevant',
+    reason,
+    source_sentence: null,
+    guideline: null,
+    kroky: [],
+  })
+
+  const base: RawCandidate = {
+    id: 'm-c1',
+    source: 'nis_record',
+    modality: 'CT',
+    date: '2023-02-01',
+    description: 'CT plic',
+    place: 'Nemocnice M',
+    organization_id: 'org-m-email',
+    study_id: null,
+    report_id: null,
+    status: 'missing',
+    is_baseline: false,
+    verdict: { label: 'uncertain', reason: 'Nejasné.', source_sentence: null, guideline: null, kroky: [] },
+    decision: null,
+    decision_reason: null,
+  }
+
+  const mC1: RawCandidate = { ...base, id: 'm-c1' }
+  const mC2: RawCandidate = {
+    ...base,
+    id: 'm-c2',
+    verdict: relevantVerdict('Shoda s diagnózou.'),
+    decision: 'relevant',
+    decision_reason: 'Koordinátor/ka potvrdila relevanci.',
+  }
+  const mC3: RawCandidate = { ...base, id: 'm-c3', verdict: relevantVerdict('Shoda s diagnózou.') }
+  const mC4: RawCandidate = { ...base, id: 'm-c4', verdict: relevantVerdict('Shoda s diagnózou.') }
+  const mC5: RawCandidate = { ...base, id: 'm-c5', verdict: relevantVerdict('Shoda s diagnózou.') }
+  const mC6: RawCandidate = { ...base, id: 'm-c6', organization_id: 'org-m-none' }
+  const mC7: RawCandidate = { ...base, id: 'm-c7', organization_id: 'org-m-none' }
+  const mC8: RawCandidate = { ...base, id: 'm-c8', organization_id: 'org-m-none', study_id: 'STU-M-8' }
+  const mC9: RawCandidate = { ...base, id: 'm-c9', organization_id: 'org-m-new', place: 'Nemocnice Nová' }
+  const mC10: RawCandidate = { ...base, id: 'm-c10', verdict: relevantVerdict('Výchozí nález.') }
+  const mC12: RawCandidate = {
+    ...base,
+    id: 'm-c12',
+    verdict: { label: 'uncertain', reason: 'Výchozí nejistota.', source_sentence: null, guideline: null, kroky: [] },
+  }
+
+  const reqBase: RawRequest = {
+    id: 'req-m-2',
+    trigger_id: triggerM.id,
+    trigger_date: triggerM.date,
+    patient_id: patientM.id,
+    candidate_id: 'm-c2',
+    prior_modality: 'CT',
+    prior_date: '2023-02-01',
+    prior_description: 'CT plic',
+    place: 'Nemocnice M',
+    organization_id: 'org-m-email',
+    channel: 'email',
+    state: 'draft',
+    email_draft: 'Dobrý den, žádáme o zaslání zprávy z vyšetření CT plic.',
+    created_at: '2026-10-18T09:00:00.000Z',
+    sent_at: null,
+    study_id: null,
+    fhir_task: null,
+  }
+
+  const rM2: RawRequest = { ...reqBase, id: 'req-m-2', candidate_id: 'm-c2' }
+  const rM3: RawRequest = {
+    ...reqBase,
+    id: 'req-m-3',
+    candidate_id: 'm-c3',
+    state: 'sent',
+    sent_at: '2026-10-18T10:00:00.000Z',
+    study_id: 'STU-M-3',
+  }
+  const rM4: RawRequest = { ...reqBase, id: 'req-m-4', candidate_id: 'm-c4', state: 'draft' }
+  const rM5: RawRequest = {
+    ...reqBase,
+    id: 'req-m-5',
+    candidate_id: 'm-c5',
+    state: 'received',
+    sent_at: '2026-10-10T09:00:00.000Z',
+  }
+  const rM6: RawRequest = {
+    ...reqBase,
+    id: 'req-m-6',
+    candidate_id: 'm-c6',
+    channel: 'phone',
+    email_draft: null,
+    organization_id: 'org-m-none',
+    state: 'draft',
+  }
+  const rM7: RawRequest = {
+    ...reqBase,
+    id: 'req-m-7',
+    candidate_id: 'm-c7',
+    channel: 'phone',
+    email_draft: null,
+    organization_id: 'org-m-none',
+    state: 'draft',
+  }
+  const rM8: RawRequest = {
+    ...reqBase,
+    id: 'req-m-8',
+    candidate_id: 'm-c8',
+    channel: 'phone',
+    email_draft: null,
+    organization_id: 'org-m-none',
+    state: 'sent',
+    sent_at: '2026-10-15T09:00:00.000Z',
+  }
+  const rM9: RawRequest = {
+    ...reqBase,
+    id: 'req-m-9',
+    candidate_id: 'm-c9',
+    channel: 'phone',
+    email_draft: null,
+    organization_id: 'org-m-new',
+    place: 'Nemocnice Nová',
+    state: 'draft',
+  }
+
+  const contactEmail: Contact = {
+    organization_id: 'org-m-email',
+    organization_name: 'Nemocnice M Email',
+    email: 'm-email@example.com',
+    phone: null,
+    source_url: null,
+    verified_at: '2024-01-01T09:00:00.000Z',
+    needs_reverify: true,
+    fhir_endpoint: null,
+  }
+  const contactFhir: Contact = {
+    organization_id: 'org-m-fhir',
+    organization_name: 'Nemocnice M FHIR',
+    email: null,
+    phone: null,
+    source_url: null,
+    verified_at: null,
+    needs_reverify: false,
+    fhir_endpoint: 'https://fhir.example/org-m-fhir',
+  }
+
+  const eM8: TimelineEvent = {
+    id: 'evt-m-8',
+    date: '2026-10-19T08:00:00.000Z',
+    type: 'imaging',
+    title: 'Plánované zobrazení',
+    detail: 'bez snímků v PACS',
+    resource: 'ImagingStudy/STU-M-8',
+    simulated: false,
+  }
+
+  const verdictsM: Record<string, VerdictVersion[]> = {
+    'm-c10': [{ n: 0, verdict: mC10.verdict, active: true }],
+    'm-c12': [
+      { n: 0, verdict: mC12.verdict, active: true },
+      {
+        n: 1,
+        verdict: { label: 'relevant', reason: 'Potvrzeno dle doplněné zprávy.', source_sentence: null, guideline: null, kroky: [] },
+        active: false,
+      },
+    ],
+  }
+
+  const scenarioM = {
+    patient: patientM,
+    insurer: '111' as const,
+    triggers: [
+      {
+        trigger: triggerM,
+        candidates: [mC1, mC2, mC3, mC4, mC5, mC6, mC7, mC8, mC9, mC10, mC12],
+        duplicate_alert: null,
+        insurer_request: null,
+        verdicts: verdictsM,
+      },
+    ],
+    requests: [rM2, rM3, rM4, rM5, rM6, rM7, rM8, rM9],
+    timeline: [eM8],
+    contacts: { 'org-m-email': contactEmail, 'org-m-fhir': contactFhir },
+    reports: [],
+  }
+
+  const patientE: Patient = {
+    id: 'pac-store-e',
+    sex: 'female',
+    birth_year: 1965,
+    diagnoses: [{ code: 'C50', display: 'Zhoubný novotvar prsu' }],
+    index_date: '2026-06-01',
+    name: 'Eva Veselá',
+    rc: birthNumber('1965-05-05', 'female', 2),
+  }
+  const triggerE1: Trigger = {
+    id: 'trig-store-e1',
+    patient_id: patientE.id,
+    kind: 'exam',
+    modality: 'CT',
+    date: '2026-01-10',
+    simulated: false,
+  }
+  const triggerE2: Trigger = {
+    id: 'trig-store-e2',
+    patient_id: patientE.id,
+    kind: 'exam',
+    modality: 'MR',
+    date: '2026-09-15',
+    simulated: false,
+  }
+  const eC1: RawCandidate = { ...base, id: 'e-c1', organization_id: null, place: null, decision: 'not_relevant', decision_reason: 'Mimo oblast.' }
+  const eC2: RawCandidate = {
+    ...base,
+    id: 'e-c2',
+    organization_id: null,
+    place: null,
+    verdict: relevantVerdict('Shoda s diagnózou.'),
+    decision: 'relevant',
+    decision_reason: 'Potvrzeno.',
+  }
+  const eC3: RawCandidate = { ...base, id: 'e-c3', organization_id: null, place: null }
+
+  const scenarioE = {
+    patient: patientE,
+    insurer: '205' as const,
+    triggers: [
+      { trigger: triggerE1, candidates: [eC1], duplicate_alert: null, insurer_request: null },
+      { trigger: triggerE2, candidates: [eC2, eC3], duplicate_alert: null, insurer_request: null },
+    ],
+    requests: [],
+    timeline: [],
+    contacts: {},
+    reports: [],
+  }
+
+  return {
+    scenarioM,
+    scenarioE,
+    patientMId: patientM.id,
+    triggerMId: triggerM.id,
+    patientEId: patientE.id,
+    triggerE1Id: triggerE1.id,
+    triggerE2Id: triggerE2.id,
+  }
+}
+
+function makeMutationStore() {
+  const fx = buildMutationFixtures()
+  const store: Store = createStore([fx.scenarioM, fx.scenarioE])
+  return { store, fx }
+}
+
+test('addCandidate(): creates a draft request; channel follows the contact (fhir/email/phone)', () => {
+  const { store, fx } = makeMutationStore()
+
+  const bodyEmail: CandidateCreate = { modality: 'MR', description: 'MR testovací', place: 'Nemocnice M', organization_id: 'org-m-email' }
+  const caseEmail = store.addCandidate(fx.triggerMId, bodyEmail)
+  const addedEmail = caseEmail.candidates.find((c) => c.description === 'MR testovací')
+  assert.ok(addedEmail)
+  assert.equal(addedEmail.source, 'collector')
+  assert.equal(addedEmail.decision, 'relevant')
+  assert.equal(addedEmail.verdict.label, 'relevant')
+  assert.equal(addedEmail.verdict.reason, 'Přidal/a koordinátor/ka.')
+  assert.equal(addedEmail.status, 'missing')
+  const reqEmail = store.queue().find((r) => r.candidate_id === addedEmail.id)
+  assert.equal(reqEmail?.state, 'draft')
+  assert.equal(reqEmail?.channel, 'email')
+  assert.ok(reqEmail?.email_draft)
+
+  const bodyFhir: CandidateCreate = { modality: 'MR', description: 'MR testovací FHIR', place: 'Nemocnice M', organization_id: 'org-m-fhir' }
+  const caseFhir = store.addCandidate(fx.triggerMId, bodyFhir)
+  const addedFhir = caseFhir.candidates.find((c) => c.description === 'MR testovací FHIR')
+  assert.ok(addedFhir)
+  const reqFhir = store.queue().find((r) => r.candidate_id === addedFhir.id)
+  assert.equal(reqFhir?.channel, 'fhir')
+
+  const bodyNone: CandidateCreate = { modality: 'MR', description: 'MR bez místa' }
+  const caseNone = store.addCandidate(fx.triggerMId, bodyNone)
+  const addedNone = caseNone.candidates.find((c) => c.description === 'MR bez místa')
+  assert.ok(addedNone)
+  assert.equal(addedNone.status, 'place_unknown')
+  const reqNone = store.queue().find((r) => r.candidate_id === addedNone.id)
+  assert.equal(reqNone?.channel, 'phone')
+})
+
+test('decide(): relevant on a non-available candidate with no request creates a draft request', () => {
+  const { store, fx } = makeMutationStore()
+  const body: DecisionUpdate = { decision: 'relevant', reason: 'Potvrzeno koordinátorem.', role: 'collector' }
+  const kase = store.decide(fx.triggerMId, 'm-c1', body)
+  const c1 = kase.candidates.find((c) => c.id === 'm-c1')
+  assert.equal(c1?.decision, 'relevant')
+  assert.equal(c1?.decision_reason, 'Potvrzeno koordinátorem.')
+  assert.equal(c1?.request_state, 'draft')
+  assert.ok(c1?.request_id)
+})
+
+test('decide(): removed deletes the candidate\'s existing draft request', () => {
+  const { store, fx } = makeMutationStore()
+  const before = store.getCase(fx.triggerMId).candidates.find((c) => c.id === 'm-c2')
+  assert.equal(before?.request_state, 'draft')
+
+  const body: DecisionUpdate = { decision: 'removed', reason: 'Duplicitní záznam.', role: 'collector' }
+  const kase = store.decide(fx.triggerMId, 'm-c2', body)
+  const c2 = kase.candidates.find((c) => c.id === 'm-c2')
+  assert.equal(c2?.decision, 'removed')
+  assert.equal(c2?.request_id, null)
+  assert.equal(c2?.request_state, null)
+  assert.ok(!store.queue().some((r) => r.candidate_id === 'm-c2'))
+})
+
+test('rejudge(): appends an active version citing the note when no prepared verdict is seeded, twice', () => {
+  const { store, fx } = makeMutationStore()
+
+  const v1 = store.rejudge(fx.triggerMId, 'm-c10', 'Nová zpráva z nemocnice.')
+  const versions1 = store.verdicts(fx.triggerMId, 'm-c10')
+  assert.equal(versions1.length, 2)
+  assert.equal(versions1[0]?.active, false)
+  assert.equal(versions1[1]?.active, true)
+  assert.equal(versions1[1]?.n, 1)
+  assert.equal(versions1[1]?.verdict.label, 'relevant')
+  assert.match(versions1[1]?.verdict.reason ?? '', /Nová zpráva z nemocnice\./)
+  assert.ok(versions1[1]?.trace)
+  const c10after1 = v1.candidates.find((c) => c.id === 'm-c10')
+  assert.deepEqual(c10after1?.verdict, versions1[1]?.verdict)
+
+  store.rejudge(fx.triggerMId, 'm-c10', 'Druhé přehodnocení.')
+  const versions2 = store.verdicts(fx.triggerMId, 'm-c10')
+  assert.equal(versions2.length, 3)
+  assert.equal(versions2[0]?.active, false)
+  assert.equal(versions2[1]?.active, false)
+  assert.equal(versions2[2]?.active, true)
+  assert.equal(versions2[2]?.n, 2)
+})
+
+test('rejudge(): uses the scenario\'s prepared verdict when seeded, instead of citing the note', () => {
+  const { store, fx } = makeMutationStore()
+  const kase = store.rejudge(fx.triggerMId, 'm-c12', 'Poznámka koordinátora.')
+  const versions = store.verdicts(fx.triggerMId, 'm-c12')
+  const active = versions.find((v) => v.active)
+  assert.equal(active?.verdict.label, 'relevant')
+  assert.equal(active?.verdict.reason, 'Potvrzeno dle doplněné zprávy.')
+  const c12 = kase.candidates.find((c) => c.id === 'm-c12')
+  assert.deepEqual(c12?.verdict, active?.verdict)
+})
+
+test('restore(): candidate.verdict equals the restored version\'s verdict (rejudge twice, then restore 0)', () => {
+  const { store, fx } = makeMutationStore()
+  store.rejudge(fx.triggerMId, 'm-c10', 'První přehodnocení.')
+  store.rejudge(fx.triggerMId, 'm-c10', 'Druhé přehodnocení.')
+  const original = store.verdicts(fx.triggerMId, 'm-c10').find((v) => v.n === 0)
+  assert.ok(original)
+
+  const kase = store.restore(fx.triggerMId, 'm-c10', 0)
+  const versions = store.verdicts(fx.triggerMId, 'm-c10')
+  assert.equal(versions.length, 4)
+  const restored = versions.find((v) => v.active)
+  assert.equal(restored?.n, 3)
+  assert.equal(restored?.restored_from, 0)
+  assert.deepEqual(restored?.verdict, original.verdict)
+
+  const c10 = kase.candidates.find((c) => c.id === 'm-c10')
+  assert.deepEqual(c10?.verdict, original.verdict)
+})
+
+test('approve(): draft becomes sent with sent_at set; queue() and getCase() both reflect it', () => {
+  const { store, fx } = makeMutationStore()
+  const approved = store.approve('req-m-4')
+  assert.equal(approved.state, 'sent')
+  assert.ok(approved.sent_at)
+
+  const queued = store.queue().find((r) => r.id === 'req-m-4')
+  assert.equal(queued?.state, 'sent')
+  const kase = store.getCase(fx.triggerMId)
+  const c4 = kase.candidates.find((c) => c.id === 'm-c4')
+  assert.equal(c4?.request_state, 'sent')
+})
+
+test('approve(): on an already-received request throws Conflict', () => {
+  const { store } = makeMutationStore()
+  assert.throws(() => store.approve('req-m-5'), Conflict)
+})
+
+test('requested(): draft becomes requested', () => {
+  const { store } = makeMutationStore()
+  const updated = store.requested('req-m-6')
+  assert.equal(updated.state, 'requested')
+})
+
+test('notFound(): draft becomes not_found', () => {
+  const { store } = makeMutationStore()
+  const updated = store.notFound('req-m-7')
+  assert.equal(updated.state, 'not_found')
+})
+
+test('deliver(): received; candidate becomes available with pacs_source; adds a simulated imaging event; stats().in_pacs grows by 1', () => {
+  const { store, fx } = makeMutationStore()
+  const before = store.stats().in_pacs
+  const delivered = store.deliver('req-m-3')
+  assert.equal(delivered.state, 'received')
+
+  const kase = store.getCase(fx.triggerMId)
+  const c3 = kase.candidates.find((c) => c.id === 'm-c3')
+  assert.equal(c3?.status, 'available')
+  assert.ok(c3?.pacs_source)
+
+  const events = store.timeline(fx.patientMId, 'imaging')
+  const imagingEvent = events.find((e) => e.resource === 'ImagingStudy/STU-M-3')
+  assert.ok(imagingEvent)
+  assert.equal(imagingEvent.simulated, true)
+
+  assert.equal(store.stats().in_pacs, before + 1)
+})
+
+test('pacsArrival(): a matching study clears the PACS-missing detail, marks the candidate available, and its request received', () => {
+  const { store, fx } = makeMutationStore()
+  const result: PacsFeedResult = store.pacsArrival('STU-M-8')
+  assert.equal(result.rows, 1)
+  assert.equal(result.patched, 1)
+  assert.equal(result.unmatched, 0)
+
+  const events = store.timeline(fx.patientMId, 'imaging')
+  const event = events.find((e) => e.resource === 'ImagingStudy/STU-M-8')
+  assert.notEqual(event?.detail, 'bez snímků v PACS')
+
+  const kase = store.getCase(fx.triggerMId)
+  const c8 = kase.candidates.find((c) => c.id === 'm-c8')
+  assert.equal(c8?.status, 'available')
+  assert.equal(c8?.request_state, 'received')
+})
+
+test('pacsArrival(): no matching study returns unmatched 1, patched 0, and changes nothing', () => {
+  const { store } = makeMutationStore()
+  const result: PacsFeedResult = store.pacsArrival('STU-DOES-NOT-EXIST')
+  assert.equal(result.rows, 1)
+  assert.equal(result.patched, 0)
+  assert.equal(result.unmatched, 1)
+})
+
+test('saveContact(): updates an existing contact, resets needs_reverify and verified_at', () => {
+  const { store } = makeMutationStore()
+  const body: ContactUpdate = { email: 'novy@example.com' }
+  const updated = store.saveContact('org-m-email', body)
+  assert.equal(updated.email, 'novy@example.com')
+  assert.equal(updated.needs_reverify, false)
+  assert.notEqual(updated.verified_at, '2024-01-01T09:00:00.000Z')
+  assert.ok(updated.verified_at)
+})
+
+test('saveContact(): creates the contact when missing, naming it from an existing request for that org', () => {
+  const { store } = makeMutationStore()
+  assert.equal(store.lookupContact('org-m-new'), null)
+  const body: ContactUpdate = { phone: '+420 000 111 222' }
+  const created = store.saveContact('org-m-new', body)
+  assert.equal(created.organization_id, 'org-m-new')
+  assert.equal(created.phone, '+420 000 111 222')
+  assert.ok(created.organization_name)
+  assert.ok(created.verified_at)
+  assert.equal(created.needs_reverify, false)
+  assert.deepEqual(store.lookupContact('org-m-new'), created)
+})
+
+test('createTrigger(): for the live patient, creates the templated trigger; a second call returns the existing summary; reset() removes it', () => {
+  const fx = buildFixtures()
+  const store: Store = createStore([fx.scenarioLive])
+
+  const body: TriggerCreate = { patient_id: fx.patientCId, kind: 'exam', modality: 'CT', date: '2026-11-05' }
+  const summary1 = store.createTrigger(body)
+  assert.equal(summary1.trigger.id, fx.triggerLiveId)
+  assert.equal(summary1.trigger.simulated, true)
+  assert.equal(summary1.trigger.modality, 'CT')
+  assert.equal(summary1.trigger.date, '2026-11-05')
+  assert.equal(store.triggers().filter((t) => t.trigger.patient_id === fx.patientCId).length, 1)
+
+  const body2: TriggerCreate = { patient_id: fx.patientCId, kind: 'exam', modality: 'MR', date: '2026-12-01' }
+  const summary2 = store.createTrigger(body2)
+  assert.equal(summary2.trigger.id, fx.triggerLiveId)
+  assert.equal(summary2.trigger.date, '2026-11-05')
+  assert.equal(store.triggers().filter((t) => t.trigger.patient_id === fx.patientCId).length, 1)
+
+  store.reset()
+  assert.ok(!store.triggers().some((t) => t.trigger.patient_id === fx.patientCId))
+  assert.throws(() => store.getCase(fx.triggerLiveId), NotFound)
+})
+
+test('createTrigger(): for a patient without live, copies the latest trigger\'s candidates with fresh ids and no decisions (Q1)', () => {
+  const { store, fx } = makeMutationStore()
+  const body: TriggerCreate = { patient_id: fx.patientEId, kind: 'exam', modality: 'MR', date: '2026-10-23' }
+  const summary = store.createTrigger(body)
+
+  assert.equal(summary.trigger.patient_id, fx.patientEId)
+  assert.notEqual(summary.trigger.id, fx.triggerE1Id)
+  assert.notEqual(summary.trigger.id, fx.triggerE2Id)
+  assert.equal(summary.trigger.simulated, true)
+  assert.equal(summary.trigger.modality, 'MR')
+  assert.equal(summary.trigger.date, '2026-10-23')
+
+  const kase = store.getCase(summary.trigger.id)
+  assert.equal(kase.candidates.length, 2)
+  assert.ok(!kase.candidates.some((c) => c.id === 'e-c2' || c.id === 'e-c3'))
+  assert.ok(kase.candidates.every((c) => c.decision === null && c.decision_reason === null))
+})
+
+test('reset(): restores request and candidate state after mutations (T6)', () => {
+  const { store, fx } = makeMutationStore()
+  store.approve('req-m-4')
+  store.deliver('req-m-3')
+  store.reset()
+
+  const kase = store.getCase(fx.triggerMId)
+  const c3 = kase.candidates.find((c) => c.id === 'm-c3')
+  assert.equal(c3?.status, 'missing')
+  const req4 = store.queue().find((r) => r.id === 'req-m-4')
+  assert.equal(req4?.state, 'draft')
 })

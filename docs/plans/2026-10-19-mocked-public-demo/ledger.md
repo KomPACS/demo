@@ -15,7 +15,7 @@
 | T3 | Seed helpers: RČ and relative dates | dev | COMPLETED | 0 | - |
 | T4 | Scenario type and store reads | full | COMPLETED | 0 | - |
 | T5 | LLM trace and verdict builder | dev | COMPLETED | 0 | tests written after code, not TDD |
-| T6 | Store mutations | full | PENDING | 0 | - |
+| T6 | Store mutations | full | COMPLETED | 0 | - |
 | T7 | Mock fetch router | dev | PENDING | 0 | - |
 | T8 | Wire the mock into the API client | inline | PENDING | 0 | - |
 | T9 | Show name and RČ, Fiktivní data badge, insurer label | inline | COMPLETED | 0 | - |
