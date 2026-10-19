@@ -3,7 +3,7 @@
  * Zastávka prohlídky: 2.
  */
 import { birthNumber } from '../rc.ts'
-import { day, month, at } from '../dates.ts'
+import { day, month, at, workingDaysAhead } from '../dates.ts'
 import { verdict } from '../trace.ts'
 import type { Scenario } from '../types.ts'
 
@@ -37,7 +37,7 @@ const scenario: Scenario = {
         kind: 'exam',
         modality: 'CT',
         body_part: 'hrudník',
-        date: day(5),
+        date: workingDaysAhead(3),
         simulated: false,
       },
       duplicate_alert: null,
@@ -140,7 +140,7 @@ const scenario: Scenario = {
     {
       id: 'req-s01-1',
       trigger_id: triggerId,
-      trigger_date: day(5),
+      trigger_date: workingDaysAhead(3),
       patient_id: patientId,
       candidate_id: 'cand-s01-2',
       prior_modality: 'CT',
@@ -159,7 +159,7 @@ const scenario: Scenario = {
     {
       id: 'req-s01-2',
       trigger_id: triggerId,
-      trigger_date: day(5),
+      trigger_date: workingDaysAhead(3),
       patient_id: patientId,
       candidate_id: 'cand-s01-3',
       prior_modality: 'RTG',

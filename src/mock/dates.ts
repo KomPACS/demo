@@ -35,3 +35,13 @@ export function workingDaysAgo(n: number): string {
   }
   return dayKey(d)
 }
+
+export function workingDaysAhead(n: number): string {
+  const d = new Date()
+  let left = n
+  while (left > 0) {
+    d.setDate(d.getDate() + 1)
+    if (d.getDay() !== 0 && d.getDay() !== 6) left--
+  }
+  return dayKey(d)
+}

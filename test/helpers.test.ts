@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { birthNumber, isValidBirthNumber } from '../src/mock/rc.ts'
-import { day, month, at, workingDaysAgo } from '../src/mock/dates.ts'
+import { day, month, at, workingDaysAgo, workingDaysAhead } from '../src/mock/dates.ts'
 
 function dayKey(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
@@ -72,4 +72,12 @@ test('workingDaysAgo: skips Saturday and Sunday', () => {
     if (d.getDay() !== 0 && d.getDay() !== 6) left--
   }
   assert.equal(workingDaysAgo(2), dayKey(d))
+})
+
+test('workingDaysAhead: lands on a weekday n working days ahead', () => {
+  for (const n of [1, 3, 5, 10]) {
+    const d = new Date(`${workingDaysAhead(n)}T12:00:00`)
+    assert.ok(d.getDay() !== 0 && d.getDay() !== 6)
+    assert.ok(d > new Date())
+  }
 })
