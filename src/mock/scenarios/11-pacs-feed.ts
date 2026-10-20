@@ -3,11 +3,18 @@
  */
 import { birthNumber } from '../rc.ts'
 import { day, at, workingDaysAhead } from '../dates.ts'
-import { verdict } from '../trace.ts'
+import { verdict, lookupStep, llmStep, emailDraft } from '../trace.ts'
 import type { Scenario } from '../types.ts'
 
 const patientId = 'pac-11'
 const triggerId = 'f11-pacs-feed'
+const patientRc = birthNumber('1956-03-20', 'male', 61)
+const triggerDate = workingDaysAhead(7)
+
+let stepMinute = 14
+function nextAt(): string {
+  return at(0, `09:${String(stepMinute++).padStart(2, '0')}`)
+}
 
 const guideline = {
   page: 230,
@@ -23,7 +30,7 @@ const scenario: Scenario = {
     diagnoses: [{ code: 'C67', display: 'Zhoubný novotvar močového měchýře' }],
     index_date: day(-500),
     name: 'Jaroslav Kolář',
-    rc: birthNumber('1956-03-20', 'male', 61),
+    rc: patientRc,
   },
   insurer: '207',
   triggers: [
@@ -34,7 +41,7 @@ const scenario: Scenario = {
         kind: 'exam',
         modality: 'CT',
         body_part: 'hrudník, břicho a pánev',
-        date: workingDaysAhead(7),
+        date: triggerDate,
         simulated: false,
       },
       duplicate_alert: null,
@@ -60,6 +67,11 @@ const scenario: Scenario = {
             reason: 'Kontrolní CT hrudníku, břicha a pánve po cystektomii dle dispenzarizačního schématu.',
             query: 'Kontrolní CT po cystektomii u C67',
             guideline,
+            sources: ['PACS', 'NIS'],
+            steps: [
+              lookupStep('PACS', 'Doručeno z Oblastní nemocnice Kolín: CT hrudníku, břicha a pánve.', nextAt()),
+              llmStep('Závěr', 'Relevantní. Kontrola dle dispenzarizačního schématu.'),
+            ],
           }),
         },
         {
@@ -82,6 +94,11 @@ const scenario: Scenario = {
             reason: 'Nedávné kontrolní CT provedené ve vlastním zařízení, zatím nesynchronizováno z PACS feedu.',
             query: 'Nedávné kontrolní CT po cystektomii u C67',
             guideline,
+            sources: ['NIS'],
+            steps: [
+              lookupStep('PACS', 'PACS feed: studie zatím nesynchronizována.', nextAt()),
+              llmStep('Závěr', 'Relevantní. Nedávná kontrola, čeká na synchronizaci z PACS feedu.'),
+            ],
           }),
         },
       ],
@@ -91,7 +108,7 @@ const scenario: Scenario = {
     {
       id: 'req-f11-1',
       trigger_id: triggerId,
-      trigger_date: workingDaysAhead(7),
+      trigger_date: triggerDate,
       patient_id: patientId,
       candidate_id: 'cand-f11-1',
       prior_modality: 'CT',
@@ -101,7 +118,14 @@ const scenario: Scenario = {
       organization_id: 'org-kolin',
       channel: 'email',
       state: 'received',
-      email_draft: 'Dobrý den, žádáme o zaslání zprávy a snímků z vyšetření CT hrudníku, břicha a pánve po cystektomii.',
+      email_draft: emailDraft({
+        sex: 'male',
+        name: 'Jaroslav Kolář',
+        rc: patientRc,
+        examDescription: 'CT hrudníku, břicha a pánve po cystektomii',
+        examDate: day(-150),
+        triggerDate,
+      }),
       created_at: at(-20),
       sent_at: at(-10),
       study_id: 'STU-f11-1',

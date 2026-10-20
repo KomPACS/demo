@@ -3,12 +3,17 @@
  */
 import { birthNumber } from '../rc.ts'
 import { day, at, workingDaysAhead } from '../dates.ts'
-import { verdict } from '../trace.ts'
+import { verdict, lookupStep, llmStep } from '../trace.ts'
 import type { Scenario } from '../types.ts'
 
 const patientId = 'pac-06'
 const triggerId = 's06-fhir-bulovka'
 const reportId = 'rep-s06-1'
+
+let stepMinute = 14
+function nextAt(): string {
+  return at(0, `09:${String(stepMinute++).padStart(2, '0')}`)
+}
 
 const scenario: Scenario = {
   patient: {
@@ -54,6 +59,11 @@ const scenario: Scenario = {
             label: 'relevant',
             reason: 'Vstupní stagingové CT před léčbou, dostupné v PACS.',
             query: 'Vstupní staging CT u C67',
+            sources: ['PACS', 'NIS'],
+            steps: [
+              lookupStep('PACS', 'Studie nalezena: FN Královské Vinohrady, CT břicha a pánve.', nextAt()),
+              llmStep('Závěr', 'Relevantní. Vstupní staging CT, dostupné v PACS.'),
+            ],
           }),
         },
         {
@@ -76,6 +86,18 @@ const scenario: Scenario = {
             reason: 'Kontrolní CT během hospitalizace v Nemocnici Na Bulovce, dosud nedoloženo v PACS.',
             query: 'CT břicha a pánve za poslední půlrok',
             source_sentence: 'Během hospitalizace na Bulovce doplněno kontrolní CT břicha a pánve, výsledek zdejšímu pracovišti neznámý.',
+            event_status: 'done',
+            event_word: 'doplněno',
+            context_before: 'Pacient hospitalizován pro komplikace po transuretrální resekci.',
+            context_after: 'Stav při propuštění stabilizovaný, doporučeno pokračovat v dispenzarizaci na urologii dle spádu.',
+            source_doc: { type: 'Propouštěcí zpráva', department: 'urologie, Nemocnice Na Bulovce', date: day(-120) },
+            sources: ['zpráva'],
+            steps: [
+              llmStep('Zmínka', 'CT břicha a pánve během hospitalizace na Bulovce.'),
+              lookupStep('PACS', 'Studie nenalezena.', nextAt()),
+              lookupStep('Kontakt', 'FHIR endpoint Nemocnice Na Bulovce nalezen.', nextAt()),
+              llmStep('Závěr', 'Relevantní. Kontrolní CT dosud nedoloženo v PACS.'),
+            ],
           }),
         },
       ],

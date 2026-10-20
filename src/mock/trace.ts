@@ -2,6 +2,7 @@ import type { components } from '@/api.ts'
 import type { Report } from './types.ts'
 
 type Verdict = components['schemas']['Verdict']
+type VerdictStep = components['schemas']['VerdictStep']
 type LlmCall = components['schemas']['LlmCall']
 type LlmStep = components['schemas']['LlmStep']
 type Patient = components['schemas']['Patient']
@@ -20,6 +21,13 @@ export function verdict(v: {
   query?: string
   source_sentence?: string
   guideline?: { page: number; quote: string }
+  event_status?: Verdict['event_status']
+  event_word?: string
+  context_before?: string
+  context_after?: string
+  source_doc?: Verdict['source_doc']
+  sources?: string[]
+  steps?: VerdictStep[]
 }): Verdict {
   const kroky: string[] = []
   if (v.query) kroky.push(`Dotaz: „${v.query}“`)
@@ -32,7 +40,49 @@ export function verdict(v: {
     source_sentence: v.source_sentence ?? null,
     guideline: v.guideline ?? null,
     kroky,
+    event_status: v.event_status ?? null,
+    event_word: v.event_word ?? null,
+    context_before: v.context_before ?? null,
+    context_after: v.context_after ?? null,
+    source_doc: v.source_doc ?? null,
+    sources: v.sources ?? [],
+    steps: v.steps ?? [],
   }
+}
+
+export function lookupStep(label: string, text: string, at: string): VerdictStep {
+  return { kind: 'lookup', label, text, at }
+}
+
+export function llmStep(label: string, text: string): VerdictStep {
+  return { kind: 'llm', label, text }
+}
+
+function czechDate(iso: string): string {
+  const [y, m, d] = iso.slice(0, 10).split('-')
+  return `${Number(d)}. ${Number(m)}. ${y}`
+}
+
+export function emailDraft(opts: {
+  sex: Patient['sex']
+  name: string
+  rc: string
+  examDescription: string
+  examDate: string | null
+  triggerDate: string
+}): string {
+  const patientLabel = opts.sex === 'female' ? 'Pacientka' : 'Pacient'
+  const dateSuffix = opts.examDate ? ` ze dne ${czechDate(opts.examDate)}` : ''
+  return [
+    'Dobrý den,',
+    `žádáme o zaslání zprávy a snímků z vyšetření ${opts.examDescription}${dateSuffix}.`,
+    `${patientLabel}: ${opts.name}, RČ ${opts.rc}.`,
+    'Snímky prosím odešlete přes ePACS na FN v Motole, Radiologická klinika.',
+    `Důvod: srovnání s plánovaným vyšetřením ${czechDate(opts.triggerDate)}.`,
+    '',
+    'Děkujeme,',
+    'Demo účet, koordinátor/ka, Onkologická klinika FN v Motole, tel. +420 000 000 000',
+  ].join('\n')
 }
 
 function judgeCall(patient: Patient, trigger: Trigger, candidates: Candidate[], reports: Report[]): LlmCall {

@@ -3,12 +3,17 @@
  */
 import { birthNumber } from '../rc.ts'
 import { day, at, workingDaysAhead } from '../dates.ts'
-import { verdict } from '../trace.ts'
+import { verdict, lookupStep, llmStep } from '../trace.ts'
 import type { Scenario } from '../types.ts'
 
 const patientId = 'pac-13'
 const triggerId = 'f13-telefon-cekame'
 const reportId = 'rep-f13-1'
+
+let stepMinute = 14
+function nextAt(): string {
+  return at(0, `09:${String(stepMinute++).padStart(2, '0')}`)
+}
 
 const scenario: Scenario = {
   patient: {
@@ -60,6 +65,18 @@ const scenario: Scenario = {
               page: 200,
               quote: 'PET/CT ev. PET/MR používáme zvláště v rámci restagingu při biochemickém relapsu.',
             },
+            event_status: 'unclear',
+            event_word: 'Indikováno',
+            context_before: 'Pacient sledován pro karcinom prostaty po radikální prostatektomii, nyní biochemický relaps PSA.',
+            context_after: 'Doporučeno zajistit výsledek před projednáním na MDT.',
+            source_doc: { type: 'Ambulantní zpráva', department: 'urologie', date: day(-180) },
+            sources: ['zpráva'],
+            steps: [
+              llmStep('Zmínka', 'PET/CT restaging indikováno ve FN Plzeň.'),
+              lookupStep('PACS', 'FN Plzeň: studie nenalezena.', nextAt()),
+              llmStep('Doporučení', 'Modrá kniha ČOS, s. 200: PET/CT při biochemickém relapsu.'),
+              llmStep('Závěr', 'Relevantní. Poslední zobrazovací vyšetření po relapsu PSA.'),
+            ],
           }),
         },
       ],

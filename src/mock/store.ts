@@ -1,6 +1,6 @@
 import type { components } from '@/api.ts'
 import type { Scenario, ScenarioTrigger } from './types.ts'
-import { llmTrace, verdict } from './trace.ts'
+import { llmTrace, verdict, emailDraft } from './trace.ts'
 
 type DisputeCategory = components['schemas']['DisputeCategory']
 
@@ -125,7 +125,17 @@ function makeDraftRequest(scenario: Scenario, st: ScenarioTrigger, raw: RawCandi
     organization_id: raw.organization_id,
     channel,
     state: 'draft',
-    email_draft: channel === 'email' ? `Dobrý den, žádáme o zaslání zprávy z vyšetření ${raw.description}.` : null,
+    email_draft:
+      channel === 'email'
+        ? emailDraft({
+            sex: scenario.patient.sex,
+            name: scenario.patient.name ?? scenario.patient.id,
+            rc: scenario.patient.rc ?? '',
+            examDescription: raw.description,
+            examDate: raw.date,
+            triggerDate: st.trigger.date,
+          })
+        : null,
     created_at: new Date().toISOString(),
     sent_at: null,
     study_id: null,

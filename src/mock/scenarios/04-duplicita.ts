@@ -4,16 +4,22 @@
  */
 import { birthNumber } from '../rc.ts'
 import { day, at, workingDaysAhead } from '../dates.ts'
-import { verdict } from '../trace.ts'
+import { verdict, lookupStep, llmStep, emailDraft } from '../trace.ts'
 import type { Scenario } from '../types.ts'
 
 const patientId = 'pac-04'
 const triggerId = 's04-duplicita'
 const reportId = 'rep-s04-1'
+const patientRc = birthNumber('1972-03-10', 'female', 44)
 
 const triggerDate = workingDaysAhead(4)
 const duplicateDate = day(-26)
 const daysApart = Math.round((Date.parse(triggerDate) - Date.parse(duplicateDate)) / 86_400_000)
+
+let stepMinute = 25
+function nextAt(): string {
+  return at(0, `08:${String(stepMinute++).padStart(2, '0')}`)
+}
 
 const scenario: Scenario = {
   patient: {
@@ -23,7 +29,7 @@ const scenario: Scenario = {
     diagnoses: [{ code: 'C64', display: 'Zhoubný novotvar ledviny' }],
     index_date: day(-900),
     name: 'Hana Veselá',
-    rc: birthNumber('1972-03-10', 'female', 44),
+    rc: patientRc,
   },
   insurer: '211',
   triggers: [
@@ -70,6 +76,19 @@ const scenario: Scenario = {
               quote:
                 'Základním vyšetřením je CT vyšetření břicha a pánve (možno též zvážit i MRI pro snížení radiační zátěže), CT hrudníku.',
             },
+            event_status: 'done',
+            event_word: 'Provedeno',
+            context_before: 'Pacientka po nefrektomii pro karcinom ledviny v dispenzární péči.',
+            context_after: 'Stav bez komplikací, doporučena další kontrola za půl roku.',
+            source_doc: { type: 'Ambulantní zpráva', department: 'nefrologie, FN Plzeň', date: duplicateDate },
+            sources: ['zpráva'],
+            steps: [
+              lookupStep('Zprávy', 'Nalezené zprávy pacientky z NIS.', nextAt()),
+              llmStep('Zmínka', 'CT břicha a pánve, FN Plzeň, provedeno.'),
+              lookupStep('PACS', 'FN Plzeň: studie nenalezena.', nextAt()),
+              lookupStep('Datum', `${daysApart} dnů před plánovaným CT: pravděpodobná duplicita.`, nextAt()),
+              llmStep('Závěr', 'Relevantní. Pravděpodobně duplicitní s nově plánovaným vyšetřením.'),
+            ],
           }),
         },
         {
@@ -91,6 +110,11 @@ const scenario: Scenario = {
             label: 'relevant',
             reason: 'Vstupní stagingové CT před nefrektomií.',
             query: 'Vstupní staging CT u karcinomu ledviny',
+            sources: ['PACS', 'NIS'],
+            steps: [
+              lookupStep('PACS', 'Studie nalezena: FN Plzeň, CT hrudníku, břicha a pánve.', nextAt()),
+              llmStep('Závěr', 'Relevantní. Vstupní staging CT, dostupné v PACS.'),
+            ],
           }),
         },
         {
@@ -112,6 +136,11 @@ const scenario: Scenario = {
             label: 'relevant',
             reason: 'Pravidelná ultrazvuková kontrola u nízkorizikového nálezu po nefrektomii.',
             query: 'UZ kontrola po nefrektomii',
+            sources: ['PACS', 'NIS'],
+            steps: [
+              lookupStep('PACS', 'Studie nalezena: FN Plzeň, UZ ledvin a jater.', nextAt()),
+              llmStep('Závěr', 'Relevantní. Pravidelná ultrazvuková kontrola, dostupná v PACS.'),
+            ],
           }),
         },
       ],
@@ -131,7 +160,7 @@ const scenario: Scenario = {
       organization_id: 'org-fnplzen',
       channel: 'email',
       state: 'draft',
-      email_draft: 'Dobrý den, žádáme o zaslání zprávy a snímků z vyšetření CT břicha a pánve.',
+      email_draft: emailDraft({ sex: 'female', name: 'Hana Veselá', rc: patientRc, examDescription: 'CT břicha a pánve', examDate: duplicateDate, triggerDate }),
       created_at: at(-1),
       sent_at: null,
       study_id: null,

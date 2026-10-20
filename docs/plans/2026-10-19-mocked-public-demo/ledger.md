@@ -30,7 +30,7 @@
 | T18 | Integration page | inline | COMPLETED | 0 | - |
 | T19 | Contract: evidence, steps, review, dispute | inline | COMPLETED | 0 | - |
 | T20 | Mock store for T19 | full | COMPLETED | 0 | - |
-| T21 | Scenario data: evidence, drafts | dev | PENDING | 0 | - |
+| T21 | Scenario data: evidence, drafts | dev | COMPLETED | 0 | - |
 | T22 | Case B2: tiles + evidence panel | dev | PENDING | 0 | - |
 | T23 | Request review + approved batch | dev | PENDING | 0 | - |
 | T24 | Dispute thread | dev | PENDING | 0 | - |

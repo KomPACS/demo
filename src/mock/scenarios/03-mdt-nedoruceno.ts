@@ -4,12 +4,19 @@
  */
 import { birthNumber } from '../rc.ts'
 import { day, at, workingDaysAhead, workingDaysAgo } from '../dates.ts'
-import { verdict } from '../trace.ts'
+import { verdict, lookupStep, llmStep, emailDraft } from '../trace.ts'
 import type { Scenario } from '../types.ts'
 
 const patientId = 'pac-03'
 const triggerId = 's03-mdt-nedoruceno'
 const reportId = 'rep-s03-1'
+const patientRc = birthNumber('1962-07-14', 'male', 31)
+const triggerDate = workingDaysAhead(3)
+
+let stepMinute = 20
+function nextAt(): string {
+  return at(0, `08:${String(stepMinute++).padStart(2, '0')}`)
+}
 
 const mdtGuideline = {
   page: 52,
@@ -25,7 +32,7 @@ const scenario: Scenario = {
     diagnoses: [{ code: 'C20', display: 'Zhoubný novotvar rekta' }],
     index_date: day(-60),
     name: 'Tomáš Svoboda',
-    rc: birthNumber('1962-07-14', 'male', 31),
+    rc: patientRc,
   },
   insurer: '205',
   triggers: [
@@ -36,7 +43,7 @@ const scenario: Scenario = {
         kind: 'mdt',
         modality: null,
         body_part: null,
-        date: workingDaysAhead(3),
+        date: triggerDate,
         simulated: false,
       },
       duplicate_alert: null,
@@ -63,6 +70,19 @@ const scenario: Scenario = {
             query: 'Předoperační staging u karcinomu rekta',
             source_sentence: 'Doplněno MR pánve k posouzení cirkumferenčního okraje nádoru.',
             guideline: mdtGuideline,
+            event_status: 'done',
+            event_word: 'Doplněno',
+            context_before: 'Pacient indikován k MDT projednání karcinomu rekta.',
+            context_after: 'Zvažováno doplnění PET/CT, zatím není jasné, zda bylo provedeno.',
+            source_doc: { type: 'Ambulantní zpráva', department: 'onkochirurgie, FN Hradec Králové', date: day(-20) },
+            sources: ['zpráva'],
+            steps: [
+              lookupStep('Zprávy', 'Nalezené zprávy pacienta z NIS.', nextAt()),
+              llmStep('Zmínka', 'MR pánve, FN Hradec Králové.'),
+              lookupStep('PACS', 'Studie nenalezena.', nextAt()),
+              llmStep('Doporučení', 'Modrá kniha ČOS, s. 52: MDT u rekta.'),
+              llmStep('Závěr', 'Relevantní. Nezbytná pro posouzení resekability před MDT.'),
+            ],
           }),
         },
         {
@@ -84,6 +104,11 @@ const scenario: Scenario = {
             label: 'relevant',
             reason: 'Vstupní stagingové CT hrudníku a břicha před zahájením léčby.',
             query: 'Vstupní staging CT u karcinomu rekta',
+            sources: ['PACS', 'NIS'],
+            steps: [
+              lookupStep('PACS', 'Studie nalezena: VFN v Praze, CT hrudníku a břicha.', nextAt()),
+              llmStep('Závěr', 'Relevantní. Vstupní staging CT, dostupné v PACS.'),
+            ],
           }),
         },
         {
@@ -106,6 +131,17 @@ const scenario: Scenario = {
             reason: 'Zmínka o PET/CT ve zprávě je nejasná, nelze potvrdit, že bylo provedeno.',
             query: 'PET/CT u karcinomu rekta',
             source_sentence: 'Zvažováno doplnění PET/CT, zatím není jasné, zda bylo provedeno.',
+            event_status: 'recommended',
+            event_word: 'Zvažováno',
+            context_before: 'Doplněno MR pánve k posouzení cirkumferenčního okraje nádoru.',
+            context_after: 'Stav celkově dobrý, bez komplikací.',
+            source_doc: { type: 'Ambulantní zpráva', department: 'onkochirurgie, FN Hradec Králové', date: day(-20) },
+            sources: ['zpráva'],
+            steps: [
+              llmStep('Zmínka', 'PET/CT zmíněno, ale bez potvrzení provedení.'),
+              lookupStep('PACS', 'Studie nenalezena.', nextAt()),
+              llmStep('Závěr', 'Nejisté. Nelze potvrdit, že vyšetření proběhlo.'),
+            ],
           }),
         },
       ],
@@ -115,7 +151,7 @@ const scenario: Scenario = {
     {
       id: 'req-s03-1',
       trigger_id: triggerId,
-      trigger_date: workingDaysAhead(3),
+      trigger_date: triggerDate,
       patient_id: patientId,
       candidate_id: 'cand-s03-1',
       prior_modality: 'MR',
@@ -125,7 +161,7 @@ const scenario: Scenario = {
       organization_id: 'org-fnhk',
       channel: 'email',
       state: 'not_delivered',
-      email_draft: 'Dobrý den, žádáme o zaslání zprávy a snímků z vyšetření MR pánve.',
+      email_draft: emailDraft({ sex: 'male', name: 'Tomáš Svoboda', rc: patientRc, examDescription: 'MR pánve', examDate: day(-20), triggerDate }),
       created_at: at(-6),
       sent_at: `${workingDaysAgo(4)}T09:15:00.000Z`,
       study_id: null,
@@ -134,7 +170,7 @@ const scenario: Scenario = {
     {
       id: 'req-s03-2',
       trigger_id: triggerId,
-      trigger_date: workingDaysAhead(3),
+      trigger_date: triggerDate,
       patient_id: patientId,
       candidate_id: 'cand-s03-2',
       prior_modality: 'CT',
@@ -144,7 +180,7 @@ const scenario: Scenario = {
       organization_id: 'org-vfn',
       channel: 'email',
       state: 'received',
-      email_draft: 'Dobrý den, žádáme o zaslání zprávy a snímků z vyšetření CT hrudníku a břicha.',
+      email_draft: emailDraft({ sex: 'male', name: 'Tomáš Svoboda', rc: patientRc, examDescription: 'CT hrudníku a břicha', examDate: day(-35), triggerDate }),
       created_at: at(-10),
       sent_at: at(-8),
       study_id: 'STU-s03-2',

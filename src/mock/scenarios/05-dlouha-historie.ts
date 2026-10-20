@@ -3,7 +3,7 @@
  */
 import { birthNumber } from '../rc.ts'
 import { day, at, workingDaysAhead } from '../dates.ts'
-import { verdict } from '../trace.ts'
+import { verdict, lookupStep, llmStep, emailDraft } from '../trace.ts'
 import type { Scenario } from '../types.ts'
 
 const patientId = 'pac-05'
@@ -11,11 +11,23 @@ const triggerId = 's05-dlouha-historie'
 const report1Id = 'rep-s05-1'
 const report2Id = 'rep-s05-2'
 const report3Id = 'rep-s05-3'
+const patientRc = birthNumber('1971-09-05', 'female', 52)
+const triggerDate = workingDaysAhead(5)
+
+let stepMinute = 30
+function nextAt(): string {
+  return at(0, `08:${String(stepMinute++).padStart(2, '0')}`)
+}
 
 const mr9Verdict = verdict({
   label: 'relevant',
   reason: 'Přehodnoceno po konzultaci s radiologem: jde o plánovanou kontrolní MR v rámci dispenzarizace.',
   query: 'MR prsou v rámci dispenzarizace',
+  sources: ['PACS', 'NIS'],
+  steps: [
+    lookupStep('PACS', 'Studie nalezena: FN v Motole, MR prsou.', nextAt()),
+    llmStep('Závěr', 'Relevantní. Plánovaná kontrolní MR v rámci dispenzarizace.'),
+  ],
 })
 
 const scenario: Scenario = {
@@ -26,7 +38,7 @@ const scenario: Scenario = {
     diagnoses: [{ code: 'C50', display: 'Zhoubný novotvar prsu' }],
     index_date: day(-2200),
     name: 'Alena Horáková',
-    rc: birthNumber('1971-09-05', 'female', 52),
+    rc: patientRc,
   },
   insurer: '111',
   triggers: [
@@ -37,7 +49,7 @@ const scenario: Scenario = {
         kind: 'exam',
         modality: 'CT',
         body_part: 'hrudník, břicho a pánev',
-        date: workingDaysAhead(5),
+        date: triggerDate,
         simulated: false,
       },
       duplicate_alert: null,
@@ -62,6 +74,11 @@ const scenario: Scenario = {
             label: 'relevant',
             reason: 'Diagnostická mamografie v době stanovení diagnózy.',
             query: 'Vstupní mamografie u karcinomu prsu',
+            sources: ['PACS', 'NIS'],
+            steps: [
+              lookupStep('PACS', 'Studie nalezena: FN v Motole, mamografie oboustranně.', nextAt()),
+              llmStep('Závěr', 'Relevantní. Diagnostická mamografie v době stanovení diagnózy.'),
+            ],
           }),
         },
         {
@@ -83,6 +100,12 @@ const scenario: Scenario = {
             label: 'relevant',
             reason: 'Vstupní stagingové CT před zahájením léčby.',
             query: 'Vstupní staging CT u karcinomu prsu',
+            sources: ['PACS', 'NIS'],
+            steps: [
+              lookupStep('PACS', 'Studie nalezena: FN v Motole, CT hrudníku, břicha a pánve.', nextAt()),
+              lookupStep('Datum', 'Před zahájením léčby: vstupní vyšetření.', nextAt()),
+              llmStep('Závěr', 'Relevantní. Výchozí bod pro hodnocení odpovědi na léčbu.'),
+            ],
           }),
         },
         {
@@ -110,6 +133,18 @@ const scenario: Scenario = {
               quote:
                 'Klinické vyšetření jedou za 3–4 měsíce během prvních 2 let (každých 6 měsíců u pacientek s nízkým rizikem relapsu nebo DCIS), každých 6–8 měsíců 3.–5. rok (interval dle rizika relapsu). Bilaterální MG jednou za rok, s doplněním UZ nebo MRI dle potřeby.',
             },
+            event_status: 'done',
+            event_word: 'Doplněna',
+            context_before: 'Pacientka po stanovení diagnózy karcinomu prsu.',
+            context_after: 'Nález koresponduje s mamografickým vyšetřením.',
+            source_doc: { type: 'Ambulantní zpráva', department: 'onkologie, FN v Motole', date: day(-2190) },
+            sources: ['PACS', 'zpráva'],
+            steps: [
+              lookupStep('PACS', 'Studie nalezena: FN v Motole, MR prsou.', nextAt()),
+              llmStep('Zmínka', 'Ambulantní zpráva potvrzuje stejné vyšetření.'),
+              llmStep('Doporučení', 'Modrá kniha ČOS, s. 154: MRI dle potřeby.'),
+              llmStep('Závěr', 'Relevantní. MR k dořešení rozsahu nádoru před operací.'),
+            ],
           }),
         },
         {
@@ -131,6 +166,11 @@ const scenario: Scenario = {
             label: 'relevant',
             reason: 'Roční kontrolní mamografie po ukončení primární léčby.',
             query: 'Roční kontrolní mamografie',
+            sources: ['NIS'],
+            steps: [
+              lookupStep('PACS', 'VFN v Praze: studie zatím nenalezena, zpráva v NIS.', nextAt()),
+              llmStep('Závěr', 'Relevantní. Roční kontrolní mamografie po léčbě.'),
+            ],
           }),
         },
         {
@@ -152,6 +192,11 @@ const scenario: Scenario = {
             label: 'not_relevant',
             reason: 'Standardní ultrazvuková kontrola bez nového nálezu, nahrazena novější mamografií.',
             query: 'UZ kontrola prsou',
+            sources: ['PACS', 'NIS'],
+            steps: [
+              lookupStep('PACS', 'Studie nalezena: FN v Motole, UZ prsou.', nextAt()),
+              llmStep('Závěr', 'Nerelevantní. Nahrazeno novější mamografií.'),
+            ],
           }),
         },
         {
@@ -174,6 +219,18 @@ const scenario: Scenario = {
             reason: 'Nejasné, zda šlo o kontrolu jaterních lézí nebo o jiný důvod indikace.',
             query: 'CT břicha u karcinomu prsu',
             source_sentence: 'Doplněno CT břicha k vyloučení jaterních metastáz.',
+            event_status: 'done',
+            event_word: 'Doplněno',
+            context_before: 'Pacientka v dispenzarizaci pro karcinom prsu.',
+            context_after: 'Dále zmíněna kontrola jater ultrazvukem při téže návštěvě, nález bez změn.',
+            source_doc: { type: 'Ambulantní zpráva', department: 'onkologie, FN v Motole', date: day(-1090) },
+            sources: ['zpráva'],
+            steps: [
+              lookupStep('Zprávy', 'Nalezené zprávy pacientky z NIS.', nextAt()),
+              llmStep('Zmínka', 'CT břicha, vyloučení jaterních metastáz.'),
+              lookupStep('PACS', 'VFN v Praze: studie nenalezena.', nextAt()),
+              llmStep('Závěr', 'Nejisté. Nelze potvrdit, zda šlo o kontrolu jater nebo jiný důvod.'),
+            ],
           }),
         },
         {
@@ -196,6 +253,17 @@ const scenario: Scenario = {
             reason: 'Zmínka o kontrole jater, pravděpodobně duplicitní k souběžnému CT.',
             query: 'UZ jater u karcinomu prsu',
             source_sentence: 'Dále zmíněna kontrola jater ultrazvukem při téže návštěvě, nález bez změn.',
+            event_status: 'done',
+            event_word: 'zmíněna',
+            context_before: 'Doplněno CT břicha k vyloučení jaterních metastáz.',
+            context_after: 'Plán další kontroly za tři měsíce.',
+            source_doc: { type: 'Ambulantní zpráva', department: 'onkologie, FN v Motole', date: day(-1090) },
+            sources: ['zpráva'],
+            steps: [
+              llmStep('Zmínka', 'UZ jater při téže návštěvě jako CT břicha.'),
+              lookupStep('PACS', 'VFN v Praze: studie nenalezena.', nextAt()),
+              llmStep('Závěr', 'Nejisté, pravděpodobně duplicitní k souběžnému CT.'),
+            ],
           }),
         },
         {
@@ -217,6 +285,11 @@ const scenario: Scenario = {
             label: 'relevant',
             reason: 'Pravidelná roční mamografická kontrola.',
             query: 'Roční mamografická kontrola',
+            sources: ['PACS', 'NIS'],
+            steps: [
+              lookupStep('PACS', 'Studie nalezena: FN v Motole, mamografie oboustranně.', nextAt()),
+              llmStep('Závěr', 'Relevantní. Pravidelná roční kontrola.'),
+            ],
           }),
         },
         {
@@ -256,6 +329,17 @@ const scenario: Scenario = {
             reason: 'Nově zjištěný nodulus, zatím nejistá etiologie.',
             query: 'CT hrudníku pro nově zjištěný nodulus',
             source_sentence: 'Doplněno CT hrudníku, etiologie nálezu zatím nejasná, doporučena dispenzarizace.',
+            event_status: 'done',
+            event_word: 'Doplněno',
+            context_before: 'Pacientka vyšetřena pro nově zjištěný plicní nodulus na RTG.',
+            context_after: 'Kontrola za tři měsíce doporučena.',
+            source_doc: { type: 'Ambulantní zpráva', department: 'pneumologie, Thomayerova nemocnice', date: day(-60) },
+            sources: ['zpráva'],
+            steps: [
+              llmStep('Zmínka', 'CT hrudníku, nově zjištěný nodulus.'),
+              lookupStep('PACS', 'Thomayerova nemocnice: studie nenalezena.', nextAt()),
+              llmStep('Závěr', 'Nejisté. Nově zjištěný nodulus, etiologie zatím nejasná.'),
+            ],
           }),
         },
       ],
@@ -294,7 +378,7 @@ const scenario: Scenario = {
     {
       id: 'req-s05-6',
       trigger_id: triggerId,
-      trigger_date: workingDaysAhead(5),
+      trigger_date: triggerDate,
       patient_id: patientId,
       candidate_id: 'cand-s05-6',
       prior_modality: 'CT',
@@ -304,7 +388,7 @@ const scenario: Scenario = {
       organization_id: 'org-vfn',
       channel: 'email',
       state: 'draft',
-      email_draft: 'Dobrý den, žádáme o zaslání zprávy z vyšetření CT břicha.',
+      email_draft: emailDraft({ sex: 'female', name: 'Alena Horáková', rc: patientRc, examDescription: 'CT břicha', examDate: day(-1090), triggerDate }),
       created_at: at(-1),
       sent_at: null,
       study_id: null,
@@ -313,7 +397,7 @@ const scenario: Scenario = {
     {
       id: 'req-s05-10',
       trigger_id: triggerId,
-      trigger_date: workingDaysAhead(5),
+      trigger_date: triggerDate,
       patient_id: patientId,
       candidate_id: 'cand-s05-10',
       prior_modality: 'CT',

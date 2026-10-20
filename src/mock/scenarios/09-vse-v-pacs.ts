@@ -4,11 +4,16 @@
  */
 import { birthNumber } from '../rc.ts'
 import { day, at, workingDaysAhead } from '../dates.ts'
-import { verdict } from '../trace.ts'
+import { verdict, lookupStep, llmStep } from '../trace.ts'
 import type { Scenario } from '../types.ts'
 
 const patientId = 'pac-09'
 const triggerId = 's09-vse-v-pacs'
+
+let stepMinute = 14
+function nextAt(): string {
+  return at(0, `09:${String(stepMinute++).padStart(2, '0')}`)
+}
 
 const guideline = {
   page: 220,
@@ -60,6 +65,12 @@ const scenario: Scenario = {
             reason: 'Vstupní stagingové CT před nefrektomií, dostupné v PACS.',
             query: 'Vstupní staging CT u C64',
             guideline,
+            sources: ['PACS', 'NIS'],
+            steps: [
+              lookupStep('PACS', 'Studie nalezena: FN Královské Vinohrady, CT břicha a pánve.', nextAt()),
+              llmStep('Doporučení', 'Modrá kniha ČOS, s. 220: CT břicha a pánve, CT hrudníku.'),
+              llmStep('Závěr', 'Relevantní. Vstupní staging CT, dostupné v PACS.'),
+            ],
           }),
         },
         {
@@ -82,6 +93,11 @@ const scenario: Scenario = {
             reason: 'Součást vstupního stagingu před nefrektomií, dle doporučení doplněno i CT hrudníku.',
             query: 'CT hrudníku u C64 v době stagingu',
             guideline,
+            sources: ['PACS', 'NIS'],
+            steps: [
+              lookupStep('PACS', 'Studie nalezena: FN Královské Vinohrady, CT hrudníku.', nextAt()),
+              llmStep('Závěr', 'Relevantní. Součást vstupního stagingu.'),
+            ],
           }),
         },
         {
@@ -104,6 +120,11 @@ const scenario: Scenario = {
             reason: 'Kontrolní CT po nefrektomii dle schématu dispenzarizace renálního karcinomu.',
             query: 'Kontrolní CT po nefrektomii u C64',
             guideline,
+            sources: ['PACS', 'NIS'],
+            steps: [
+              lookupStep('PACS', 'Studie nalezena: FN Královské Vinohrady, CT břicha a pánve.', nextAt()),
+              llmStep('Závěr', 'Relevantní. Kontrola dle schématu dispenzarizace.'),
+            ],
           }),
         },
         {
@@ -125,6 +146,11 @@ const scenario: Scenario = {
             label: 'relevant',
             reason: 'Nedávné kontrolní USG břicha u pacienta s nízkým rizikem rekurence.',
             query: 'USG břicha v rámci dispenzarizace u C64',
+            sources: ['PACS', 'NIS'],
+            steps: [
+              lookupStep('PACS', 'Studie nalezena: FN Královské Vinohrady, USG břicha.', nextAt()),
+              llmStep('Závěr', 'Relevantní. Nedávná kontrola, dostupná v PACS.'),
+            ],
           }),
         },
       ],

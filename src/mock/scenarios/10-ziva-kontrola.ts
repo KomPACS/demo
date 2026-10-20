@@ -4,12 +4,19 @@
  */
 import { birthNumber } from '../rc.ts'
 import { day, at, workingDaysAhead } from '../dates.ts'
-import { verdict } from '../trace.ts'
+import { verdict, lookupStep, llmStep, emailDraft } from '../trace.ts'
 import type { Scenario } from '../types.ts'
 
 const patientId = 'pac-10'
 const triggerId = 's10-ziva-kontrola'
 const reportId = 'rep-s10-1'
+const patientRc = birthNumber('1969-02-09', 'female', 58)
+const triggerDate = workingDaysAhead(5)
+
+let stepMinute = 14
+function nextAt(): string {
+  return at(0, `09:${String(stepMinute++).padStart(2, '0')}`)
+}
 
 const guideline = {
   page: 80,
@@ -24,7 +31,7 @@ const scenario: Scenario = {
     diagnoses: [{ code: 'C25', display: 'Zhoubný novotvar slinivky břišní' }],
     index_date: day(-300),
     name: 'Lenka Pokorná',
-    rc: birthNumber('1969-02-09', 'female', 58),
+    rc: patientRc,
   },
   insurer: '211',
   triggers: [],
@@ -35,7 +42,7 @@ const scenario: Scenario = {
       kind: 'exam',
       modality: 'CT',
       body_part: 'břicho',
-      date: workingDaysAhead(5),
+      date: triggerDate,
       simulated: false,
     },
     duplicate_alert: null,
@@ -61,6 +68,12 @@ const scenario: Scenario = {
           reason: 'Kontrolní CT břicha po resekci pankreatu, provedené blíže bydliště, zatím není v místním PACS.',
           query: 'CT břicha po resekci pankreatu za poslední půlrok',
           guideline,
+          sources: ['NIS'],
+          steps: [
+            lookupStep('PACS', 'Pardubická nemocnice: studie zatím nenalezena.', nextAt()),
+            llmStep('Doporučení', 'Modrá kniha ČOS, s. 80: CT při symptomech a elevaci CA 19-9.'),
+            llmStep('Závěr', 'Relevantní. Kontrolní CT po resekci pankreatu, zatím mimo PACS.'),
+          ],
         }),
       },
       {
@@ -84,6 +97,17 @@ const scenario: Scenario = {
           query: 'Vyšetření břicha u C25 zmíněné ve zprávě',
           source_sentence:
             'V dokumentaci zmíněno také vyšetření břicha z jiného pracoviště, bližší údaje (modalita, datum) nejsou v textu uvedeny.',
+          event_status: 'unclear',
+          event_word: 'zmíněno',
+          context_before: 'Pacientka po resekci pankreatu, v dispenzarizaci, aktuálně bez obtíží, CA 19-9 bez elevace.',
+          context_after: 'Doporučeno doplnit při příští kontrole.',
+          source_doc: { type: 'Ambulantní zpráva', department: 'chirurgie, FN Hradec Králové', date: day(-70) },
+          sources: ['zpráva'],
+          steps: [
+            llmStep('Zmínka', 'Vyšetření břicha zmíněno bez modality a data.'),
+            lookupStep('PACS', 'Studie nenalezena, pracoviště neznámé.', nextAt()),
+            llmStep('Závěr', 'Nejisté. Nelze ověřit souvislost se sledováním pankreatu.'),
+          ],
         }),
       },
       {
@@ -106,6 +130,11 @@ const scenario: Scenario = {
           reason: 'Vstupní kontrolní CT po radikální resekci pankreatu, dostupné v PACS.',
           query: 'Vstupní kontrolní CT po resekci pankreatu',
           guideline,
+          sources: ['PACS', 'NIS'],
+          steps: [
+            lookupStep('PACS', 'Studie nalezena: FN Hradec Králové, CT břicha a pánve.', nextAt()),
+            llmStep('Závěr', 'Relevantní. Vstupní kontrolní CT po resekci, dostupné v PACS.'),
+          ],
         }),
       },
       {
@@ -127,6 +156,11 @@ const scenario: Scenario = {
           label: 'relevant',
           reason: 'Nedávné kontrolní USG jater v rámci dispenzarizace po resekci pankreatu.',
           query: 'USG jater v rámci dispenzarizace u C25',
+          sources: ['PACS', 'NIS'],
+          steps: [
+            lookupStep('PACS', 'Studie nalezena: FN Hradec Králové, USG jater.', nextAt()),
+            llmStep('Závěr', 'Relevantní. Nedávná kontrola, dostupná v PACS.'),
+          ],
         }),
       },
     ],
@@ -135,7 +169,7 @@ const scenario: Scenario = {
     {
       id: 'req-s10-1',
       trigger_id: triggerId,
-      trigger_date: workingDaysAhead(5),
+      trigger_date: triggerDate,
       patient_id: patientId,
       candidate_id: 'cand-s10-1',
       prior_modality: 'CT',
@@ -145,7 +179,7 @@ const scenario: Scenario = {
       organization_id: 'org-pardubice',
       channel: 'email',
       state: 'draft',
-      email_draft: 'Dobrý den, žádáme o zaslání zprávy a snímků z vyšetření CT břicha.',
+      email_draft: emailDraft({ sex: 'female', name: 'Lenka Pokorná', rc: patientRc, examDescription: 'CT břicha', examDate: day(-90), triggerDate }),
       created_at: at(-1),
       sent_at: null,
       study_id: null,
