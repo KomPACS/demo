@@ -159,7 +159,7 @@ const scenario: Scenario = {
           report_id: null,
           status: 'missing_report',
           is_baseline: false,
-          pacs_source: 'PACS Všeobecná fakultní nemocnice v Praze',
+          pacs_source: 'PACS Fakultní nemocnice v Motole · přijato přes ePACS z Všeobecná fakultní nemocnice v Praze',
           decision: null,
           decision_reason: null,
           verdict: verdict({

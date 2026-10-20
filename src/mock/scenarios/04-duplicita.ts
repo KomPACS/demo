@@ -103,7 +103,7 @@ const scenario: Scenario = {
           report_id: null,
           status: 'available',
           is_baseline: true,
-          pacs_source: 'PACS Fakultní nemocnice Plzeň',
+          pacs_source: 'PACS Fakultní nemocnice v Motole · přijato přes ePACS z Fakultní nemocnice Plzeň',
           decision: null,
           decision_reason: null,
           verdict: verdict({
@@ -112,7 +112,7 @@ const scenario: Scenario = {
             query: 'Vstupní staging CT u karcinomu ledviny',
             sources: ['PACS', 'NIS'],
             steps: [
-              lookupStep('PACS', 'Studie nalezena: FN Plzeň, CT hrudníku, břicha a pánve.', nextAt()),
+              lookupStep('PACS', 'Studie nalezena v PACS FN v Motole, přijato přes ePACS z FN Plzeň: CT hrudníku, břicha a pánve.', nextAt()),
               llmStep('Závěr', 'Relevantní. Vstupní staging CT, dostupné v PACS.'),
             ],
           }),
@@ -129,7 +129,7 @@ const scenario: Scenario = {
           report_id: null,
           status: 'available',
           is_baseline: false,
-          pacs_source: 'PACS Fakultní nemocnice Plzeň',
+          pacs_source: 'PACS Fakultní nemocnice v Motole · přijato přes ePACS z Fakultní nemocnice Plzeň',
           decision: null,
           decision_reason: null,
           verdict: verdict({
@@ -138,7 +138,7 @@ const scenario: Scenario = {
             query: 'UZ kontrola po nefrektomii',
             sources: ['PACS', 'NIS'],
             steps: [
-              lookupStep('PACS', 'Studie nalezena: FN Plzeň, UZ ledvin a jater.', nextAt()),
+              lookupStep('PACS', 'Studie nalezena v PACS FN v Motole, přijato přes ePACS z FN Plzeň: UZ ledvin a jater.', nextAt()),
               llmStep('Závěr', 'Relevantní. Pravidelná ultrazvuková kontrola, dostupná v PACS.'),
             ],
           }),

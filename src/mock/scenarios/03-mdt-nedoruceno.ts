@@ -97,7 +97,7 @@ const scenario: Scenario = {
           report_id: null,
           status: 'available',
           is_baseline: true,
-          pacs_source: 'PACS Všeobecná fakultní nemocnice v Praze',
+          pacs_source: 'PACS Fakultní nemocnice v Motole · přijato přes ePACS z Všeobecná fakultní nemocnice v Praze',
           decision: null,
           decision_reason: null,
           verdict: verdict({
@@ -106,7 +106,7 @@ const scenario: Scenario = {
             query: 'Vstupní staging CT u karcinomu rekta',
             sources: ['PACS', 'NIS'],
             steps: [
-              lookupStep('PACS', 'Studie nalezena: VFN v Praze, CT hrudníku a břicha.', nextAt()),
+              lookupStep('PACS', 'Studie nalezena v PACS FN v Motole, přijato přes ePACS z VFN v Praze: CT hrudníku a břicha.', nextAt()),
               llmStep('Závěr', 'Relevantní. Vstupní staging CT, dostupné v PACS.'),
             ],
           }),

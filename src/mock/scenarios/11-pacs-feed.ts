@@ -59,7 +59,7 @@ const scenario: Scenario = {
           report_id: null,
           status: 'available',
           is_baseline: false,
-          pacs_source: 'Doručeno z Oblastní nemocnice Kolín',
+          pacs_source: 'PACS Fakultní nemocnice v Motole · doručeno z Oblastní nemocnice Kolín',
           decision: null,
           decision_reason: null,
           verdict: verdict({

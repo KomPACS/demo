@@ -122,7 +122,7 @@ const scenario: Scenario = {
         report_id: null,
         status: 'available',
         is_baseline: true,
-        pacs_source: 'PACS Fakultní nemocnice Hradec Králové',
+        pacs_source: 'PACS Fakultní nemocnice v Motole · přijato přes ePACS z Fakultní nemocnice Hradec Králové',
         decision: null,
         decision_reason: null,
         verdict: verdict({
@@ -132,7 +132,7 @@ const scenario: Scenario = {
           guideline,
           sources: ['PACS', 'NIS'],
           steps: [
-            lookupStep('PACS', 'Studie nalezena: FN Hradec Králové, CT břicha a pánve.', nextAt()),
+            lookupStep('PACS', 'Studie nalezena v PACS FN v Motole, přijato přes ePACS z FN Hradec Králové: CT břicha a pánve.', nextAt()),
             llmStep('Závěr', 'Relevantní. Vstupní kontrolní CT po resekci, dostupné v PACS.'),
           ],
         }),
@@ -149,7 +149,7 @@ const scenario: Scenario = {
         report_id: null,
         status: 'available',
         is_baseline: false,
-        pacs_source: 'PACS Fakultní nemocnice Hradec Králové',
+        pacs_source: 'PACS Fakultní nemocnice v Motole · přijato přes ePACS z Fakultní nemocnice Hradec Králové',
         decision: null,
         decision_reason: null,
         verdict: verdict({
@@ -158,7 +158,7 @@ const scenario: Scenario = {
           query: 'USG jater v rámci dispenzarizace u C25',
           sources: ['PACS', 'NIS'],
           steps: [
-            lookupStep('PACS', 'Studie nalezena: FN Hradec Králové, USG jater.', nextAt()),
+            lookupStep('PACS', 'Studie nalezena v PACS FN v Motole, přijato přes ePACS z FN Hradec Králové: USG jater.', nextAt()),
             llmStep('Závěr', 'Relevantní. Nedávná kontrola, dostupná v PACS.'),
           ],
         }),

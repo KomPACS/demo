@@ -86,7 +86,7 @@ const scenario: Scenario = {
           report_id: reportId,
           status: 'available',
           is_baseline: false,
-          pacs_source: 'PACS Pardubická nemocnice',
+          pacs_source: 'PACS Fakultní nemocnice v Motole · přijato přes ePACS z Pardubická nemocnice',
           decision: null,
           decision_reason: null,
           verdict: verdict({
@@ -101,7 +101,7 @@ const scenario: Scenario = {
             source_doc: { type: 'Ambulantní zpráva', department: 'onkologie', date: day(-60) },
             sources: ['PACS', 'zpráva'],
             steps: [
-              lookupStep('PACS', 'Studie nalezena: Pardubická nemocnice, CT hrudníku.', nextAt()),
+              lookupStep('PACS', 'Studie nalezena v PACS FN v Motole, přijato přes ePACS z Pardubická nemocnice: CT hrudníku.', nextAt()),
               llmStep('Zmínka', 'Ambulantní zpráva potvrzuje stejné vyšetření.'),
               llmStep('Závěr', 'Relevantní. Snímky jsou dostupné v PACS.'),
             ],

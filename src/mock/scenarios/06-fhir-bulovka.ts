@@ -52,7 +52,7 @@ const scenario: Scenario = {
           report_id: null,
           status: 'available',
           is_baseline: true,
-          pacs_source: 'PACS Fakultní nemocnice Královské Vinohrady',
+          pacs_source: 'PACS Fakultní nemocnice v Motole · přijato přes ePACS z Fakultní nemocnice Královské Vinohrady',
           decision: null,
           decision_reason: null,
           verdict: verdict({
@@ -61,7 +61,7 @@ const scenario: Scenario = {
             query: 'Vstupní staging CT u C67',
             sources: ['PACS', 'NIS'],
             steps: [
-              lookupStep('PACS', 'Studie nalezena: FN Královské Vinohrady, CT břicha a pánve.', nextAt()),
+              lookupStep('PACS', 'Studie nalezena v PACS FN v Motole, přijato přes ePACS z FN Královské Vinohrady: CT břicha a pánve.', nextAt()),
               llmStep('Závěr', 'Relevantní. Vstupní staging CT, dostupné v PACS.'),
             ],
           }),

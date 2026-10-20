@@ -57,7 +57,7 @@ const scenario: Scenario = {
           report_id: null,
           status: 'available',
           is_baseline: true,
-          pacs_source: 'PACS Fakultní nemocnice Královské Vinohrady',
+          pacs_source: 'PACS Fakultní nemocnice v Motole · přijato přes ePACS z Fakultní nemocnice Královské Vinohrady',
           decision: null,
           decision_reason: null,
           verdict: verdict({
@@ -67,7 +67,7 @@ const scenario: Scenario = {
             guideline,
             sources: ['PACS', 'NIS'],
             steps: [
-              lookupStep('PACS', 'Studie nalezena: FN Královské Vinohrady, CT břicha a pánve.', nextAt()),
+              lookupStep('PACS', 'Studie nalezena v PACS FN v Motole, přijato přes ePACS z FN Královské Vinohrady: CT břicha a pánve.', nextAt()),
               llmStep('Doporučení', 'Modrá kniha ČOS, s. 220: CT břicha a pánve, CT hrudníku.'),
               llmStep('Závěr', 'Relevantní. Vstupní staging CT, dostupné v PACS.'),
             ],
@@ -85,7 +85,7 @@ const scenario: Scenario = {
           report_id: null,
           status: 'available',
           is_baseline: false,
-          pacs_source: 'PACS Fakultní nemocnice Královské Vinohrady',
+          pacs_source: 'PACS Fakultní nemocnice v Motole · přijato přes ePACS z Fakultní nemocnice Královské Vinohrady',
           decision: null,
           decision_reason: null,
           verdict: verdict({
@@ -95,7 +95,7 @@ const scenario: Scenario = {
             guideline,
             sources: ['PACS', 'NIS'],
             steps: [
-              lookupStep('PACS', 'Studie nalezena: FN Královské Vinohrady, CT hrudníku.', nextAt()),
+              lookupStep('PACS', 'Studie nalezena v PACS FN v Motole, přijato přes ePACS z FN Královské Vinohrady: CT hrudníku.', nextAt()),
               llmStep('Závěr', 'Relevantní. Součást vstupního stagingu.'),
             ],
           }),
@@ -112,7 +112,7 @@ const scenario: Scenario = {
           report_id: null,
           status: 'available',
           is_baseline: false,
-          pacs_source: 'PACS Fakultní nemocnice Královské Vinohrady',
+          pacs_source: 'PACS Fakultní nemocnice v Motole · přijato přes ePACS z Fakultní nemocnice Královské Vinohrady',
           decision: null,
           decision_reason: null,
           verdict: verdict({
@@ -122,7 +122,7 @@ const scenario: Scenario = {
             guideline,
             sources: ['PACS', 'NIS'],
             steps: [
-              lookupStep('PACS', 'Studie nalezena: FN Královské Vinohrady, CT břicha a pánve.', nextAt()),
+              lookupStep('PACS', 'Studie nalezena v PACS FN v Motole, přijato přes ePACS z FN Královské Vinohrady: CT břicha a pánve.', nextAt()),
               llmStep('Závěr', 'Relevantní. Kontrola dle schématu dispenzarizace.'),
             ],
           }),
@@ -139,7 +139,7 @@ const scenario: Scenario = {
           report_id: null,
           status: 'available',
           is_baseline: false,
-          pacs_source: 'PACS Fakultní nemocnice Královské Vinohrady',
+          pacs_source: 'PACS Fakultní nemocnice v Motole · přijato přes ePACS z Fakultní nemocnice Královské Vinohrady',
           decision: null,
           decision_reason: null,
           verdict: verdict({
@@ -148,7 +148,7 @@ const scenario: Scenario = {
             query: 'USG břicha v rámci dispenzarizace u C64',
             sources: ['PACS', 'NIS'],
             steps: [
-              lookupStep('PACS', 'Studie nalezena: FN Královské Vinohrady, USG břicha.', nextAt()),
+              lookupStep('PACS', 'Studie nalezena v PACS FN v Motole, přijato přes ePACS z FN Královské Vinohrady: USG břicha.', nextAt()),
               llmStep('Závěr', 'Relevantní. Nedávná kontrola, dostupná v PACS.'),
             ],
           }),

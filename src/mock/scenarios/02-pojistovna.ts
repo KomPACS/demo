@@ -98,7 +98,7 @@ const scenario: Scenario = {
           report_id: null,
           status: 'available',
           is_baseline: true,
-          pacs_source: 'PACS Masarykův onkologický ústav',
+          pacs_source: 'PACS Fakultní nemocnice v Motole · přijato přes ePACS z Masarykův onkologický ústav',
           decision: null,
           decision_reason: null,
           verdict: verdict({
@@ -107,7 +107,7 @@ const scenario: Scenario = {
             query: 'Vstupní staging CT u C18',
             sources: ['PACS', 'NIS'],
             steps: [
-              lookupStep('PACS', 'Studie nalezena: Masarykův onkologický ústav, CT břicha a pánve.', nextAt()),
+              lookupStep('PACS', 'Studie nalezena v PACS FN v Motole, přijato přes ePACS z Masarykův onkologický ústav: CT břicha a pánve.', nextAt()),
               llmStep('Závěr', 'Relevantní. Vstupní staging CT, dostupné v PACS.'),
             ],
           }),

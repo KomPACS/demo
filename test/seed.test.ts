@@ -245,6 +245,10 @@ test('seed scenarios: global coverage', async () => {
   assert.ok(candidates.some((c) => c.decision === 'removed'))
   assert.ok(all.some((t) => Object.values(t.verdicts ?? {}).some((v) => v.length >= 2)))
 
+  for (const c of [...candidates, ...scenarios.flatMap((s) => s.live?.candidates ?? [])]) {
+    if (c.pacs_source) assert.ok(c.pacs_source.startsWith('PACS Fakultní nemocnice v Motole'), `${c.id}: pacs_source must be our PACS, got ${c.pacs_source}`)
+  }
+
   const contactIds = scenarios.flatMap((s) => Object.keys(s.contacts))
   assert.equal(new Set(contactIds).size, contactIds.length, `contact defined twice: ${contactIds.join(', ')}`)
 
