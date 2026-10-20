@@ -15,6 +15,7 @@ export type ScenarioTrigger = {
   duplicate_alert: components['schemas']['DuplicateAlert'] | null
   insurer_request: components['schemas']['InsurerRequest'] | null
   verdicts?: Record<string, components['schemas']['VerdictVersion'][]>
+  checked_at?: string | null
 }
 
 export type Scenario = {

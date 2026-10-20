@@ -770,6 +770,7 @@ function buildMutationFixtures() {
         duplicate_alert: null,
         insurer_request: null,
         verdicts: verdictsM,
+        checked_at: '2026-10-19T07:30:00.000Z',
       },
     ],
     requests: [rM2, rM3, rM4, rM5, rM6, rM7, rM8, rM9],
@@ -903,28 +904,40 @@ test('decide(): removed deletes the candidate\'s existing draft request', () => 
   assert.ok(!store.queue().some((r) => r.candidate_id === 'm-c2'))
 })
 
-test('rejudge(): appends an active version citing the note when no prepared verdict is seeded, twice', () => {
+test('rejudge(): appends an active version with the note stored separately (verdict unchanged) when no prepared verdict is seeded, twice', () => {
   const { store, fx } = makeMutationStore()
+  const before = store.verdicts(fx.triggerMId, 'm-c10')[0]
+  assert.ok(before)
 
-  const v1 = store.rejudge(fx.triggerMId, 'm-c10', 'Nová zpráva z nemocnice.')
+  const v1 = store.rejudge(fx.triggerMId, 'm-c10', 'Nová zpráva z nemocnice.', null)
   const versions1 = store.verdicts(fx.triggerMId, 'm-c10')
   assert.equal(versions1.length, 2)
   assert.equal(versions1[0]?.active, false)
   assert.equal(versions1[1]?.active, true)
   assert.equal(versions1[1]?.n, 1)
-  assert.equal(versions1[1]?.verdict.label, 'relevant')
-  assert.match(versions1[1]?.verdict.reason ?? '', /Nová zpráva z nemocnice\./)
+  assert.deepEqual(versions1[1]?.verdict, before.verdict)
+  assert.equal(versions1[1]?.note, 'Nová zpráva z nemocnice.')
+  assert.equal(versions1[1]?.new_evidence, null)
   assert.ok(versions1[1]?.trace)
   const c10after1 = v1.candidates.find((c) => c.id === 'm-c10')
   assert.deepEqual(c10after1?.verdict, versions1[1]?.verdict)
 
-  store.rejudge(fx.triggerMId, 'm-c10', 'Druhé přehodnocení.')
+  store.rejudge(fx.triggerMId, 'm-c10', 'Druhé přehodnocení.', null)
   const versions2 = store.verdicts(fx.triggerMId, 'm-c10')
   assert.equal(versions2.length, 3)
   assert.equal(versions2[0]?.active, false)
   assert.equal(versions2[1]?.active, false)
   assert.equal(versions2[2]?.active, true)
   assert.equal(versions2[2]?.n, 2)
+})
+
+test('rejudge(): stores the category on the new version', () => {
+  const { store, fx } = makeMutationStore()
+  store.rejudge(fx.triggerMId, 'm-c10', 'Chybná modalita uvedená v žádosti.', 'modality_region')
+  const versions = store.verdicts(fx.triggerMId, 'm-c10')
+  const active = versions.find((v) => v.active)
+  assert.equal(active?.category, 'modality_region')
+  assert.equal(active?.note, 'Chybná modalita uvedená v žádosti.')
 })
 
 test('rejudge(): uses the scenario\'s prepared verdict when seeded, instead of citing the note', () => {
@@ -957,22 +970,90 @@ test('restore(): candidate.verdict equals the restored version\'s verdict (rejud
   assert.deepEqual(c10?.verdict, original.verdict)
 })
 
-test('approve(): draft becomes sent with sent_at set; queue() and getCase() both reflect it', () => {
+test('approve(): draft becomes approved, no sent_at set; queue() and getCase() both reflect it', () => {
   const { store, fx } = makeMutationStore()
   const approved = store.approve('req-m-4')
-  assert.equal(approved.state, 'sent')
-  assert.ok(approved.sent_at)
+  assert.equal(approved.state, 'approved')
+  assert.equal(approved.sent_at, null)
 
   const queued = store.queue().find((r) => r.id === 'req-m-4')
-  assert.equal(queued?.state, 'sent')
+  assert.equal(queued?.state, 'approved')
   const kase = store.getCase(fx.triggerMId)
   const c4 = kase.candidates.find((c) => c.id === 'm-c4')
-  assert.equal(c4?.request_state, 'sent')
+  assert.equal(c4?.request_state, 'approved')
 })
 
 test('approve(): on an already-received request throws Conflict', () => {
   const { store } = makeMutationStore()
   assert.throws(() => store.approve('req-m-5'), Conflict)
+})
+
+test('send(): approved becomes sent with sent_at set', () => {
+  const { store } = makeMutationStore()
+  store.approve('req-m-4')
+  const sent = store.send('req-m-4')
+  assert.equal(sent.state, 'sent')
+  assert.ok(sent.sent_at)
+})
+
+test('send(): on a draft request throws Conflict', () => {
+  const { store } = makeMutationStore()
+  assert.throws(() => store.send('req-m-6'), Conflict)
+})
+
+test('saveDraft(): from draft sets email_draft and state approved', () => {
+  const { store } = makeMutationStore()
+  const updated = store.saveDraft('req-m-2', 'Nový text žádosti.')
+  assert.equal(updated.email_draft, 'Nový text žádosti.')
+  assert.equal(updated.state, 'approved')
+})
+
+test('saveDraft(): from approved keeps it approved and updates email_draft', () => {
+  const { store } = makeMutationStore()
+  store.approve('req-m-4')
+  const updated = store.saveDraft('req-m-4', 'Upravený text žádosti.')
+  assert.equal(updated.state, 'approved')
+  assert.equal(updated.email_draft, 'Upravený text žádosti.')
+})
+
+test('saveDraft(): on a sent request throws Conflict', () => {
+  const { store } = makeMutationStore()
+  assert.throws(() => store.saveDraft('req-m-3', 'Text.'), Conflict)
+})
+
+test('callAgain(): phone channel in draft appends an ISO timestamp to call_attempts, twice; state stays draft', () => {
+  const { store } = makeMutationStore()
+  const after1 = store.callAgain('req-m-6')
+  assert.equal(after1.state, 'draft')
+  assert.equal(after1.call_attempts?.length, 1)
+  assert.ok(Date.parse(after1.call_attempts?.[0] ?? ''))
+
+  const after2 = store.callAgain('req-m-6')
+  assert.equal(after2.state, 'draft')
+  assert.equal(after2.call_attempts?.length, 2)
+})
+
+test('callAgain(): non-phone channel throws Conflict', () => {
+  const { store } = makeMutationStore()
+  assert.throws(() => store.callAgain('req-m-2'), Conflict)
+})
+
+test('callAgain(): a non-draft phone request throws Conflict', () => {
+  const { store } = makeMutationStore()
+  assert.throws(() => store.callAgain('req-m-8'), Conflict)
+})
+
+test('getCase(): checked_at is taken from the scenario trigger when set', () => {
+  const { store, fx } = makeMutationStore()
+  const kase = store.getCase(fx.triggerMId)
+  assert.equal(kase.checked_at, '2026-10-19T07:30:00.000Z')
+})
+
+test('getCase(): checked_at falls back to the trigger date when not set on the scenario trigger', () => {
+  const { store, fx } = makeMutationStore()
+  const kase = store.getCase(fx.triggerE1Id)
+  assert.ok(kase.checked_at)
+  assert.ok(kase.checked_at.startsWith('2026-01-10'))
 })
 
 test('requested(): draft becomes requested', () => {
