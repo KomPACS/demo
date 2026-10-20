@@ -1,20 +1,12 @@
-import { useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { STOPS } from '@/lib/tour'
+import { cn } from '@/lib/utils'
 
-const STOPS = [
-  { href: '#/', title: 'Spusťte kontrolu u pacientky Lenky Pokorné, která ještě není ve frontě' },
-  { href: '#/case/s01-zpravy', title: 'Předchozí vyšetření nalezená jen ve zprávách, žádosti e-mailem i telefonem' },
-  { href: '#/case/s02-pojistovna', title: 'Vyšetření z jiné nemocnice podle výpisu pojištěnce' },
-  { href: '#/case/s03-mdt-nedoruceno', title: 'MDT: žádost nedoručena, urgovat' },
-  { href: '#/case/s04-duplicita', title: 'Upozornění na duplicitu' },
-  { href: '#/case/s09-vse-v-pacs', title: 'Vše potřebné je v PACS' },
-]
 
-export function DemoTour() {
-  const [open, setOpen] = useState(false)
+export function DemoTour({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
   return (
-    <nav aria-label="Ukázkové případy" className="fixed top-3 right-3 z-50 flex items-center gap-1 rounded-md border bg-background/95 p-1 shadow-sm">
+    <nav aria-label="Ukázkové případy" className={cn('fixed top-3 right-3 z-50 items-center gap-1 rounded-md border bg-background/95 p-1 shadow-sm', open ? 'flex' : 'hidden md:flex')}>
       {open &&
         STOPS.map((s, i) => (
           <div key={s.href} className="group relative">
@@ -31,7 +23,7 @@ export function DemoTour() {
             </span>
           </div>
         ))}
-      <Button size="sm" variant="ghost" className="w-8 px-0" onClick={() => setOpen(!open)} aria-expanded={open} aria-label={open ? 'Skrýt ukázkové případy' : 'Ukázkové případy'}>
+      <Button size="sm" variant="ghost" className="w-8 px-0" onClick={() => onOpenChange(!open)} aria-expanded={open} aria-label={open ? 'Skrýt ukázkové případy' : 'Ukázkové případy'}>
         {open ? <ChevronRight /> : <ChevronLeft />}
       </Button>
     </nav>

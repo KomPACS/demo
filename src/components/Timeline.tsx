@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react'
-import { Loading, RequestBadge, Skeleton, StatusBadge } from '@/components/common'
+import { Loading, RequestBadge, Skeleton, StatusBadge, WriteGroup } from '@/components/common'
 import { PatientBar } from '@/components/PatientBar'
 import type { Role } from '@/components/Sidebar'
 import { Button } from '@/components/ui/button'
@@ -617,9 +617,11 @@ function EventPopup({
           </ul>
           {item.events.length === 1 && <Row label="Záznam">{item.events[0].resource}</Row>}
           {missingStudy && onArriveInPacs && (
-            <Button variant="outline" className="self-start" loading={arriving} disabled={arriving} onClick={() => arrive(missingStudy)}>
-              Simulovat doručení do PACS (demo)
-            </Button>
+            <WriteGroup>
+              <Button variant="outline" className="self-start" loading={arriving} disabled={arriving} onClick={() => arrive(missingStudy)}>
+                Simulovat doručení do PACS (demo)
+              </Button>
+            </WriteGroup>
           )}
           {arriveError && <p className="text-destructive">Doručení se nepodařilo.</p>}
         </>

@@ -25,9 +25,9 @@
 | T13 | Scenarios 9–10 and filler 11 | dev | COMPLETED | 0 | - |
 | T14 | Fillers 12–14 | dev | COMPLETED | 0 | - |
 | T15 | Tour stops and global seed checks | inline | COMPLETED | 0 | + unique names, one contact per hospital (VFN e-mail, Bulovka FHIR) |
-| T16 | Intro screen | inline | PENDING | 0 | - |
-| T17 | Read-only phone, bottom bar | dev | PENDING | 0 | - |
-| T18 | Integration page | inline | PENDING | 0 | - |
+| T16 | Intro screen | inline | COMPLETED | 0 | - |
+| T17 | Read-only phone, bottom bar | dev | COMPLETED | 0 | hook test replaced by a pure `readOnlyStore` test: a hook test needs a React renderer dependency |
+| T18 | Integration page | inline | COMPLETED | 0 | - |
 | T19 | Contract: evidence, steps, review, dispute | inline | PENDING | 0 | - |
 | T20 | Mock store for T19 | full | PENDING | 0 | - |
 | T21 | Scenario data: evidence, drafts | dev | PENDING | 0 | - |
@@ -49,6 +49,7 @@
 ## Reviews
 - G1: PASS.
 - G2: FAIL (plan refs in comments), fixed inline 18afeaf. Non-blocking: the default verdict-version literal repeats 3x in `src/mock/store.ts`.
+- G4: FAIL (open add-prior form stayed writable after a resize below 768 px; planned hook test not written). Form wrapped in `WriteGroup`; test deviation accepted (T17 note).
 - G3: FAIL (Plzeň and Hradec under two org ids, Motol under two ids and names, literal UTC times in scenario 9, two Pardubice spellings). Fixed on `fix/g3-seed-data`, plus a seed test for one id per hospital and one contact per id. P1 done.
 
 ## Warnings & Blockers

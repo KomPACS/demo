@@ -1,6 +1,6 @@
 import { Bot, RefreshCw, ThumbsDown, ThumbsUp } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
-import { Loading } from '@/components/common'
+import { Loading, WriteGroup } from '@/components/common'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Textarea } from '@/components/ui/textarea'
@@ -411,10 +411,12 @@ export function AiLog({ triggerId, candidate, onCase }: { triggerId: string; can
         {calls && judge && (
           <>
             {override && <p className="text-[15px] font-bold">Platí nové hodnocení. Níže je záznam tohoto nového volání.</p>}
+            <WriteGroup>
             <Rejudge busy={busy} onRun={rejudge} />
             {actionError && <p className="text-destructive">{actionError}</p>}
             <History versions={versions} busy={busy} onRestore={restore} />
             <Rating storageKey={`ai-rating:${triggerId}:${candidate.id}:${versions.length}`} />
+            </WriteGroup>
           </>
         )}
         {mention && <Mention call={mention} candidate={candidate} />}

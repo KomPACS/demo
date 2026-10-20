@@ -1,6 +1,6 @@
 import { ExternalLink, Plus, Send, TriangleAlert } from 'lucide-react'
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react'
-import { Loading, RequestBadge, Skeleton, StatusBadge } from '@/components/common'
+import { Loading, RequestBadge, Skeleton, StatusBadge, WriteGroup } from '@/components/common'
 import { AiLog, Raw } from '@/components/AiLog'
 import { BodyMap } from '@/components/BodyMap'
 import { PatientBar } from '@/components/PatientBar'
@@ -209,12 +209,14 @@ export function CaseDetail({
         )}
         {collector && (
           <div className="flex flex-wrap gap-2.5">
+            <WriteGroup>
             <RequestActions r={r} pending={pending} onAct={runAction} onContact={saveContact} />
             <RemoveDialog
               disabled={pending !== null}
               loading={isPending(`removed-${c.id}`)}
               onRemove={(reason) => setDecision(c.id, 'removed', reason)}
             />
+            </WriteGroup>
           </div>
         )}
       </div>
@@ -231,6 +233,7 @@ export function CaseDetail({
         onBack={onBack}
         action={
           collector && (
+            <WriteGroup>
             <Button
               disabled={pending !== null || toSend.length === 0}
               loading={isPending('send-all')}
@@ -242,6 +245,7 @@ export function CaseDetail({
                 ? `Odesílám ${Math.min(sent + 1, sent + toSend.length)} z ${sent + toSend.length}…`
                 : `Odeslat všechny připravené (${toSend.length})`}
             </Button>
+            </WriteGroup>
           )
         }
       />
@@ -333,6 +337,7 @@ export function CaseDetail({
               <PriorTile key={c.id} c={c} triggerId={triggerId} onCase={updateCase} className="border-2 border-decide-border bg-decide-bg" verdictPrefix>
                 {collector && (
                   <div className="mt-1 flex flex-wrap gap-3">
+                    <WriteGroup>
                     <Button
                       className="bg-decide hover:bg-decide/85"
                       disabled={pending !== null}
@@ -349,6 +354,7 @@ export function CaseDetail({
                     >
                       Nerelevantní
                     </Button>
+                    </WriteGroup>
                   </div>
                 )}
               </PriorTile>
@@ -385,6 +391,7 @@ export function CaseDetail({
                   </div>
                   {c.source !== 'collector' && <AiLog triggerId={triggerId} candidate={c} onCase={updateCase} />}
                 </div>
+                <WriteGroup>
                 {collector ? (
                   <Button
                     variant="outline"
@@ -406,13 +413,15 @@ export function CaseDetail({
                     </Button>
                   )
                 )}
+                </WriteGroup>
               </div>
             ))}
           </Section>
         )}
 
-        {collector &&
-          (adding ? (
+        {collector && (
+          <WriteGroup>
+          {adding ? (
             <AddCandidate
               triggerId={triggerId}
               onAdded={(c) => {
@@ -427,7 +436,9 @@ export function CaseDetail({
               <Plus className="size-5.5" />
               Přidat předchozí vyšetření ručně
             </Button>
-          ))}
+          )}
+          </WriteGroup>
+        )}
           </>
         )}
       </div>
