@@ -419,8 +419,9 @@ export function CaseDetail({
           </Section>
         )}
 
-        {collector &&
-          (adding ? (
+        {collector && (
+          <WriteGroup>
+          {adding ? (
             <AddCandidate
               triggerId={triggerId}
               onAdded={(c) => {
@@ -431,13 +432,13 @@ export function CaseDetail({
               onCancel={() => setAdding(false)}
             />
           ) : (
-            <WriteGroup>
             <Button variant="outline" className="self-start" onClick={() => setAdding(true)}>
               <Plus className="size-5.5" />
               Přidat předchozí vyšetření ručně
             </Button>
-            </WriteGroup>
-          ))}
+          )}
+          </WriteGroup>
+        )}
           </>
         )}
       </div>
