@@ -170,7 +170,7 @@ function makeClient() {
   return { client, store, fx }
 }
 
-test('routes: every one of the 21 paths responds through openapi-fetch (table-driven)', async () => {
+test('routes: every one of the 23 paths responds through openapi-fetch (table-driven)', async () => {
   const { client, fx } = makeClient()
 
   const health = await client.GET('/api/health', {})

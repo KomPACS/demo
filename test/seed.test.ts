@@ -176,6 +176,43 @@ test('seed scenarios: scenario 1 baseline and prepared dispute', async () => {
   assert.ok(versions && versions.length > 1, 'expected a prepared next version for the CT břicha candidate')
   const prepared = versions[versions.length - 1]
   assert.ok(prepared.new_evidence, 'prepared version must have new_evidence')
+
+  const abdSourceReportId = abd.report_id
+  assert.ok(abdSourceReportId, 'CT břicha candidate must link to a report')
+  const otherReport = s01.scenario.reports.find((r) => r.id !== abdSourceReportId && r.text.includes(prepared.new_evidence ?? '\0'))
+  assert.ok(otherReport, 'prepared new_evidence must occur in a scenario report other than the CT břicha source report')
+})
+
+test('seed scenarios: evidence context is checkable against the cited report', async () => {
+  const entries = await loadScenarios()
+  for (const { file, scenario } of entries) {
+    const reportById = new Map(scenario.reports.map((r) => [r.id, r]))
+    const allTriggers = scenario.live ? [...scenario.triggers, scenario.live] : scenario.triggers
+    for (const st of allTriggers) {
+      for (const c of st.candidates) {
+        const v = c.verdict
+        if (!v.source_sentence || !c.report_id) continue
+        const report = reportById.get(c.report_id)
+        assert.ok(report, `${file} candidate ${c.id}: report ${c.report_id} not found`)
+        const text = report.text
+
+        if (v.context_before !== null && v.context_before !== undefined) {
+          assert.ok(text.includes(v.context_before), `${file} candidate ${c.id}: context_before not found verbatim in report ${c.report_id}`)
+          assert.ok(
+            text.includes(`${v.context_before} ${v.source_sentence}`),
+            `${file} candidate ${c.id}: context_before is not the real sentence directly before source_sentence`,
+          )
+        }
+        if (v.context_after !== null && v.context_after !== undefined) {
+          assert.ok(text.includes(v.context_after), `${file} candidate ${c.id}: context_after not found verbatim in report ${c.report_id}`)
+          assert.ok(
+            text.includes(`${v.source_sentence} ${v.context_after}`),
+            `${file} candidate ${c.id}: context_after is not the real sentence directly after source_sentence`,
+          )
+        }
+      }
+    }
+  }
 })
 
 test('seed scenarios: global coverage', async () => {

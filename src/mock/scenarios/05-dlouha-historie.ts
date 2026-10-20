@@ -256,7 +256,6 @@ const scenario: Scenario = {
             event_status: 'done',
             event_word: 'zmíněna',
             context_before: 'Doplněno CT břicha k vyloučení jaterních metastáz.',
-            context_after: 'Plán další kontroly za tři měsíce.',
             source_doc: { type: 'Ambulantní zpráva', department: 'onkologie, FN v Motole', date: day(-1090) },
             sources: ['zpráva'],
             steps: [
@@ -332,7 +331,6 @@ const scenario: Scenario = {
             event_status: 'done',
             event_word: 'Doplněno',
             context_before: 'Pacientka vyšetřena pro nově zjištěný plicní nodulus na RTG.',
-            context_after: 'Kontrola za tři měsíce doporučena.',
             source_doc: { type: 'Ambulantní zpráva', department: 'pneumologie, Thomayerova nemocnice', date: day(-60) },
             sources: ['zpráva'],
             steps: [

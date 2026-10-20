@@ -15,6 +15,9 @@ const triggerId = 's01-zpravy'
 const report0Id = 'rep-s01-0'
 const report1Id = 'rep-s01-1'
 const report2Id = 'rep-s01-2'
+const report3Id = 'rep-s01-3'
+const [abdYear, abdMonth] = month(-9).split('-')
+const report3Date = `${abdYear}-${abdMonth}-10`
 const patientRc = birthNumber('1968-05-22', 'female', 14)
 const triggerDate = workingDaysAhead(3)
 
@@ -36,8 +39,8 @@ const abdVerdict = verdict({
   source_sentence: 'V minulosti také doplněno CT břicha, důvod indikace ve zprávě není jasný.',
   event_status: 'done',
   event_word: 'doplněno',
-  context_before: 'Hospitalizace bez komplikací.',
-  context_after: painSentence,
+  context_before: 'Bez nových ložisek.',
+  context_after: 'Stav dobrý, bez nových potíží.',
   source_doc: { type: 'Propouštěcí zpráva', department: 'onkologie, FN v Motole', date: day(-80) },
   sources: ['zpráva'],
   steps: [
@@ -131,8 +134,8 @@ const scenario: Scenario = {
             guideline,
             event_status: 'done',
             event_word: 'provedeno',
-            context_before: 'Kontrola po 3. cyklu chemoterapie.',
-            context_after: 'Pokračovat v zavedené léčbě.',
+            context_before: 'Pacientka docházející na dispenzární kontroly pro karcinom plic.',
+            context_after: 'Dále doloženo kontrolní CT hrudníku ze Všeobecné fakultní nemocnice v Praze, bez popisu v systému.',
             source_doc: { type: 'Ambulantní zpráva', department: 'pneumologie, FN v Motole', date: day(-140) },
             sources: ['PACS', 'zpráva'],
             steps: [
@@ -165,8 +168,8 @@ const scenario: Scenario = {
             guideline,
             event_status: 'done',
             event_word: 'doloženo',
-            context_before: 'Poslední podání chemoterapie.',
-            context_after: 'Nález dle sdělení pacientky stacionární.',
+            context_before: 'Kontrolní CT hrudníku a břicha provedeno, beze změn oproti předchozímu nálezu.',
+            context_after: 'Doporučeno pokračovat v dispenzarizaci dle standardního schématu.',
             source_doc: { type: 'Ambulantní zpráva', department: 'pneumologie, FN v Motole', date: day(-140) },
             sources: ['zpráva'],
             steps: [
@@ -341,6 +344,15 @@ const scenario: Scenario = {
       resource: `DiagnosticReport/${report2Id}`,
       simulated: false,
     },
+    {
+      id: 'evt-s01-report-3',
+      date: `${report3Date}T09:30:00.000Z`,
+      type: 'report',
+      title: 'Interní ambulance – bolesti břicha',
+      detail: null,
+      resource: `DiagnosticReport/${report3Id}`,
+      simulated: false,
+    },
   ],
   contacts: {
     'org-vfn': {
@@ -385,8 +397,16 @@ const scenario: Scenario = {
       date: day(-80),
       title: 'Onkologická ambulance – záznam',
       text:
-        'Pacientka byla kontrolována RTG hrudníku na plicním oddělení Thomayerovy nemocnice, nález stacionární. ' +
-        'V minulosti také doplněno CT břicha, důvod indikace ve zprávě není jasný. Stav dobrý, bez nových potíží.',
+        'Pacientka přijata pro dušnost. Pacientka byla kontrolována RTG hrudníku na plicním oddělení Thomayerovy nemocnice. ' +
+        'Bez nových ložisek. V minulosti také doplněno CT břicha, důvod indikace ve zprávě není jasný. Stav dobrý, bez nových potíží.',
+    },
+    {
+      id: report3Id,
+      date: report3Date,
+      title: 'Interní ambulance – bolesti břicha',
+      text:
+        `Pacientka přichází na interní ambulanci pro opakované bolesti břicha. ${painSentence} ` +
+        'Doporučeno doplnit CT břicha k vyloučení organické příčiny potíží.',
     },
   ],
 }
