@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
 import { api, data, type Candidate, type Case, type RequestItem } from '@/lib/api'
 
+export { sortPriors } from '@/lib/priors'
+
 export function classify(cs: Candidate[]) {
   const toDecide = cs.filter((c) => c.verdict.label === 'uncertain' && !c.decision)
   const removed = cs.filter((c) => c.decision === 'removed')
@@ -28,6 +30,16 @@ export function progress(kase: Case, requests: RequestItem[]) {
 }
 
 export const priorAnchor = (id: string) => `prior-${id}`
+
+export function gapLabel(date: string | null, triggerDate: string): string | null {
+  if (!date) return null
+  const [y, m, d] = date.slice(0, 10).split('-').map(Number)
+  const [ty, tm, td] = triggerDate.slice(0, 10).split('-').map(Number)
+  const days = Math.round((Date.UTC(ty, (tm || 1) - 1, td || 1) - Date.UTC(y, (m || 1) - 1, d || 1)) / 86_400_000)
+  if (days <= 0) return null
+  const months = Math.round(days / 30.44)
+  return months < 1 ? `${days} dní před` : `${months} měs. před`
+}
 
 export function useCase(triggerId: string) {
   const [kase, setCase] = useState<Case | null>(null)

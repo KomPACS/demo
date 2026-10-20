@@ -3,11 +3,13 @@ import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'rea
 import { Loading, RequestBadge, Skeleton, StatusBadge, WriteGroup } from '@/components/common'
 import { AiLog, Raw } from '@/components/AiLog'
 import { BodyMap } from '@/components/BodyMap'
+import { EvidencePanel } from '@/components/EvidencePanel'
 import { PatientBar } from '@/components/PatientBar'
 import { RemoveDialog } from '@/components/RemoveDialog'
 import { RequestActions } from '@/components/RequestActions'
 import type { Role } from '@/components/Sidebar'
 import { TimelineFull } from '@/components/Timeline'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -22,7 +24,7 @@ import {
   type Contact,
   type RequestItem,
 } from '@/lib/api'
-import { classify, isReady, pacsViewerUrl, priorAnchor, progress, sendable, useCase } from '@/lib/case'
+import { classify, gapLabel, isReady, pacsViewerUrl, priorAnchor, progress, sendable, sortPriors, useCase } from '@/lib/case'
 import { channelLabel, decisionLabel, formatDate, sourceLabel } from '@/lib/labels'
 import { cn, panel } from '@/lib/utils'
 
@@ -48,11 +50,14 @@ export function CaseDetail({
   const [sent, setSent] = useState(0)
   const [adding, setAdding] = useState(false)
   const [tab, setTab] = useState<'checks' | 'timeline' | 'body'>('checks')
+  const [focusId, setFocusId] = useState<string | undefined>(undefined)
   const collector = role === 'collector'
   const loaded = Boolean(kase)
 
   useEffect(() => {
-    if (loaded && focus) document.getElementById(priorAnchor(focus))?.scrollIntoView({ block: 'center' })
+    if (!loaded || !focus) return
+    document.getElementById(priorAnchor(focus))?.scrollIntoView({ block: 'center' })
+    setFocusId(focus)
   }, [loaded, focus])
 
   if (error) return <p className="p-8 text-destructive">{error}</p>
@@ -144,6 +149,7 @@ export function CaseDetail({
 
   const jump = (candidateId: string) => {
     setTab('checks')
+    setFocusId(candidateId)
     setTimeout(() => document.getElementById(priorAnchor(candidateId))?.scrollIntoView({ behavior: 'smooth', block: 'center' }))
   }
 
@@ -323,7 +329,8 @@ export function CaseDetail({
         {tab === 'timeline' && <TimelineFull kase={kase} requests={requests} role={role} onOpenPrior={jump} onCaseChanged={loadCase} />}
         {tab === 'body' && <BodyMap priors={[...toDecide, ...relevant]} triggerPart={kase.trigger.body_part} />}
         {tab === 'checks' && (
-          <>
+          <div className="flex items-start gap-5.5">
+          <div className="flex min-w-0 flex-1 flex-col gap-5.5">
             {kase.insurer_request && <InsurerCard insurer={kase.insurer_request} />}
 
         {toDecide.length > 0 && (
@@ -333,8 +340,16 @@ export function CaseDetail({
                 ? 'Systém si není jistý. Rozhodněte, zda vyšetření lékař potřebuje. Žádost vznikne až potom.'
                 : 'Systém si není jistý. Rozhoduje koordinátor/ka.'}
             </p>
-            {toDecide.map((c) => (
-              <PriorTile key={c.id} c={c} triggerId={triggerId} onCase={updateCase} className="border-2 border-decide-border bg-decide-bg" verdictPrefix>
+            {sortPriors(toDecide).map((c) => (
+              <PriorTile
+                key={c.id}
+                c={c}
+                triggerDate={kase.trigger.date}
+                selected={focusId === c.id}
+                onOpen={setFocusId}
+                className="border-2 border-decide-border bg-decide-bg"
+                verdictPrefix
+              >
                 {collector && (
                   <div className="mt-1 flex flex-wrap gap-3">
                     <WriteGroup>
@@ -364,9 +379,16 @@ export function CaseDetail({
 
         <Section title={`${toDecide.length ? 2 : 1}. Relevantní předchozí vyšetření (${relevant.length})`}>
           {relevant.length === 0 && <p className="text-base text-muted-foreground">Žádné relevantní předchozí vyšetření.</p>}
-          <div className="grid gap-3.5 lg:grid-cols-2">
-            {relevant.map((c) => (
-              <PriorTile key={c.id} c={c} triggerId={triggerId} onCase={updateCase} request={byCandidate.get(c.id)}>
+          <div className="flex flex-col gap-3.5">
+            {sortPriors(relevant).map((c) => (
+              <PriorTile
+                key={c.id}
+                c={c}
+                triggerDate={kase.trigger.date}
+                selected={focusId === c.id}
+                onOpen={setFocusId}
+                request={byCandidate.get(c.id)}
+              >
                 {requestBlock(c)}
               </PriorTile>
             ))}
@@ -439,7 +461,18 @@ export function CaseDetail({
           )}
           </WriteGroup>
         )}
-          </>
+          </div>
+          {focusId && kase.candidates.find((c) => c.id === focusId) && (
+            <EvidencePanel
+              candidate={kase.candidates.find((c) => c.id === focusId)!}
+              trigger={kase.trigger}
+              checkedAt={kase.checked_at}
+              triggerId={triggerId}
+              onCase={updateCase}
+              onClose={() => setFocusId(undefined)}
+            />
+          )}
+          </div>
         )}
       </div>
     </div>
@@ -480,70 +513,58 @@ function Section({ title, className, children }: { title: string; className?: st
 
 function PriorTile({
   c,
-  triggerId,
-  onCase,
+  triggerDate,
+  selected,
+  onOpen,
   request,
   className,
   verdictPrefix,
   children,
 }: {
   c: Candidate
-  triggerId: string
-  onCase: (c: Case) => void
+  triggerDate: string
+  selected: boolean
+  onOpen: (id: string) => void
   request?: RequestItem
   className?: string
   verdictPrefix?: boolean
   children?: ReactNode
 }) {
-  const quote = c.verdict.source_sentence
+  const gap = gapLabel(c.date, triggerDate)
   return (
-    <div id={priorAnchor(c.id)} className={cn(tile, 'scroll-mt-40', className)}>
-      <div className="flex flex-wrap justify-between gap-2">
-        <div className="text-[19px] font-bold">
-          {c.description} · {formatDate(c.date)}
+    <div id={priorAnchor(c.id)} className={cn(tile, 'scroll-mt-40', className, selected && 'ring-2 ring-primary')}>
+      <button type="button" onClick={() => onOpen(c.id)} aria-pressed={selected} className="grid grid-cols-[88px_minmax(0,1fr)] gap-4 text-left">
+        <div className="flex flex-col gap-0.5 border-r pr-3">
+          <span className="text-xl leading-tight font-extrabold tabular-nums">{formatDate(c.date)}</span>
+          {gap && <span className="text-[13px] text-muted-foreground">{gap}</span>}
         </div>
-        <div className="flex flex-wrap gap-1.5">
-          <StatusBadge status={c.status} />
-          {!request && c.request_state && <RequestBadge state={c.request_state} />}
+        <div className="flex min-w-0 flex-col gap-1.5">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <span className="text-[17px] font-bold">{c.description}</span>
+            <span className="flex flex-wrap gap-1.5">
+              <StatusBadge status={c.status} />
+              {!request && c.request_state && <RequestBadge state={c.request_state} />}
+              {c.is_baseline && <Badge className="h-auto rounded-full bg-primary-soft px-3 py-1 text-sm font-bold text-primary-hover">vstupní vyšetření</Badge>}
+            </span>
+          </div>
+          <div className="text-[14px] text-muted-foreground">
+            {c.place ?? 'místo neznámé'} · {sourceLabel[c.source]}
+            {c.pacs_source && <> · PACS: {c.pacs_source}</>}
+          </div>
+          <div className="text-[15px]">
+            {c.decision === 'relevant' || c.decision === 'not_relevant' ? (
+              <>
+                <b>Rozhodnutí koordinátora/ky: {decisionLabel[c.decision]}.</b>{' '}
+                <span className="text-muted-foreground">Původní hodnocení LLM: {c.verdict.reason}</span>
+              </>
+            ) : (
+              <>
+                {verdictPrefix ? <b>Hodnocení LLM: nejisté.</b> : <b>Proč:</b>} {c.verdict.reason}
+              </>
+            )}
+          </div>
         </div>
-      </div>
-      <div className="text-[15px] text-muted-foreground">
-        {c.place ?? 'místo neznámé'} · {sourceLabel[c.source]}
-        {c.pacs_source && <> · PACS: {c.pacs_source}</>}
-        {c.is_baseline && (
-          <>
-            {' '}
-            · <b className="text-foreground">vstupní vyšetření</b> před léčbou
-          </>
-        )}
-      </div>
-      {quote && <blockquote className="rounded-xl bg-background px-3.5 py-3 text-[15px] text-text">„{quote}“</blockquote>}
-      <div className="text-base">
-        {c.decision === 'relevant' || c.decision === 'not_relevant' ? (
-          <>
-            <b>Rozhodnutí koordinátora/ky: {decisionLabel[c.decision]}.</b>{' '}
-            <span className="text-muted-foreground">Původní hodnocení LLM: {c.verdict.reason}</span>
-          </>
-        ) : (
-          <>
-            {verdictPrefix ? <b>Hodnocení LLM: nejisté.</b> : <b>Proč:</b>} {c.verdict.reason}
-          </>
-        )}
-      </div>
-      {c.verdict.guideline && (
-        <div className="text-[15px] text-muted-foreground">
-          <a
-            className="font-bold text-primary underline"
-            href={`https://www.linkos.cz/files/modra-kniha/26.pdf#page=${c.verdict.guideline.page}`}
-            target="_blank"
-            rel="noreferrer"
-          >
-            Modrá kniha ČOS, s. {c.verdict.guideline.page}
-          </a>
-          : „{c.verdict.guideline.quote}“
-        </div>
-      )}
-      {c.source !== 'collector' && <AiLog triggerId={triggerId} candidate={c} onCase={onCase} />}
+      </button>
       {isReady(c, request) && (
         <Button asChild variant="outline" className="self-start">
           <a href={pacsViewerUrl(c.id)} target="_blank" rel="noreferrer">

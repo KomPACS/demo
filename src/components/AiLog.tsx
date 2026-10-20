@@ -392,13 +392,13 @@ export function AiLog({ triggerId, candidate, onCase }: { triggerId: string; can
       <DialogTrigger asChild>
         <Button variant="ghost" size="sm" className="self-start text-muted-foreground">
           <Bot className="size-4.5" />
-          Jak rozhodla AI
+          Celý záznam AI
         </Button>
       </DialogTrigger>
       <DialogContent className="flex max-h-[90vh] flex-col gap-5 overflow-y-auto sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle>
-            Jak rozhodla AI: {candidate.description} · {formatDate(candidate.date)}
+            Celý záznam AI: {candidate.description} · {formatDate(candidate.date)}
           </DialogTitle>
         </DialogHeader>
         {error && <p className="text-destructive">Záznam se nepodařilo načíst.</p>}
