@@ -1,6 +1,6 @@
-# KOMPACS demo
+# KomPACS demo
 
-Static, fully mocked demo of KOMPACS (Rakathon 2026). Synthetic data only. Live at https://demo.kompacs.cz.
+Static, fully mocked demo of KomPACS (Rakathon 2026). Synthetic data only. Live at https://demo.kompacs.cz.
 
 ```sh
 pnpm install

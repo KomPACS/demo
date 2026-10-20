@@ -32,7 +32,7 @@ export function Sidebar({
           </svg>
         </div>
         <div className="leading-tight">
-          <div className="text-lg font-extrabold tracking-wide">KOMPACS</div>
+          <div className="text-lg font-extrabold tracking-wide">KomPACS</div>
           <div className="text-sm text-muted-foreground">
             <b className="text-primary">KOM</b>parátor <b className="text-primary">PACS</b>
           </div>
