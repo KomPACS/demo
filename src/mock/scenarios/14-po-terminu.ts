@@ -3,12 +3,19 @@
  */
 import { birthNumber } from '../rc.ts'
 import { day, at, workingDaysAgo } from '../dates.ts'
-import { verdict } from '../trace.ts'
+import { verdict, lookupStep, llmStep, emailDraft } from '../trace.ts'
 import type { Scenario } from '../types.ts'
 
 const patientId = 'pac-14'
 const triggerId = 'f14-po-terminu'
 const reportId = 'rep-f14-1'
+const patientRc = birthNumber('1962-09-30', 'male', 514)
+const triggerDate = workingDaysAgo(5)
+
+let stepMinute = 14
+function nextAt(): string {
+  return at(0, `09:${String(stepMinute++).padStart(2, '0')}`)
+}
 
 const scenario: Scenario = {
   patient: {
@@ -18,7 +25,7 @@ const scenario: Scenario = {
     diagnoses: [{ code: 'C64', display: 'Zhoubný novotvar ledviny' }],
     index_date: day(-500),
     name: 'Vladimír Marek',
-    rc: birthNumber('1962-09-30', 'male', 514),
+    rc: patientRc,
   },
   insurer: '213',
   triggers: [
@@ -29,7 +36,7 @@ const scenario: Scenario = {
         kind: 'exam',
         modality: 'CT',
         body_part: 'hrudník a břicho',
-        date: workingDaysAgo(5),
+        date: triggerDate,
         simulated: false,
       },
       duplicate_alert: null,
@@ -59,6 +66,12 @@ const scenario: Scenario = {
               quote:
                 'Základním vyšetřením je CT vyšetření břicha a pánve (možno též zvážit i MRI pro snížení radiační zátěže), CT hrudníku.',
             },
+            sources: ['NIS'],
+            steps: [
+              lookupStep('PACS', 'FN Ostrava: studie zatím nenalezena.', nextAt()),
+              llmStep('Doporučení', 'Modrá kniha ČOS, s. 220: CT břicha a pánve.'),
+              llmStep('Závěr', 'Relevantní. Kontrola po nefrektomii, zatím nedoloženo.'),
+            ],
           }),
         },
         {
@@ -73,14 +86,25 @@ const scenario: Scenario = {
           report_id: reportId,
           status: 'available',
           is_baseline: false,
-          pacs_source: 'PACS Pardubická nemocnice',
+          pacs_source: 'PACS Fakultní nemocnice v Motole · přijato přes ePACS z Pardubická nemocnice',
           decision: null,
           decision_reason: null,
           verdict: verdict({
             label: 'relevant',
             reason: 'Nedávné kontrolní CT hrudníku bez nových ložisek, vhodné pro srovnání s plánovaným vyšetřením.',
             query: 'CT hrudníku za poslední půlrok',
-            source_sentence: 'Kontrolní CT hrudníku bez známek metastatického postižení.',
+            source_sentence: 'Kontrolní CT hrudníku provedeno, bez známek metastatického postižení.',
+            event_status: 'done',
+            event_word: 'provedeno',
+            context_before: 'Pacient dispenzarizován pro karcinom ledviny po nefrektomii.',
+            context_after: 'Stav stabilizovaný, pokračuje v pravidelných kontrolách.',
+            source_doc: { type: 'Ambulantní zpráva', department: 'onkologie', date: day(-60) },
+            sources: ['PACS', 'zpráva'],
+            steps: [
+              lookupStep('PACS', 'Studie nalezena v PACS FN v Motole, přijato přes ePACS z Pardubická nemocnice: CT hrudníku.', nextAt()),
+              llmStep('Zmínka', 'Ambulantní zpráva potvrzuje stejné vyšetření.'),
+              llmStep('Závěr', 'Relevantní. Snímky jsou dostupné v PACS.'),
+            ],
           }),
         },
       ],
@@ -90,7 +114,7 @@ const scenario: Scenario = {
     {
       id: 'req-f14-1',
       trigger_id: triggerId,
-      trigger_date: workingDaysAgo(5),
+      trigger_date: triggerDate,
       patient_id: patientId,
       candidate_id: 'cand-f14-1',
       prior_modality: 'CT',
@@ -100,7 +124,7 @@ const scenario: Scenario = {
       organization_id: 'org-ostrava',
       channel: 'email',
       state: 'sent',
-      email_draft: 'Dobrý den, žádáme o zaslání zprávy a snímků z vyšetření CT břicha a pánve.',
+      email_draft: emailDraft({ sex: 'male', name: 'Vladimír Marek', rc: patientRc, examDescription: 'CT břicha a pánve', examDate: day(-400), triggerDate }),
       created_at: at(-6),
       sent_at: at(-5),
       study_id: null,
@@ -154,7 +178,7 @@ const scenario: Scenario = {
       date: day(-60),
       title: 'Onkologická ambulance – kontrola',
       text:
-        'Pacient dispenzarizován pro karcinom ledviny po nefrektomii. Kontrolní CT hrudníku bez známek ' +
+        'Pacient dispenzarizován pro karcinom ledviny po nefrektomii. Kontrolní CT hrudníku provedeno, bez známek ' +
         'metastatického postižení. Stav stabilizovaný, pokračuje v pravidelných kontrolách.',
     },
   ],

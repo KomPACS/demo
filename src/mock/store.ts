@@ -1,6 +1,8 @@
 import type { components } from '@/api.ts'
 import type { Scenario, ScenarioTrigger } from './types.ts'
-import { llmTrace, verdict } from './trace.ts'
+import { llmTrace, verdict, emailDraft } from './trace.ts'
+
+type DisputeCategory = components['schemas']['DisputeCategory']
 
 type Patient = components['schemas']['Patient']
 type Candidate = components['schemas']['Candidate']
@@ -40,9 +42,12 @@ export interface Store {
   createTrigger(body: TriggerCreate): TriggerSummary
   addCandidate(triggerId: string, body: CandidateCreate): Case
   decide(triggerId: string, candidateId: string, body: DecisionUpdate): Case
-  rejudge(triggerId: string, candidateId: string, note: string | null): Case
+  rejudge(triggerId: string, candidateId: string, note: string | null, category?: DisputeCategory | null): Case
   restore(triggerId: string, candidateId: string, n: number): Case
   approve(id: string): RequestItem
+  send(id: string): RequestItem
+  saveDraft(id: string, text: string): RequestItem
+  callAgain(id: string): RequestItem
   requested(id: string): RequestItem
   notFound(id: string): RequestItem
   saveContact(orgId: string, body: ContactUpdate): Contact
@@ -82,6 +87,11 @@ function buildSummary(scenario: Scenario, st: ScenarioTrigger): TriggerSummary {
   }
 }
 
+function checkedAt(st: ScenarioTrigger): string {
+  const raw = st.checked_at
+  return raw ?? `${st.trigger.date}T00:00:00.000Z`
+}
+
 function toCase(scenario: Scenario, st: ScenarioTrigger): Case {
   return {
     trigger: st.trigger,
@@ -89,6 +99,7 @@ function toCase(scenario: Scenario, st: ScenarioTrigger): Case {
     candidates: st.candidates.map((c) => buildCandidate(st.trigger.id, c, scenario.requests)),
     duplicate_alert: st.duplicate_alert,
     insurer_request: st.insurer_request,
+    checked_at: checkedAt(st),
   }
 }
 
@@ -114,7 +125,17 @@ function makeDraftRequest(scenario: Scenario, st: ScenarioTrigger, raw: RawCandi
     organization_id: raw.organization_id,
     channel,
     state: 'draft',
-    email_draft: channel === 'email' ? `Dobrý den, žádáme o zaslání zprávy z vyšetření ${raw.description}.` : null,
+    email_draft:
+      channel === 'email'
+        ? emailDraft({
+            sex: scenario.patient.sex,
+            name: scenario.patient.name ?? scenario.patient.id,
+            rc: scenario.patient.rc ?? '',
+            examDescription: raw.description,
+            examDate: raw.date,
+            triggerDate: st.trigger.date,
+          })
+        : null,
     created_at: new Date().toISOString(),
     sent_at: null,
     study_id: null,
@@ -196,13 +217,7 @@ export function createStore(scenarios: Scenario[]): Store {
 
     getCase(triggerId: string): Case {
       const { scenario, st } = findScenarioTrigger(triggerId)
-      return {
-        trigger: st.trigger,
-        patient: scenario.patient,
-        candidates: st.candidates.map((c) => buildCandidate(st.trigger.id, c, scenario.requests)),
-        duplicate_alert: st.duplicate_alert,
-        insurer_request: st.insurer_request,
-      }
+      return toCase(scenario, st)
     },
 
     timeline(patientId: string, type?: TimelineEvent['type'], q?: string): TimelineEvent[] {
@@ -345,20 +360,27 @@ export function createStore(scenarios: Scenario[]): Store {
       return toCase(scenario, st)
     },
 
-    rejudge(triggerId: string, candidateId: string, note: string | null): Case {
+    rejudge(triggerId: string, candidateId: string, note: string | null, category: DisputeCategory | null = null): Case {
       const { scenario, st, raw } = findCandidate(triggerId, candidateId)
       const verdicts = st.verdicts ?? (st.verdicts = {})
       const history = verdicts[candidateId] ?? [{ n: 0, verdict: raw.verdict, active: true }]
       const prepared = history.length > 1 ? history[history.length - 1] : undefined
-      const nextVerdict: Verdict =
-        prepared && !prepared.active
-          ? prepared.verdict
-          : verdict({ label: raw.verdict.label, reason: note ? `Přehodnoceno: ${note}` : 'Přehodnoceno bez poznámky.' })
+      const nextVerdict: Verdict = prepared && !prepared.active ? prepared.verdict : raw.verdict
+      const newEvidence: string | null = prepared && !prepared.active ? (prepared.new_evidence ?? null) : null
       const nextN = Math.max(...history.map((v) => v.n)) + 1
       for (const v of history) v.active = false
       const traced: RawCandidate = { ...raw, verdict: nextVerdict }
       const trace = llmTrace(scenario.patient, st.trigger, [traced], scenario.reports)[0] ?? null
-      const entry: VerdictVersion = { n: nextN, verdict: nextVerdict, note: note ?? null, created: new Date().toISOString(), active: true, trace }
+      const entry: VerdictVersion = {
+        n: nextN,
+        verdict: nextVerdict,
+        note: note ?? null,
+        category: category ?? null,
+        created: new Date().toISOString(),
+        active: true,
+        trace,
+        new_evidence: newEvidence,
+      }
       verdicts[candidateId] = [...history, entry]
       raw.verdict = nextVerdict
       return toCase(scenario, st)
@@ -381,8 +403,30 @@ export function createStore(scenarios: Scenario[]): Store {
     approve(id: string): RequestItem {
       const { req } = findRequest(id)
       if (req.state !== 'draft') throw new Conflict(`cannot approve request in state ${req.state}`)
+      req.state = 'approved'
+      return attachContact(req)
+    },
+
+    send(id: string): RequestItem {
+      const { req } = findRequest(id)
+      if (req.state !== 'approved') throw new Conflict(`cannot send request in state ${req.state}`)
       req.state = 'sent'
       req.sent_at = new Date().toISOString()
+      return attachContact(req)
+    },
+
+    saveDraft(id: string, text: string): RequestItem {
+      const { req } = findRequest(id)
+      if (req.state !== 'draft' && req.state !== 'approved') throw new Conflict(`cannot save draft in state ${req.state}`)
+      req.email_draft = text
+      req.state = 'approved'
+      return attachContact(req)
+    },
+
+    callAgain(id: string): RequestItem {
+      const { req } = findRequest(id)
+      if (req.channel !== 'phone' || req.state !== 'draft') throw new Conflict(`cannot call again in state ${req.state}`)
+      req.call_attempts = [...(req.call_attempts ?? []), new Date().toISOString()]
       return attachContact(req)
     },
 

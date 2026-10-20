@@ -16,9 +16,10 @@ const STATUS_COLOR: Record<keyof Schemas['StatusCounts'], string> = {
   place_unknown: 'bg-decide',
 }
 
-const STATE_ORDER: RequestItem['state'][] = ['draft', 'sent', 'requested', 'not_delivered', 'received', 'not_found']
+const STATE_ORDER: RequestItem['state'][] = ['draft', 'approved', 'sent', 'requested', 'not_delivered', 'received', 'not_found']
 const STATE_COLOR: Record<RequestItem['state'], string> = {
   draft: 'bg-decide',
+  approved: 'bg-chart-5',
   sent: 'bg-chart-2',
   requested: 'bg-primary-tint',
   not_delivered: 'bg-missing',

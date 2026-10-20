@@ -124,6 +124,97 @@ test('seed scenarios: store integration (getCase, timeline, llmTrace)', async ()
   }
 })
 
+test('seed scenarios: evidence fields', async () => {
+  const entries = await loadScenarios()
+  for (const { file, scenario } of entries) {
+    const allTriggers = scenario.live ? [...scenario.triggers, scenario.live] : scenario.triggers
+    for (const st of allTriggers) {
+      for (const c of st.candidates) {
+        const v = c.verdict
+        if (c.source === 'report_text') {
+          assert.ok(v.source_sentence, `${file} candidate ${c.id}: report_text needs source_sentence`)
+          assert.ok(v.event_word, `${file} candidate ${c.id}: report_text needs event_word`)
+          assert.ok(
+            v.source_sentence?.includes(v.event_word ?? ''),
+            `${file} candidate ${c.id}: event_word "${v.event_word}" not found in source_sentence "${v.source_sentence}"`,
+          )
+        }
+        if (v.event_status === 'planned' || v.event_status === 'recommended') {
+          assert.notEqual(v.label, 'relevant', `${file} candidate ${c.id}: ${v.event_status} event must not be relevant`)
+        }
+        for (const step of v.steps ?? []) {
+          if (step.kind === 'lookup') assert.ok(step.at, `${file} candidate ${c.id}: lookup step "${step.label}" needs at`)
+          else assert.ok(!step.at, `${file} candidate ${c.id}: llm step "${step.label}" must not have at`)
+        }
+      }
+    }
+    for (const r of scenario.requests) {
+      if (r.channel === 'email' && r.email_draft) {
+        assert.ok(scenario.patient.rc && r.email_draft.includes(scenario.patient.rc), `${file} request ${r.id}: draft must contain RČ`)
+        if (r.prior_date) {
+          const [y, m, d] = r.prior_date.slice(0, 10).split('-')
+          const czech = `${Number(d)}. ${Number(m)}. ${y}`
+          assert.ok(r.email_draft.includes(czech), `${file} request ${r.id}: draft must contain prior date ${czech}`)
+        }
+      }
+    }
+  }
+})
+
+test('seed scenarios: scenario 1 baseline and prepared dispute', async () => {
+  const entries = await loadScenarios()
+  const s01 = entries.find((e) => e.file === '01-zpravy.ts')
+  assert.ok(s01, 's01-zpravy.ts not found')
+  const st = s01.scenario.triggers.find((t) => t.trigger.id === 's01-zpravy')
+  assert.ok(st)
+  const baselines = st.candidates.filter((c) => c.is_baseline)
+  assert.equal(baselines.length, 1, 'expected exactly one baseline candidate')
+
+  const abd = st.candidates.find((c) => c.description.includes('CT břicha'))
+  assert.ok(abd, 'CT břicha candidate not found')
+  const versions = st.verdicts?.[abd.id]
+  assert.ok(versions && versions.length > 1, 'expected a prepared next version for the CT břicha candidate')
+  const prepared = versions[versions.length - 1]
+  assert.ok(prepared.new_evidence, 'prepared version must have new_evidence')
+
+  const abdSourceReportId = abd.report_id
+  assert.ok(abdSourceReportId, 'CT břicha candidate must link to a report')
+  const otherReport = s01.scenario.reports.find((r) => r.id !== abdSourceReportId && r.text.includes(prepared.new_evidence ?? '\0'))
+  assert.ok(otherReport, 'prepared new_evidence must occur in a scenario report other than the CT břicha source report')
+})
+
+test('seed scenarios: evidence context is checkable against the cited report', async () => {
+  const entries = await loadScenarios()
+  for (const { file, scenario } of entries) {
+    const reportById = new Map(scenario.reports.map((r) => [r.id, r]))
+    const allTriggers = scenario.live ? [...scenario.triggers, scenario.live] : scenario.triggers
+    for (const st of allTriggers) {
+      for (const c of st.candidates) {
+        const v = c.verdict
+        if (!v.source_sentence || !c.report_id) continue
+        const report = reportById.get(c.report_id)
+        assert.ok(report, `${file} candidate ${c.id}: report ${c.report_id} not found`)
+        const text = report.text
+
+        if (v.context_before !== null && v.context_before !== undefined) {
+          assert.ok(text.includes(v.context_before), `${file} candidate ${c.id}: context_before not found verbatim in report ${c.report_id}`)
+          assert.ok(
+            text.includes(`${v.context_before} ${v.source_sentence}`),
+            `${file} candidate ${c.id}: context_before is not the real sentence directly before source_sentence`,
+          )
+        }
+        if (v.context_after !== null && v.context_after !== undefined) {
+          assert.ok(text.includes(v.context_after), `${file} candidate ${c.id}: context_after not found verbatim in report ${c.report_id}`)
+          assert.ok(
+            text.includes(`${v.source_sentence} ${v.context_after}`),
+            `${file} candidate ${c.id}: context_after is not the real sentence directly after source_sentence`,
+          )
+        }
+      }
+    }
+  }
+})
+
 test('seed scenarios: global coverage', async () => {
   const scenarios = (await loadScenarios()).map((e) => e.scenario)
   const all = scenarios.flatMap((s) => s.triggers)
@@ -153,6 +244,10 @@ test('seed scenarios: global coverage', async () => {
   assert.ok(all.some((t) => t.insurer_request))
   assert.ok(candidates.some((c) => c.decision === 'removed'))
   assert.ok(all.some((t) => Object.values(t.verdicts ?? {}).some((v) => v.length >= 2)))
+
+  for (const c of [...candidates, ...scenarios.flatMap((s) => s.live?.candidates ?? [])]) {
+    if (c.pacs_source) assert.ok(c.pacs_source.startsWith('PACS Fakultní nemocnice v Motole'), `${c.id}: pacs_source must be our PACS, got ${c.pacs_source}`)
+  }
 
   const contactIds = scenarios.flatMap((s) => Object.keys(s.contacts))
   assert.equal(new Set(contactIds).size, contactIds.length, `contact defined twice: ${contactIds.join(', ')}`)

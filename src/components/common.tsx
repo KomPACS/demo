@@ -15,6 +15,7 @@ const statusColor: Record<Candidate['status'], string> = {
 
 const requestColor: Record<RequestItem['state'], string> = {
   draft: 'bg-divider text-text',
+  approved: 'bg-primary-soft text-primary-hover',
   sent: 'bg-primary-soft text-primary-hover',
   requested: 'bg-primary-soft text-primary-hover',
   not_delivered: 'bg-missing text-white',

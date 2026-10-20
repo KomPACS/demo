@@ -102,12 +102,13 @@ function buildFixtures() {
   }
   const reqDraft2: RawRequest = { ...reqSpace, id: 'req-fetch-2' }
   const reqDraft3: RawRequest = { ...reqSpace, id: 'req-fetch-3' }
+  const reqPhone: RawRequest = { ...reqSpace, id: 'req-fetch-phone', channel: 'phone', email_draft: null }
 
   const scenarioA = {
     patient: patientA,
     insurer: '111' as const,
     triggers: [{ trigger: triggerA, candidates: [c1, c2], duplicate_alert: null, insurer_request: null }],
-    requests: [reqSpace, reqDraft2, reqDraft3],
+    requests: [reqSpace, reqDraft2, reqDraft3, reqPhone],
     timeline: [],
     contacts: { 'org-fetch-1': contact1 },
     reports: [],
@@ -158,7 +159,7 @@ function buildFixtures() {
     live: { trigger: triggerLive, candidates: [cLive], duplicate_alert: null, insurer_request: null },
   }
 
-  return { scenarioA, scenarioLive, patientA, triggerA, c1, c2, reqSpace, reqDraft2, reqDraft3, patientLive }
+  return { scenarioA, scenarioLive, patientA, triggerA, c1, c2, reqSpace, reqDraft2, reqDraft3, reqPhone, patientLive }
 }
 
 function makeClient() {
@@ -169,7 +170,7 @@ function makeClient() {
   return { client, store, fx }
 }
 
-test('routes: every one of the 21 paths responds through openapi-fetch (table-driven)', async () => {
+test('routes: every one of the 23 paths responds through openapi-fetch (table-driven)', async () => {
   const { client, fx } = makeClient()
 
   const health = await client.GET('/api/health', {})
@@ -230,7 +231,11 @@ test('routes: every one of the 21 paths responds through openapi-fetch (table-dr
   assert.ok(queue.data?.some((r) => r.id === fx.reqSpace.id))
 
   const approved = await client.POST('/api/requests/{request_id}/approve', { params: { path: { request_id: fx.reqSpace.id } } })
-  assert.equal(approved.data?.state, 'sent')
+  assert.equal(approved.data?.state, 'approved')
+
+  const sent = await client.POST('/api/requests/{request_id}/send', { params: { path: { request_id: fx.reqSpace.id } } })
+  assert.equal(sent.data?.state, 'sent')
+  assert.ok(sent.data?.sent_at)
 
   const requested = await client.POST('/api/requests/{request_id}/requested', { params: { path: { request_id: fx.reqDraft2.id } } })
   assert.equal(requested.data?.state, 'requested')
@@ -327,4 +332,59 @@ test('POST /api/triggers: default delay is 4000-6000 ms (captured via setTimeout
     globalThis.setTimeout = originalSetTimeout
   }
   assert.ok(capturedMs !== undefined && capturedMs >= 4000 && capturedMs <= 6000)
+})
+
+test('POST /api/requests/{id}/send: 200 once approved; 409 directly from draft', async () => {
+  const { client, fx } = makeClient()
+  const conflict = await client.POST('/api/requests/{request_id}/send', { params: { path: { request_id: fx.reqDraft2.id } } })
+  assert.equal(conflict.response.status, 409)
+
+  await client.POST('/api/requests/{request_id}/approve', { params: { path: { request_id: fx.reqDraft2.id } } })
+  const sent = await client.POST('/api/requests/{request_id}/send', { params: { path: { request_id: fx.reqDraft2.id } } })
+  assert.equal(sent.response.status, 200)
+  assert.equal(sent.data?.state, 'sent')
+  assert.ok(sent.data?.sent_at)
+})
+
+test('PUT /api/requests/{id}/draft: 200 sets email_draft and state approved; 409 from sent', async () => {
+  const { client, fx } = makeClient()
+  const updated = await client.PUT('/api/requests/{request_id}/draft', {
+    params: { path: { request_id: fx.reqDraft3.id } },
+    body: { email_draft: 'Nový text žádosti.' },
+  })
+  assert.equal(updated.response.status, 200)
+  assert.equal(updated.data?.email_draft, 'Nový text žádosti.')
+  assert.equal(updated.data?.state, 'approved')
+
+  await client.POST('/api/requests/{request_id}/approve', { params: { path: { request_id: fx.reqSpace.id } } })
+  await client.POST('/api/requests/{request_id}/send', { params: { path: { request_id: fx.reqSpace.id } } })
+  const conflict = await client.PUT('/api/requests/{request_id}/draft', {
+    params: { path: { request_id: fx.reqSpace.id } },
+    body: { email_draft: 'Text.' },
+  })
+  assert.equal(conflict.response.status, 409)
+})
+
+test('POST /api/requests/{id}/call-again: 200 appends call_attempts for phone channel; 409 for email channel', async () => {
+  const { client, fx } = makeClient()
+  const conflict = await client.POST('/api/requests/{request_id}/call-again', { params: { path: { request_id: fx.reqDraft2.id } } })
+  assert.equal(conflict.response.status, 409)
+
+  const updated = await client.POST('/api/requests/{request_id}/call-again', { params: { path: { request_id: fx.reqPhone.id } } })
+  assert.equal(updated.response.status, 200)
+  assert.equal(updated.data?.state, 'draft')
+  assert.equal(updated.data?.call_attempts?.length, 1)
+})
+
+test('POST rejudge: category from the body is persisted on the new verdict version', async () => {
+  const { client, fx } = makeClient()
+  await client.POST('/api/triggers/{trigger_id}/candidates/{candidate_id}/rejudge', {
+    params: { path: { trigger_id: fx.triggerA.id, candidate_id: fx.c1.id } },
+    body: { note: 'Špatně uvedené místo.', category: 'place' },
+  })
+  const versions = await client.GET('/api/triggers/{trigger_id}/candidates/{candidate_id}/verdicts', {
+    params: { path: { trigger_id: fx.triggerA.id, candidate_id: fx.c1.id } },
+  })
+  const active = versions.data?.find((v) => v.active)
+  assert.equal(active?.category, 'place')
 })

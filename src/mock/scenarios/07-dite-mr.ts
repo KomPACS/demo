@@ -3,11 +3,16 @@
  */
 import { birthNumber } from '../rc.ts'
 import { day, at, workingDaysAhead } from '../dates.ts'
-import { verdict } from '../trace.ts'
+import { verdict, lookupStep, llmStep } from '../trace.ts'
 import type { Scenario } from '../types.ts'
 
 const patientId = 'pac-07'
 const triggerId = 's07-dite-mr'
+
+let stepMinute = 14
+function nextAt(): string {
+  return at(0, `09:${String(stepMinute++).padStart(2, '0')}`)
+}
 
 const guideline = {
   page: 242,
@@ -58,6 +63,11 @@ const scenario: Scenario = {
             label: 'relevant',
             reason: 'Vstupní MR mozku před zahájením radioterapie, dostupné v PACS.',
             query: 'Vstupní MR mozku u difuzního gliomu mozkového kmene',
+            sources: ['PACS', 'NIS'],
+            steps: [
+              lookupStep('PACS', 'Studie nalezena: FN v Motole, MR mozku a mozkového kmene.', nextAt()),
+              llmStep('Závěr', 'Relevantní. Vstupní MR před zahájením radioterapie.'),
+            ],
           }),
         },
         {
@@ -80,6 +90,12 @@ const scenario: Scenario = {
             reason: 'První kontrolní MR po ukončení radioterapie, standardní součást dispenzarizace.',
             query: 'Kontrolní MR mozku po radioterapii',
             guideline,
+            sources: ['PACS', 'NIS'],
+            steps: [
+              lookupStep('PACS', 'Studie nalezena: FN v Motole, MR mozku.', nextAt()),
+              llmStep('Doporučení', 'Modrá kniha ČOS, s. 242: kontrola à 3–4 měsíce.'),
+              llmStep('Závěr', 'Relevantní. Standardní součást dispenzarizace.'),
+            ],
           }),
         },
         {
@@ -102,6 +118,11 @@ const scenario: Scenario = {
             reason: 'Další kontrolní MR v rámci dispenzarizace, ke srovnání s aktuálním nálezem.',
             query: 'Kontrolní MR mozku v rámci dispenzarizace',
             guideline,
+            sources: ['PACS', 'NIS'],
+            steps: [
+              lookupStep('PACS', 'Studie nalezena: FN v Motole, MR mozku.', nextAt()),
+              llmStep('Závěr', 'Relevantní. Další kontrolní MR v rámci dispenzarizace.'),
+            ],
           }),
         },
       ],

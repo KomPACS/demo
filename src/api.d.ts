@@ -235,7 +235,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Approve */
+        /**
+         * Approve
+         * @description Marks a draft as reviewed: draft → approved. Sending is /send.
+         */
         post: operations["approve_api_requests__request_id__approve_post"];
         delete?: never;
         options?: never;
@@ -345,6 +348,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/requests/{request_id}/send": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Send */
+        post: operations["send_api_requests__request_id__send_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/requests/{request_id}/draft": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Save Draft */
+        put: operations["save_draft_api_requests__request_id__draft_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/requests/{request_id}/call-again": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Call Again */
+        post: operations["call_again_api_requests__request_id__call_again_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -390,7 +444,7 @@ export interface components {
             /** Request Id */
             request_id: string | null;
             /** Request State */
-            request_state: ("draft" | "sent" | "requested" | "not_delivered" | "received" | "not_found") | null;
+            request_state: ("draft" | "approved" | "sent" | "requested" | "not_delivered" | "received" | "not_found") | null;
             /**
              * Pacs Source
              * @description Where PACS availability came from (PACS CSV feed).
@@ -418,6 +472,8 @@ export interface components {
             candidates: components["schemas"]["Candidate"][];
             duplicate_alert: components["schemas"]["DuplicateAlert"] | null;
             insurer_request?: components["schemas"]["InsurerRequest"] | null;
+            /** Checked At */
+            checked_at?: string | null;
         };
         /** Contact */
         Contact: {
@@ -627,6 +683,7 @@ export interface components {
         RejudgeRequest: {
             /** Note */
             note?: string | null;
+            category?: components["schemas"]["DisputeCategory"] | null;
         };
         /** RequestItem */
         RequestItem: {
@@ -662,7 +719,7 @@ export interface components {
              * State
              * @enum {string}
              */
-            state: "draft" | "sent" | "requested" | "not_delivered" | "received" | "not_found";
+            state: "draft" | "approved" | "sent" | "requested" | "not_delivered" | "received" | "not_found";
             contact: components["schemas"]["Contact"] | null;
             /** Email Draft */
             email_draft: string | null;
@@ -685,6 +742,8 @@ export interface components {
             fhir_task?: {
                 [key: string]: unknown;
             } | null;
+            /** Call Attempts */
+            call_attempts?: string[];
         };
         /** StatusCounts */
         StatusCounts: {
@@ -820,6 +879,22 @@ export interface components {
              * @default []
              */
             kroky: string[];
+            /** Event Status */
+            event_status?: ("done" | "planned" | "recommended" | "unclear") | null;
+            /** Event Word */
+            event_word?: string | null;
+            /** Context Before */
+            context_before?: string | null;
+            /** Context After */
+            context_after?: string | null;
+            source_doc?: components["schemas"]["SourceDoc"] | null;
+            /**
+             * Sources
+             * @description Labels of independent sources.
+             */
+            sources?: string[];
+            /** Steps */
+            steps?: components["schemas"]["VerdictStep"][];
         };
         /** VerdictVersion */
         VerdictVersion: {
@@ -838,6 +913,45 @@ export interface components {
              */
             active: boolean;
             trace?: components["schemas"]["LlmCall"] | null;
+            category?: components["schemas"]["DisputeCategory"] | null;
+            /** New Evidence */
+            new_evidence?: string | null;
+        };
+        /** SourceDoc */
+        SourceDoc: {
+            /** Type */
+            type: string;
+            /** Department */
+            department: string;
+            /** Date */
+            date: string;
+        };
+        /**
+         * VerdictStep
+         * @description lookup = repeatable data lookup; llm = the model's reading.
+         */
+        VerdictStep: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "lookup" | "llm";
+            /** Label */
+            label: string;
+            /** Text */
+            text: string;
+            /** At */
+            at?: string | null;
+        };
+        /**
+         * DisputeCategory
+         * @enum {string}
+         */
+        DisputeCategory: "event_status" | "date" | "modality_region" | "place" | "guideline_relevance" | "duplicate" | "other";
+        /** DraftUpdate */
+        DraftUpdate: {
+            /** Email Draft */
+            email_draft: string;
         };
     };
     responses: never;
@@ -1470,6 +1584,103 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PacsFeedResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    send_api_requests__request_id__send_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequestItem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    save_draft_api_requests__request_id__draft_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DraftUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequestItem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    call_again_api_requests__request_id__call_again_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequestItem"];
                 };
             };
             /** @description Validation Error */

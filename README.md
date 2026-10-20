@@ -17,5 +17,6 @@ pnpm build
 ## Contract changes
 
 - 2026-10-19: `Patient.name`, `Patient.rc` (optional).
+- 2026-10-20: `Verdict` evidence fields and tagged `steps`, `Case.checked_at`, request state `approved` + `call_attempts`, routes `send`, `draft`, `call-again`; `approve` now ends in `approved`; dispute `category` and `new_evidence` (all optional).
 
 Built with help from Claude Code.

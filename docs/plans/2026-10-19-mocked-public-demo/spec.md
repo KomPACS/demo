@@ -72,6 +72,10 @@ A source link proves that a sentence exists. It does not prove that the AI read 
 
 Each prior shows its date first, large, with the gap to the planned exam. Sections stay ordered by action (to decide, relevant). Inside a section, newest first. The baseline exam (`is_baseline`) is pinned on top with a label.
 
+### One home hospital (lasting)
+
+KomPACS runs at one hospital: FN v Motole. All patients are its patients, and its PACS is "our PACS". A prior from another hospital is "dostupné" only after it arrived in our PACS (for example via ePACS). Every request asks for delivery to FN v Motole and is signed by its coordinator.
+
 ### Requests are reviewed before they leave (lasting)
 
 - E-mail: the coordinator sees the channel, institution, recipient, contact verification and the full editable text. The text holds patient name + RČ, exam + date, the delivery route (ePACS) and the sender. It goes only to a verified institutional address.

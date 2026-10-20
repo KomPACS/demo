@@ -24,6 +24,7 @@ export const decisionLabel: Record<NonNullable<Candidate['decision']>, string> =
 
 export const requestState: Record<RequestState, string> = {
   draft: 'návrh',
+  approved: 'schváleno',
   sent: 'odesláno (demo)',
   requested: 'vyžádáno',
   not_delivered: 'nedoručeno',

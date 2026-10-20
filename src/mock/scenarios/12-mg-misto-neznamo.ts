@@ -3,12 +3,17 @@
  */
 import { birthNumber } from '../rc.ts'
 import { day, at, workingDaysAhead } from '../dates.ts'
-import { verdict } from '../trace.ts'
+import { verdict, lookupStep, llmStep } from '../trace.ts'
 import type { Scenario } from '../types.ts'
 
 const patientId = 'pac-12'
 const triggerId = 'f12-mg-misto-neznamo'
 const reportId = 'rep-f12-1'
+
+let stepMinute = 14
+function nextAt(): string {
+  return at(0, `09:${String(stepMinute++).padStart(2, '0')}`)
+}
 
 const scenario: Scenario = {
   patient: {
@@ -61,6 +66,18 @@ const scenario: Scenario = {
               quote:
                 'MRI vyšetření prsů je indikováno individuálně, nejčastěji v případě nejasného nálezu na MG/UZ vyšetření nebo upřesnění rozsahu postižení v prsu.',
             },
+            event_status: 'done',
+            event_word: 'podstoupila',
+            context_before: 'Pacientka po záchovné operaci prsu pro karcinom, dispenzarizována na chirurgické ambulanci.',
+            context_after: 'Doporučeno doplnit MR prsů k upřesnění rozsahu nálezu.',
+            source_doc: { type: 'Ambulantní zpráva', department: 'chirurgická ambulance', date: day(-200) },
+            sources: ['zpráva'],
+            steps: [
+              llmStep('Zmínka', 'Mamografické vyšetření prsou zmíněno bez pracoviště.'),
+              lookupStep('PACS', 'Studie nenalezena, pracoviště neznámé.', nextAt()),
+              lookupStep('Kontakt', 'Telefonické dohledání pracoviště se nezdařilo.', nextAt()),
+              llmStep('Závěr', 'Relevantní. Mohlo zachytit časné změny, pracoviště nedohledáno.'),
+            ],
           }),
         },
       ],

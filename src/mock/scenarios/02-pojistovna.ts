@@ -4,12 +4,19 @@
  */
 import { birthNumber } from '../rc.ts'
 import { day, at, workingDaysAhead } from '../dates.ts'
-import { verdict } from '../trace.ts'
+import { verdict, lookupStep, llmStep, emailDraft } from '../trace.ts'
 import type { Scenario } from '../types.ts'
 
 const patientId = 'pac-02'
 const triggerId = 's02-pojistovna'
 const indexDate = day(-760)
+const patientRc = birthNumber('1957-11-03', 'male', 21)
+const triggerDate = workingDaysAhead(2)
+
+let stepMinute = 10
+function nextAt(): string {
+  return at(0, `08:${String(stepMinute++).padStart(2, '0')}`)
+}
 
 const scenario: Scenario = {
   patient: {
@@ -19,7 +26,7 @@ const scenario: Scenario = {
     diagnoses: [{ code: 'C18', display: 'Zhoubný novotvar tlustého střeva' }],
     index_date: indexDate,
     name: 'Petr Dvořák',
-    rc: birthNumber('1957-11-03', 'male', 21),
+    rc: patientRc,
   },
   insurer: '207',
   triggers: [
@@ -30,7 +37,7 @@ const scenario: Scenario = {
         kind: 'exam',
         modality: 'CT',
         body_part: 'břicho a pánev',
-        date: workingDaysAhead(2),
+        date: triggerDate,
         simulated: false,
       },
       duplicate_alert: null,
@@ -71,6 +78,12 @@ const scenario: Scenario = {
               quote:
                 'CT hrudníku, břicha a pánve jednou za (3)–6 měsíců 2 roky, pak jednou za 6–12 měsíců do 5 let.',
             },
+            sources: ['pojišťovna'],
+            steps: [
+              lookupStep('Výpis pojištěnce', 'Nalezen výkon: CT hrudníku, břicha a pánve, Nemocnice Jihlava.', nextAt()),
+              lookupStep('PACS', 'Nemocnice Jihlava: studie nenalezena.', nextAt()),
+              llmStep('Závěr', 'Relevantní. Kontrolní CT po metastazektomii, v PACS ani v NIS nedohledáno.'),
+            ],
           }),
         },
         {
@@ -85,13 +98,18 @@ const scenario: Scenario = {
           report_id: null,
           status: 'available',
           is_baseline: true,
-          pacs_source: 'PACS Masarykův onkologický ústav',
+          pacs_source: 'PACS Fakultní nemocnice v Motole · přijato přes ePACS z Masarykův onkologický ústav',
           decision: null,
           decision_reason: null,
           verdict: verdict({
             label: 'relevant',
             reason: 'Vstupní stagingové CT před léčbou, dostupné v PACS.',
             query: 'Vstupní staging CT u C18',
+            sources: ['PACS', 'NIS'],
+            steps: [
+              lookupStep('PACS', 'Studie nalezena v PACS FN v Motole, přijato přes ePACS z Masarykův onkologický ústav: CT břicha a pánve.', nextAt()),
+              llmStep('Závěr', 'Relevantní. Vstupní staging CT, dostupné v PACS.'),
+            ],
           }),
         },
       ],
@@ -101,7 +119,7 @@ const scenario: Scenario = {
     {
       id: 'req-s02-1',
       trigger_id: triggerId,
-      trigger_date: workingDaysAhead(2),
+      trigger_date: triggerDate,
       patient_id: patientId,
       candidate_id: 'cand-s02-1',
       prior_modality: 'CT',
@@ -111,7 +129,14 @@ const scenario: Scenario = {
       organization_id: 'org-jihlava',
       channel: 'email',
       state: 'draft',
-      email_draft: 'Dobrý den, žádáme o zaslání zprávy a snímků z vyšetření CT hrudníku, břicha a pánve.',
+      email_draft: emailDraft({
+        sex: 'male',
+        name: 'Petr Dvořák',
+        rc: patientRc,
+        examDescription: 'CT hrudníku, břicha a pánve',
+        examDate: day(-150),
+        triggerDate,
+      }),
       created_at: at(-1),
       sent_at: null,
       study_id: null,

@@ -55,7 +55,12 @@ function buildRouteTable(store: Store): RouteTable {
     '/api/triggers/{trigger_id}/candidates/{candidate_id}/rejudge': {
       post: (ctx) => {
         const body = ctx.body as Schemas['RejudgeRequest'] | undefined
-        return store.rejudge(str(ctx.params, 'trigger_id'), str(ctx.params, 'candidate_id'), body?.note ?? null)
+        return store.rejudge(
+          str(ctx.params, 'trigger_id'),
+          str(ctx.params, 'candidate_id'),
+          body?.note ?? null,
+          body?.category ?? null,
+        )
       },
     },
     '/api/triggers/{trigger_id}/candidates/{candidate_id}/verdicts': {
@@ -83,6 +88,15 @@ function buildRouteTable(store: Store): RouteTable {
     },
     '/api/requests/{request_id}/requested': {
       post: (ctx) => store.requested(str(ctx.params, 'request_id')),
+    },
+    '/api/requests/{request_id}/send': {
+      post: (ctx) => store.send(str(ctx.params, 'request_id')),
+    },
+    '/api/requests/{request_id}/draft': {
+      put: (ctx) => store.saveDraft(str(ctx.params, 'request_id'), (ctx.body as Schemas['DraftUpdate']).email_draft),
+    },
+    '/api/requests/{request_id}/call-again': {
+      post: (ctx) => store.callAgain(str(ctx.params, 'request_id')),
     },
     '/api/requests/{request_id}/not-found': {
       post: (ctx) => store.notFound(str(ctx.params, 'request_id')),
