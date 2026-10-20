@@ -1,11 +1,11 @@
-# Spec: Mocked public KOMPACS demo at demo.kompacs.cz
+# Spec: Mocked public KomPACS demo at demo.kompacs.cz
 
 - **Issue:** #1
 - **Status place:** `ledger.md`
 
 ## Goal
 
-A visitor without a presenter clicks through every KOMPACS scenario on synthetic data, in the browser only.
+A visitor without a presenter clicks through every KomPACS scenario on synthetic data, in the browser only.
 
 ## Scope
 
