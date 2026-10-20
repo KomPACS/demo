@@ -17,7 +17,7 @@ const scenario: Scenario = {
     birth_year: 1975,
     diagnoses: [{ code: 'C50', display: 'Zhoubný novotvar prsu' }],
     index_date: day(-300),
-    name: 'Lenka Horáková',
+    name: 'Martina Krejčí',
     rc: birthNumber('1975-02-10', 'female', 512),
   },
   insurer: '209',

@@ -23,7 +23,7 @@ const scenario: Scenario = {
     birth_year: 1969,
     diagnoses: [{ code: 'C25', display: 'Zhoubný novotvar slinivky břišní' }],
     index_date: day(-300),
-    name: 'Lenka Horáková',
+    name: 'Lenka Pokorná',
     rc: birthNumber('1969-02-09', 'female', 58),
   },
   insurer: '211',

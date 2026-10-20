@@ -17,7 +17,7 @@ const scenario: Scenario = {
     birth_year: 1975,
     diagnoses: [{ code: 'C50', display: 'Zhoubný novotvar prsu' }],
     index_date: day(-18),
-    name: 'Lenka Veselá',
+    name: 'Petra Němcová',
     rc: birthNumber('1975-07-02', 'female', 9),
   },
   insurer: '209',

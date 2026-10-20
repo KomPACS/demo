@@ -72,8 +72,8 @@ const scenario: Scenario = {
           modality: 'CT',
           date: day(-150),
           description: 'CT hrudníku',
-          place: 'Nemocnice Na Bulovce',
-          organization_id: 'org-bulovka',
+          place: 'Všeobecná fakultní nemocnice v Praze',
+          organization_id: 'org-vfn',
           study_id: null,
           report_id: report1Id,
           status: 'missing',
@@ -85,7 +85,7 @@ const scenario: Scenario = {
             label: 'relevant',
             reason: 'Novější kontrolní CT hrudníku po poslední linii léčby, zatím není v PACS.',
             query: 'CT hrudníku po poslední léčbě',
-            source_sentence: 'Dále doloženo kontrolní CT hrudníku z Nemocnice Na Bulovce, bez popisu v systému.',
+            source_sentence: 'Dále doloženo kontrolní CT hrudníku ze Všeobecné fakultní nemocnice v Praze, bez popisu v systému.',
             guideline,
           }),
         },
@@ -117,8 +117,8 @@ const scenario: Scenario = {
           modality: 'CT',
           date: month(-9),
           description: 'CT břicha',
-          place: 'Nemocnice Na Bulovce',
-          organization_id: 'org-bulovka',
+          place: 'Všeobecná fakultní nemocnice v Praze',
+          organization_id: 'org-vfn',
           study_id: null,
           report_id: report2Id,
           status: 'missing',
@@ -146,8 +146,8 @@ const scenario: Scenario = {
       prior_modality: 'CT',
       prior_date: day(-150),
       prior_description: 'CT hrudníku',
-      place: 'Nemocnice Na Bulovce',
-      organization_id: 'org-bulovka',
+      place: 'Všeobecná fakultní nemocnice v Praze',
+      organization_id: 'org-vfn',
       channel: 'email',
       state: 'draft',
       email_draft: 'Dobrý den, žádáme o zaslání zprávy z vyšetření CT hrudníku.',
@@ -215,10 +215,10 @@ const scenario: Scenario = {
     },
   ],
   contacts: {
-    'org-bulovka': {
-      organization_id: 'org-bulovka',
-      organization_name: 'Nemocnice Na Bulovce',
-      email: 'radiologie@nemocnicebulovka.example.com',
+    'org-vfn': {
+      organization_id: 'org-vfn',
+      organization_name: 'Všeobecná fakultní nemocnice v Praze',
+      email: 'radiologie@vfn.example.com',
       phone: null,
       source_url: null,
       verified_at: day(-30),
@@ -243,7 +243,7 @@ const scenario: Scenario = {
       title: 'Pneumologická ambulance – kontrola',
       text:
         'Pacientka docházející na dispenzární kontroly pro karcinom plic. Kontrolní CT hrudníku a břicha beze změn ' +
-        'oproti předchozímu nálezu. Dále doloženo kontrolní CT hrudníku z Nemocnice Na Bulovce, bez popisu v systému. ' +
+        'oproti předchozímu nálezu. Dále doloženo kontrolní CT hrudníku ze Všeobecné fakultní nemocnice v Praze, bez popisu v systému. ' +
         'Doporučeno pokračovat v dispenzarizaci dle standardního schématu.',
     },
     {

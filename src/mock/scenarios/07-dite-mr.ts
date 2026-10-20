@@ -21,7 +21,7 @@ const scenario: Scenario = {
     birth_year: 2014,
     diagnoses: [{ code: 'C71', display: 'Zhoubný novotvar mozku' }],
     index_date: day(-540),
-    name: 'Eliška Horáková',
+    name: 'Eliška Kučerová',
     rc: birthNumber('2014-04-18', 'female', 5),
   },
   insurer: '213',

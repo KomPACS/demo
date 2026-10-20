@@ -33,7 +33,7 @@ function assertRecent(dateStr: string | null | undefined, context: string) {
 
 test('seed scenarios: invariants', async () => {
   const entries = await loadScenarios()
-  assert.equal(entries.length, 2, 'expected 2 scenarios after T10')
+  assert.equal(entries.length, 14, 'expected 14 scenarios')
 
   const ids = {
     patient: new Set<string>(),
@@ -120,6 +120,46 @@ test('seed scenarios: store integration (getCase, timeline, llmTrace)', async ()
       assert.ok(events.length > 0)
       const trace = store.llmTrace(st.trigger.id)
       assert.ok(Array.isArray(trace))
+    }
+  }
+})
+
+test('seed scenarios: global coverage', async () => {
+  const scenarios = (await loadScenarios()).map((e) => e.scenario)
+  const all = scenarios.flatMap((s) => s.triggers)
+  const requests = scenarios.flatMap((s) => s.requests)
+  const candidates = all.flatMap((t) => t.candidates)
+
+  assert.equal(new Set(scenarios.map((s) => s.patient.id)).size, 14)
+  assert.deepEqual([...new Set(scenarios.map((s) => s.insurer))].sort(), ['111', '201', '205', '207', '209', '211', '213'])
+
+  const surnames = scenarios.map((s) => s.patient.name?.split(' ').at(-1)?.replace(/(ová|á|ý)$/, ''))
+  assert.equal(new Set(surnames).size, surnames.length, `surnames repeat: ${surnames.join(', ')}`)
+  const firstNames = scenarios.map((s) => s.patient.name?.split(' ')[0])
+  assert.equal(new Set(firstNames).size, firstNames.length, `first names repeat: ${firstNames.join(', ')}`)
+
+  const triggerIds = new Set(all.map((t) => t.trigger.id))
+  for (const id of ['s01-zpravy', 's02-pojistovna', 's03-mdt-nedoruceno', 's04-duplicita', 's05-dlouha-historie', 's06-fhir-bulovka', 's07-dite-mr', 's08-bez-predchozich', 's09-vse-v-pacs']) {
+    assert.ok(triggerIds.has(id), `missing hero trigger ${id}`)
+  }
+  const live = scenarios.find((s) => s.patient.id === 'pac-10')
+  assert.ok(live && live.triggers.length === 0 && live.live)
+
+  for (const state of ['draft', 'sent', 'requested', 'not_delivered', 'received', 'not_found']) {
+    assert.ok(requests.some((r) => r.state === state), `no request in state ${state}`)
+  }
+  assert.ok(requests.some((r) => r.channel === 'fhir'))
+  assert.ok(all.some((t) => t.duplicate_alert))
+  assert.ok(all.some((t) => t.insurer_request))
+  assert.ok(candidates.some((c) => c.decision === 'removed'))
+  assert.ok(all.some((t) => Object.values(t.verdicts ?? {}).some((v) => v.length >= 2)))
+
+  const orgNames = new Map<string, string>()
+  for (const s of scenarios) {
+    for (const c of Object.values(s.contacts)) {
+      const seen = orgNames.get(c.organization_id)
+      assert.ok(!seen || seen === c.organization_name, `${c.organization_id} is both ${seen} and ${c.organization_name}`)
+      orgNames.set(c.organization_id, c.organization_name)
     }
   }
 })

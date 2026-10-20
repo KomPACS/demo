@@ -17,7 +17,7 @@ const scenario: Scenario = {
     birth_year: 1954,
     diagnoses: [{ code: 'C61', display: 'Zhoubný novotvar prostaty' }],
     index_date: day(-900),
-    name: 'Zdeněk Procházka',
+    name: 'Zdeněk Fiala',
     rc: birthNumber('1954-06-15', 'male', 513),
   },
   insurer: '201',

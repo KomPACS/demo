@@ -22,7 +22,7 @@ const scenario: Scenario = {
     birth_year: 1956,
     diagnoses: [{ code: 'C67', display: 'Zhoubný novotvar močového měchýře' }],
     index_date: day(-500),
-    name: 'Jaroslav Veselý',
+    name: 'Jaroslav Kolář',
     rc: birthNumber('1956-03-20', 'male', 61),
   },
   insurer: '207',

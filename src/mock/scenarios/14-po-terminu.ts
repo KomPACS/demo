@@ -17,7 +17,7 @@ const scenario: Scenario = {
     birth_year: 1962,
     diagnoses: [{ code: 'C64', display: 'Zhoubný novotvar ledviny' }],
     index_date: day(-500),
-    name: 'Miroslav Marek',
+    name: 'Vladimír Marek',
     rc: birthNumber('1962-09-30', 'male', 514),
   },
   insurer: '213',

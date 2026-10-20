@@ -2,13 +2,13 @@ import { useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
-// shortcut: trigger ids of the current demo seed; update them after `just send-orders` runs again.
 const STOPS = [
-  { triggerId: 'sr-528051', title: 'Předchozí vyšetření nalezená ve zprávách, žádosti e-mailem i telefonem' },
-  { triggerId: 'sr-528067', title: 'Pojišťovna zná vyšetření z jiné nemocnice' },
-  { triggerId: 'mdt-mdt-demo-PAC-FAKE000001', title: 'MDT: žádost nedoručena, urgovat' },
-  { triggerId: 'sr-528045', title: 'Upozornění na duplicitu' },
-  { triggerId: 'sr-528035', title: 'Dlouhá historie, relevantní jen některá vyšetření' },
+  { href: '#/', title: 'Spusťte kontrolu u pacientky Lenky Pokorné, která ještě není ve frontě' },
+  { href: '#/case/s01-zpravy', title: 'Předchozí vyšetření nalezená jen ve zprávách, žádosti e-mailem i telefonem' },
+  { href: '#/case/s02-pojistovna', title: 'Vyšetření z jiné nemocnice podle výpisu pojištěnce' },
+  { href: '#/case/s03-mdt-nedoruceno', title: 'MDT: žádost nedoručena, urgovat' },
+  { href: '#/case/s04-duplicita', title: 'Upozornění na duplicitu' },
+  { href: '#/case/s09-vse-v-pacs', title: 'Vše potřebné je v PACS' },
 ]
 
 export function DemoTour() {
@@ -17,9 +17,9 @@ export function DemoTour() {
     <nav aria-label="Ukázkové případy" className="fixed top-3 right-3 z-50 flex items-center gap-1 rounded-md border bg-background/95 p-1 shadow-sm">
       {open &&
         STOPS.map((s, i) => (
-          <div key={s.triggerId} className="group relative">
+          <div key={s.href} className="group relative">
             <Button asChild size="sm" variant="outline" className="w-8 px-0">
-              <a href={`#/case/${encodeURIComponent(s.triggerId)}`} aria-label={`${i + 1}: ${s.title}`}>
+              <a href={s.href} aria-label={`${i + 1}: ${s.title}`}>
                 {i + 1}
               </a>
             </Button>

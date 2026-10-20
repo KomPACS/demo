@@ -63,7 +63,7 @@ const scenario: Scenario = {
           date: day(-120),
           description: 'CT břicha a pánve',
           place: 'Nemocnice Na Bulovce',
-          organization_id: 'org-bulovka-fhir',
+          organization_id: 'org-bulovka',
           study_id: null,
           report_id: reportId,
           status: 'missing',
@@ -92,7 +92,7 @@ const scenario: Scenario = {
       prior_date: day(-120),
       prior_description: 'CT břicha a pánve',
       place: 'Nemocnice Na Bulovce',
-      organization_id: 'org-bulovka-fhir',
+      organization_id: 'org-bulovka',
       channel: 'fhir',
       state: 'draft',
       email_draft: null,
@@ -139,8 +139,8 @@ const scenario: Scenario = {
     },
   ],
   contacts: {
-    'org-bulovka-fhir': {
-      organization_id: 'org-bulovka-fhir',
+    'org-bulovka': {
+      organization_id: 'org-bulovka',
       organization_name: 'Nemocnice Na Bulovce',
       email: null,
       phone: null,
