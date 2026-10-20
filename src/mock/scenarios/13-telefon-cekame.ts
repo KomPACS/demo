@@ -42,7 +42,7 @@ const scenario: Scenario = {
           date: day(-180),
           description: 'PET/CT restaging',
           place: 'Fakultní nemocnice Plzeň',
-          organization_id: 'org-plzen',
+          organization_id: 'org-fnplzen',
           study_id: null,
           report_id: reportId,
           status: 'missing',
@@ -76,7 +76,7 @@ const scenario: Scenario = {
       prior_date: day(-180),
       prior_description: 'PET/CT restaging',
       place: 'Fakultní nemocnice Plzeň',
-      organization_id: 'org-plzen',
+      organization_id: 'org-fnplzen',
       channel: 'phone',
       state: 'requested',
       email_draft: null,
@@ -106,18 +106,7 @@ const scenario: Scenario = {
       simulated: false,
     },
   ],
-  contacts: {
-    'org-plzen': {
-      organization_id: 'org-plzen',
-      organization_name: 'Fakultní nemocnice Plzeň',
-      email: null,
-      phone: '+420 000 456 789',
-      source_url: null,
-      verified_at: day(-400),
-      needs_reverify: true,
-      fhir_endpoint: null,
-    },
-  },
+  contacts: {},
   reports: [
     {
       id: reportId,
