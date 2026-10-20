@@ -53,7 +53,7 @@ Resume steps:
 1. `npx -y pnpm@10 install`, then `npx -y pnpm@10 exec playwright install chromium` (for `scripts/shots.mjs`).
 2. `curl -fsSL https://www.linkos.cz/files/modra-kniha/26.pdf -o tmp/modra-kniha-26.pdf`, then extract the text to `tmp/modra-kniha-26.txt` (pdftotext or pdfminer). Printed page = PDF page index + 1.
 3. Re-run the G3 review (`lean-sdd:code-reviewer`, base c2f738d, head 87838de). Fix, then set the ledger status for P1.
-4. Design run with the user. Canvas: https://claude.ai/artifact/Y5FyPeQAS5vj7xA1ZwvwzX (private, owner only). Source copy: `design/` next to this ledger.
+4. Design run with the user. Canvas source: `design/` next to this ledger.
    - Done: row 0 "Dnes" (3 screenshots), Intro A (dialog + tour coach, interactive), Intro B (welcome screen with a story picker), Souhrn úvah A (step trace in the prior card, interactive).
    - To do: Souhrn úvah B (side panel) and C (evidence first), AI agent A (right panel) and B (question box in the case), Telefon A (bottom bar) and B (header menu). Then the user picks per row.
 5. Write plan P2 (polish + intro/tour + reasoning trace + MCP panel + pipeline animation) from the picks. Then P3: GitHub Pages deploy, CNAME `demo.kompacs.cz`.
