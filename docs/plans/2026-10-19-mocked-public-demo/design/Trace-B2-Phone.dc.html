@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<title>Souhrn úvah B2 – telefon</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#0F6B66}a:hover{color:#0A4E4A}
+mark{background:#FFF6DE;color:#6E4400;border-radius:4px;padding:0 2px}
+</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; overflow: hidden; background: #F3F6F7; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; color: #14232A;">
+  <div style="height: 844px; display: flex; flex-direction: column;">
+    <header style="background: #0F4F4C; color: #FFFFFF; padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 6px;">
+      <a href="#" style="font-size: 13px; color: #A9D3CD; font-weight: 600; text-decoration: none;">‹ Fronta k vyřízení</a>
+      <div style="font-size: 21px; font-weight: 800;">Jana Nováková</div>
+      <div style="font-size: 13px; color: #A9D3CD;">RČ 685522/0141 · C34 · Plánované CT 23. 10. 2026</div>
+    </header>
+    <div role="note" style="background: #FFF6DE; color: #5E3A00; padding: 10px 16px; font-size: 13px; line-height: 1.4; border-bottom: 1px solid #F1D48A;"><b>Na mobilu jen prohlížení.</b> Mobilní aplikaci neplánujeme. Žádosti a rozhodnutí dělejte na počítači.</div>
+    <main style="flex: 1; min-height: 0; overflow-y: auto; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px;">
+      <sc-for list="{{sections}}" as="sec" hint-placeholder-count="2">
+        <h2 style="{{sec.headStyle}}">{{sec.title}}</h2>
+        <sc-for list="{{sec.tiles}}" as="tile" hint-placeholder-count="2">
+          <button type="button" onClick="{{tile.pick}}" style="{{tile.frame}}">
+            <span style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px;">
+              <span style="font-size: 21px; font-weight: 800; font-variant-numeric: tabular-nums;">{{tile.date}}</span>
+              <span style="{{tile.badgeStyle}}">{{tile.status}}</span>
+            </span>
+            <span style="font-size: 16px; font-weight: 700;">{{tile.exam}} <span style="font-size: 13px; font-weight: 500; color: #4E6066;">· {{tile.rel}}</span></span>
+            <span style="font-size: 13px; color: #4E6066;">{{tile.place}}</span>
+            <span style="font-size: 14px; line-height: 1.45; color: #2C3D44;"><b style="color: #14232A;">{{tile.lead}}</b> {{tile.reason}}</span>
+            <span style="font-size: 13px; font-weight: 700; color: #0F6B66;">Souhrn úvah ›</span>
+          </button>
+        </sc-for>
+      </sc-for>
+    </main>
+    <nav aria-label="Hlavní menu" style="background: #FFFFFF; border-top: 1px solid #DDE5E7; padding: 6px 8px 22px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px;">
+      <a href="#" aria-current="page" style="min-height: 56px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; text-decoration: none; color: #0A4E4A; font-size: 11.5px; font-weight: 800; position: relative;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg>
+        Fronta
+        <span style="position: absolute; top: 4px; left: 54%; min-width: 18px; height: 18px; padding: 0 5px; box-sizing: border-box; border-radius: 999px; background: #0F6B66; color: #FFFFFF; font-size: 11px; display: flex; align-items: center; justify-content: center;">8</span>
+      </a>
+      <a href="#" style="min-height: 56px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; text-decoration: none; color: #4E6066; font-size: 11.5px; font-weight: 700;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>
+        Přehled
+      </a>
+      <a href="#" style="min-height: 56px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; text-decoration: none; color: #4E6066; font-size: 11.5px; font-weight: 700;">
+        <span style="width: 34px; height: 26px; border-radius: 9px; background: #0F6B66; display: flex; align-items: center; justify-content: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="#FFFFFF" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></span>
+        Prohlídka
+      </a>
+      <a href="#" style="min-height: 56px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; text-decoration: none; color: #4E6066; font-size: 11.5px; font-weight: 700;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/></svg>
+        O ukázce
+      </a>
+    </nav>
+  </div>
+
+  <sc-if value="{{hasSel}}" hint-placeholder-val="{{ false }}">
+    <section aria-label="Souhrn úvah" style="position: absolute; inset: 0; background: #FFFFFF; display: flex; flex-direction: column;">
+      <div style="display: flex; align-items: center; gap: 6px; padding: 8px 12px 8px 4px; border-bottom: 1px solid #DDE5E7;">
+        <button type="button" onClick="{{back}}" aria-label="Zpět na případ" style="width: 44px; height: 44px; border: 0; background: transparent; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#14232A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+        </button>
+        <div style="flex: 1; min-width: 0;">
+          <div style="font-size: 11px; font-weight: 800; letter-spacing: .08em; color: #0F6B66;">SOUHRN ÚVAH</div>
+          <div style="display: flex; align-items: baseline; gap: 8px;"><span style="font-size: 19px; font-weight: 800; font-variant-numeric: tabular-nums;">{{sel.date}}</span><span style="font-size: 15px; font-weight: 700;">{{sel.exam}}</span></div>
+          <div style="font-size: 12px; color: #2C3D44; font-weight: 600;">{{sel.rel}}</div>
+        </div>
+      </div>
+      <div style="flex: 1; min-height: 0; overflow-y: auto; padding: 14px 16px 24px; display: flex; flex-direction: column; gap: 14px;">
+        <div role="note" style="background: #FFF6DE; color: #5E3A00; padding: 10px 12px; border-radius: 12px; border: 1px solid #F1D48A; font-size: 13px; line-height: 1.4; "><b>Na mobilu jen prohlížení.</b> Mobilní aplikaci neplánujeme. Žádosti a rozhodnutí dělejte na počítači.</div>
+        <div style="font-size: 12px; color: #4E6066;">Kontrola 20. 10. 2026 08:14 · automaticky z plánovaného CT</div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="font-size: 13px; color: #4E6066;"><b style="color: #2C3D44;">{{sel.docType}}</b> · {{sel.docMeta}}</div>
+          <blockquote style="margin: 0; padding: 12px 14px; border-radius: 14px; background: #F3F6F7; font-size: 15px; line-height: 1.55; color: #4E6066;">{{sel.before}} <span style="color: #14232A;"><sc-for list="{{sel.quote}}" as="part" hint-placeholder-count="3"><sc-if value="{{part.hl}}" hint-placeholder-val="{{ false }}"><mark>{{part.t}}</mark></sc-if><sc-if value="{{part.word}}" hint-placeholder-val="{{ false }}"><b style="color: #0A4E4A; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px;">{{part.t}}</b></sc-if><sc-if value="{{part.plain}}" hint-placeholder-val="{{ true }}">{{part.t}}</sc-if></sc-for></span> {{sel.after}}</blockquote>
+          <a href="#" style="font-size: 14px; font-weight: 700; min-height: 32px; display: inline-flex; align-items: center;">Otevřít zprávu na tomto místě</a>
+          <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+            <span style="{{sel.eventStyle}}">{{sel.event}}</span>
+            <span style="{{sel.corrStyle}}">{{sel.corrLabel}}</span>
+          </div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="font-size: 12px; font-weight: 800; letter-spacing: .08em; color: #4E6066;">KROKY</div>
+          <ol style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px;">
+            <sc-for list="{{sel.steps}}" as="step" hint-placeholder-count="4">
+              <li style="display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 8px; font-size: 14px; line-height: 1.45;">
+                <span style="width: 22px; height: 22px; border-radius: 50%; background: #EEF2F3; color: #2C3D44; font-size: 12px; font-weight: 800; display: inline-flex; align-items: center; justify-content: center;">{{step.n}}</span>
+                <span style="display: flex; flex-direction: column; gap: 3px;">
+                  <span style="display: flex; gap: 8px; align-items: center;"><span style="{{step.tagStyle}}">{{step.tag}}</span><span style="font-size: 12px; color: #4E6066;">{{step.time}}</span></span>
+                  <span><b>{{step.label}}:</b> {{step.text}}</span>
+                </span>
+              </li>
+            </sc-for>
+          </ol>
+        </div>
+        <sc-if value="{{sel.isEmail}}" hint-placeholder-val="{{ true }}">
+          <div style="border-top: 1px solid #DDE5E7; padding-top: 14px; display: flex; flex-direction: column; gap: 8px; font-size: 14px;">
+            <div style="font-size: 15px;"><b>Žádost:</b> e-mail · {{reqChip}}</div>
+            <div><b>Komu:</b> Radiodiagnostická klinika VFN · radiologie@vfn.example.com · <span style="color: #155B4F;">ověřeno 20. 9. 2026</span></div>
+            <div style="padding: 12px 14px; border-radius: 14px; border: 1px solid #C3CFD2; font-size: 14px; line-height: 1.5; white-space: pre-line; color: #2C3D44;">{{sel.draft}}</div>
+            <button type="button" disabled style="{{approveStyle}}">{{approveLabel}}</button>
+            <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px;">
+              <button type="button" disabled style="opacity: .45; cursor: not-allowed; height: 48px; border: 1px solid #C3CFD2; border-radius: 14px; background: #FFFFFF; color: #14232A; font: 600 15px 'Plus Jakarta Sans', sans-serif;">Upravit text</button>
+              <button type="button" disabled style="opacity: .45; cursor: not-allowed; height: 48px; border: 0; border-radius: 14px; background: transparent; color: #2C3D44; font: 600 15px 'Plus Jakarta Sans', sans-serif;">Vyřadit</button>
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{sel.isPhone}}" hint-placeholder-val="{{ false }}">
+          <div style="border-top: 1px solid #DDE5E7; padding-top: 14px; display: flex; flex-direction: column; gap: 8px; font-size: 14px;">
+            <div style="font-size: 15px;"><b>Žádost:</b> telefon · návrh</div>
+            <div><b>Volat:</b> Thomayerova nemocnice · Radiologické oddělení · jméno neuvedeno · <span style="font-weight: 600; color: #6E4400;">kontakt neověřený</span></div>
+            <span aria-disabled="true" style="opacity: .45; cursor: not-allowed; height: 48px; border-radius: 14px; background: #0F6B66; color: #FFFFFF; font-weight: 600; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 8px;">Zavolat +420 000 123 456</span>
+            <div style="padding: 12px 14px; border-radius: 14px; background: #F3F6F7; line-height: 1.5;"><div style="font-size: 11px; font-weight: 800; letter-spacing: .08em; color: #4E6066; margin-bottom: 4px;">CO ŘÍCT</div>Dobrý den, volám z Onkologické kliniky FN Motol. Žádáme o zprávu a snímky z RTG hrudníku ze dne 22. 7. 2026. Pacientka Jana Nováková, RČ 685522/0141. Prosíme o odeslání přes ePACS na FN Motol.</div>
+            <div style="font-size: 13px; color: #4E6066;">Po hovoru zapište výsledek:</div>
+            <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px;">
+              <button type="button" disabled style="opacity: .45; cursor: not-allowed; height: 48px; border: 0; border-radius: 14px; background: #0F6B66; color: #FFFFFF; font: 600 14px 'Plus Jakarta Sans', sans-serif;">Vyžádáno</button>
+              <button type="button" disabled style="opacity: .45; cursor: not-allowed; height: 48px; border: 1px solid #C3CFD2; border-radius: 14px; background: #FFFFFF; color: #14232A; font: 600 14px 'Plus Jakarta Sans', sans-serif;">Nedostupné</button>
+              <button type="button" disabled style="opacity: .45; cursor: not-allowed; height: 48px; border: 1px solid #C3CFD2; border-radius: 14px; background: #FFFFFF; color: #14232A; font: 600 14px 'Plus Jakarta Sans', sans-serif;">Znovu</button>
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{sel.isDecide}}" hint-placeholder-val="{{ false }}">
+          <div style="border-top: 1px solid #DDE5E7; padding-top: 14px; display: flex; flex-direction: column; gap: 8px;">
+            <div style="font-size: 14px;">Žádost vznikne až po vašem rozhodnutí.</div>
+            <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px;">
+              <button type="button" disabled style="opacity: .45; cursor: not-allowed; height: 48px; border: 0; border-radius: 14px; background: #4B33B5; color: #FFFFFF; font: 600 15px 'Plus Jakarta Sans', sans-serif;">Relevantní</button>
+              <button type="button" disabled style="opacity: .45; cursor: not-allowed; height: 48px; border: 1px solid #C3CFD2; border-radius: 14px; background: #FFFFFF; color: #14232A; font: 600 15px 'Plus Jakarta Sans', sans-serif;">Nerelevantní</button>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </section>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { picked: null, approved: false }; }
+  renderVals() {
+    const chip = (bg, fg) => 'border-radius: 999px; padding: 3px 10px; font-size: 12px; font-weight: 700; background: ' + bg + '; color: ' + fg + ';';
+    const tag = (t) => 'padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 800; letter-spacing: .06em; ' + (t === 'AI' ? 'background: #F1EEFC; color: #3F2A9E;' : 'background: #E3F1EF; color: #0A4E4A;');
+    const items = {
+      abd: {
+        title: 'CT břicha · 1/2026', status: 'chybí', place: 'VFN v Praze · zmínka ve zprávě', lead: 'Hodnocení LLM: nejisté.', reason: 'Důvod vyšetření ve zprávě chybí.', kind: 'decide',
+        docType: 'Propouštěcí zpráva', docMeta: 'onkologie FN Motol · 2. 6. 2026', before: 'Hospitalizace bez komplikací.', after: 'Pacientka udává bolesti břicha v 12/2025.',
+        quote: [{ t: 'V minulosti také ' }, { t: 'doplněno', k: 'word' }, { t: ' ' }, { t: 'CT břicha', k: 'hl' }, { t: ', ' }, { t: 'důvod indikace ve zprávě není jasný', k: 'hl' }, { t: '.' }],
+        event: 'proběhlo · „doplněno“', corr: 1,
+        steps: [['Systém', 'Zprávy', '12 dokumentů z NIS.'], ['AI', 'Zmínka', 'CT břicha 1/2026.'], ['Systém', 'PACS', 'Studie nenalezena.'], ['Systém', 'Doporučení', 'Pro C34 samostatné CT břicha neuvedeno.'], ['AI', 'Závěr', 'Nejisté. Může jít o vyšetření bolesti břicha.']]
+      },
+      vfn: {
+        title: 'CT hrudníku · 23. 5. 2026', status: 'chybí', place: 'VFN v Praze · zmínka ve zprávě', lead: 'Proč:', reason: 'Novější kontrolní CT po poslední linii léčby.', kind: 'email',
+        docType: 'Propouštěcí zpráva', docMeta: 'onkologie FN Motol · 2. 6. 2026', before: 'Poslední podání chemoterapie 3/2026.', after: 'Nález dle sdělení pacientky stacionární.',
+        quote: [{ t: 'Dále ' }, { t: 'doloženo', k: 'word' }, { t: ' ' }, { t: 'kontrolní CT hrudníku', k: 'hl' }, { t: ' ze ' }, { t: 'Všeobecné fakultní nemocnice', k: 'hl' }, { t: ' v Praze, bez popisu v systému.' }],
+        event: 'proběhlo · „doloženo“', corr: 1,
+        steps: [['Systém', 'Zprávy', '12 dokumentů z NIS, 2/2024 – 6/2026.'], ['AI', 'Zmínka', 'CT hrudníku z VFN, doloženo, 5/2026.'], ['Systém', 'PACS', 'Motol a VFN přes ePACS: studie z 5/2026 nenalezena.'], ['Systém', 'Datum', 'Po poslední léčbě (3/2026), před plánovaným CT.'], ['AI', 'Doporučení', 'Modrá kniha ČOS, s. 106: CT každých 6 měsíců.'], ['AI', 'Závěr', 'Relevantní. Nejnovější srovnatelné CT, chybí v PACS.']],
+        draft: 'Dobrý den,\nžádáme o zaslání zprávy a snímků z CT hrudníku ze dne 23. 5. 2026.\nPacientka: Jana Nováková, RČ 685522/0141.\nSnímky prosím odešlete přes ePACS na FN Motol, Radiologická klinika.\nDůvod: srovnání s plánovaným CT 23. 10. 2026.\n\nDěkujeme,\nDemo účet, koordinátor/ka, Onkologická klinika FN Motol, tel. +420 000 000 000'
+      },
+      thom: {
+        title: 'RTG hrudníku · 22. 7. 2026', status: 'chybí', place: 'Thomayerova nemocnice · zmínka ve zprávě', lead: 'Proč:', reason: 'Kontrola krátce po poslední hospitalizaci.', kind: 'phone',
+        docType: 'Zpráva z plicního oddělení', docMeta: 'Thomayerova nemocnice · 25. 7. 2026', before: 'Pacientka přijata pro dušnost.', after: 'Bez nových ložisek.',
+        quote: [{ t: 'Pacientka ' }, { t: 'byla kontrolována', k: 'word' }, { t: ' ' }, { t: 'RTG hrudníku', k: 'hl' }, { t: ' na plicním oddělení.' }],
+        event: 'proběhlo · „byla kontrolována“', corr: 1,
+        steps: [['AI', 'Zmínka', 'RTG hrudníku, Thomayerova nemocnice, 7/2026.'], ['Systém', 'PACS', 'Studie nenalezena.'], ['Systém', 'Kontakt', 'Jen telefon, ověření chybí.'], ['AI', 'Závěr', 'Relevantní. Ukazuje rozsah nálezu po hospitalizaci.']]
+      }
+    };
+const rel = { abd: '9 měs. před CT', vfn: '5 měs. před CT', thom: '3 měs. před CT', motol: '7 měs. před CT' };
+    const { picked, approved } = this.state;
+    const tileOf = (id) => {
+      const it = items[id];
+      const decide = it.kind === 'decide';
+      return {
+        ...it,
+        exam: it.title.split(' · ')[0], date: it.title.split(' · ')[1], rel: rel[id],
+        badgeStyle: chip('#FCE3DA', '#8A2E0F'),
+        frame: 'text-align: left; font-family: inherit; color: inherit; border-radius: 20px; padding: 14px 16px; display: flex; flex-direction: column; gap: 5px; cursor: pointer; ' + (decide ? 'border: 2px solid #C9BEF7; background: #FBFAFF;' : 'border: 1px solid #DDE5E7; background: #FFFFFF;'),
+        pick: () => this.setState({ picked: id })
+      };
+    };
+    const sections = [
+      { title: '1. K rozhodnutí (1)', headStyle: 'margin: 0; font-size: 18px; font-weight: 800; color: #4B33B5;', tiles: [tileOf('abd')] },
+      { title: '2. Relevantní (3)', headStyle: 'margin: 8px 0 0; font-size: 18px; font-weight: 800;', tiles: [tileOf('thom'), tileOf('vfn')] }
+    ];
+    const s = items[picked || 'vfn'];
+    const sel = {
+      ...s,
+      exam: s.title.split(' · ')[0], date: s.title.split(' · ')[1], rel: rel[picked || 'vfn'],
+      quote: s.quote.map((p) => ({ t: p.t, hl: p.k === 'hl', word: p.k === 'word', plain: !p.k })),
+      steps: s.steps.map(([t, label, text], i) => ({ n: i + 1, tag: t, label, text, tagStyle: tag(t), time: t === 'Systém' ? '08:14:0' + (i + 1) : '' })),
+      eventStyle: chip('#E3F1EF', '#0A4E4A'),
+      corrLabel: '1 zdroj · jen zmínka ve zprávě',
+      corrStyle: chip('#FFF6DE', '#6E4400'),
+      isEmail: s.kind === 'email', isPhone: s.kind === 'phone', isDecide: s.kind === 'decide',
+      draft: s.draft || ''
+    };
+    return {
+      sections, sel, hasSel: !!picked,
+      back: () => this.setState({ picked: null }),
+      reqChip: approved ? 'schváleno' : 'návrh',
+      approveLabel: approved ? 'Schváleno · zrušit' : 'Schválit',
+      approveStyle: 'opacity: .45; cursor: not-allowed; height: 50px; border-radius: 14px; font: 600 16px \'Plus Jakarta Sans\', sans-serif; ' + (approved ? 'border: 1px solid #0F6B66; background: #E3F1EF; color: #0A4E4A;' : 'border: 0; background: #0F6B66; color: #FFFFFF;'),
+      toggleApprove: () => this.setState({ approved: !this.state.approved })
+    };
+  }
+}
+</script>
+</body>
+</html>

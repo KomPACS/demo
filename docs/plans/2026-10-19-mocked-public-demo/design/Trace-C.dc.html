@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<title>Souhrn úvah C – nejdřív důkaz</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#0F6B66}a:hover{color:#0A4E4A}
+mark{background:#FFF6DE;color:#6E4400;border-radius:4px;padding:0 2px}
+</style>
+</helmet>
+<div style="width: 760px; height: 1000px; box-sizing: border-box; padding: 26px 36px; background: #F3F6F7; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; color: #14232A; display: flex; flex-direction: column; gap: 14px;">
+  <h2 style="margin: 0; font-size: 20px; font-weight: 800; color: #4B33B5;">1. K rozhodnutí (1)</h2>
+  <div style="display: flex; flex-direction: column; gap: 12px; border-radius: 20px; border: 2px solid #C9BEF7; background: #FBFAFF; padding: 22px;">
+    <div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px;">
+      <div style="font-size: 19px; font-weight: 700;">CT břicha · 1/2026</div>
+      <span style="border-radius: 999px; padding: 4px 12px; font-size: 14px; font-weight: 700; background: #FCE3DA; color: #8A2E0F;">chybí</span>
+    </div>
+    <blockquote style="margin: 0; border-radius: 19px; background: #F3F6F7; padding: 14px 16px; font-size: 17px; line-height: 1.5; color: #2C3D44;">„V minulosti také doplněno <mark>CT břicha</mark>, <mark>důvod indikace ve zprávě není jasný</mark>.“</blockquote>
+    <div style="font-size: 15px; color: #4E6066;">Všeobecná fakultní nemocnice v Praze · zmínka ve zprávě · propouštěcí zpráva 2. 6. 2026</div>
+    <div style="font-size: 16px;"><b>Hodnocení LLM: nejisté.</b> Zmínka je nejasná, může jít o jiné vyšetření než sledování plicního nálezu.</div>
+    <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 4px;">
+      <button type="button" style="height: 48px; padding: 0 20px; border: 0; border-radius: 14px; background: #4B33B5; color: #FFFFFF; font: 600 16px 'Plus Jakarta Sans', sans-serif;">Relevantní</button>
+      <button type="button" style="height: 48px; padding: 0 20px; border: 1px solid #C3CFD2; border-radius: 14px; background: #FFFFFF; color: #14232A; font: 600 16px 'Plus Jakarta Sans', sans-serif;">Nerelevantní</button>
+    </div>
+  </div>
+  <h2 style="margin: 8px 0 0; font-size: 20px; font-weight: 800;">2. Relevantní předchozí vyšetření (3)</h2>
+  <div style="display: flex; flex-direction: column; gap: 12px; border-radius: 20px; border: 1px solid #DDE5E7; background: #FFFFFF; padding: 22px;">
+    <div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px;">
+      <div style="font-size: 19px; font-weight: 700;">CT hrudníku · 23. 5. 2026</div>
+      <span style="border-radius: 999px; padding: 4px 12px; font-size: 14px; font-weight: 700; background: #FCE3DA; color: #8A2E0F;">chybí</span>
+    </div>
+    <blockquote style="margin: 0; border-radius: 19px; background: #F3F6F7; padding: 14px 16px; font-size: 17px; line-height: 1.5; color: #2C3D44;">„Dále doloženo <mark>kontrolní CT hrudníku</mark> ze <mark>Všeobecné fakultní nemocnice</mark> v Praze, <mark>bez popisu v systému</mark>.“</blockquote>
+    <div style="font-size: 15px; color: #4E6066;">Všeobecná fakultní nemocnice v Praze · zmínka ve zprávě · propouštěcí zpráva 2. 6. 2026</div>
+    <div style="font-size: 16px;"><b>Proč:</b> Novější kontrolní CT hrudníku po poslední linii léčby, zatím není v PACS.</div>
+    <div style="font-size: 15px; color: #4E6066;"><a href="#" style="font-weight: 700; color: #0F6B66; text-decoration: underline;">Modrá kniha ČOS, s. 106</a>: „Po radikální léčbě karcinomu plic je v prvních dvou letech od jejího ukončení doporučeno provádět kontroly po 3–6 měsících s CT vyšetřením každých 6 měsíců.“</div>
+    <button type="button" onClick="{{toggle}}" aria-expanded="{{openStr}}" style="align-self: flex-start; height: 28px; padding: 0 10px; border: 0; border-radius: 10px; background: {{toggleBg}}; display: inline-flex; align-items: center; gap: 4px; font: 500 12.8px 'Plus Jakarta Sans', sans-serif; color: #4E6066; cursor: pointer;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8V4H8"/><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M2 14h2M20 14h2M15 13v2M9 13v2"/></svg>
+      {{toggleLabel}}
+    </button>
+    <sc-if value="{{open}}" hint-placeholder-val="{{ false }}">
+      <ol style="margin: 0; padding: 12px 16px; list-style: none; border-radius: 14px; border: 1px solid #EEF2F3; display: flex; flex-direction: column; gap: 8px; font-size: 15px; color: #2C3D44;">
+        <li><b>Hledání:</b> CT hrudníku · po léčbě · jiná nemocnice. Prošlo 12 zpráv, 3 shody.</li>
+        <li><b>PACS:</b> bez záznamu z VFN.</li>
+        <li><b>Vyřazeno:</b> RTG hrudníku 3/2025, starší než poslední CT.</li>
+      </ol>
+    </sc-if>
+    <div style="display: flex; flex-direction: column; gap: 10px; border-top: 1px solid #DDE5E7; padding-top: 14px;">
+      <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 15px;"><b>Žádost:</b> e-mail <span style="border-radius: 999px; padding: 4px 12px; font-size: 14px; font-weight: 700; background: #EEF2F3; color: #2C3D44;">návrh</span></div>
+      <div style="font-size: 15px;"><b>Kontakt:</b> radiologie@vfn.example.com · <span style="color: #155B4F;">ověřený kontakt 20. 9. 2026</span></div>
+      <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+        <button type="button" style="height: 48px; padding: 0 20px; border: 0; border-radius: 14px; background: #0F6B66; color: #FFFFFF; font: 600 16px 'Plus Jakarta Sans', sans-serif;">Odeslat</button>
+        <button type="button" style="height: 48px; padding: 0 20px; border: 0; border-radius: 14px; background: transparent; color: #2C3D44; font: 600 16px 'Plus Jakarta Sans', sans-serif;">Vyřadit</button>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":760,"height":1000}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { open: false }; }
+  renderVals() {
+    const open = this.state.open;
+    return {
+      open,
+      openStr: open ? 'true' : 'false',
+      toggleBg: open ? '#EEF2F3' : 'transparent',
+      toggleLabel: open ? 'Skrýt, jak rozhodla AI' : 'Jak rozhodla AI',
+      toggle: () => this.setState({ open: !open })
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<title>Integrace – externí AI klient</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#0F6B66}a:hover{color:#0A4E4A}
+</style>
+</helmet>
+<div style="width: 1280px; height: 800px; box-sizing: border-box; padding: 48px 56px; background: #F3F6F7; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; color: #14232A; display: grid; grid-template-columns: 400px minmax(0, 1fr); gap: 48px;">
+  <section style="display: flex; flex-direction: column; gap: 18px;">
+    <div style="font-size: 12px; font-weight: 800; letter-spacing: .1em; color: #0F6B66;">INTEGRACE · MCP</div>
+    <h1 style="margin: 0; font-size: 30px; line-height: 1.2; font-weight: 800;">KomPACS jako zdroj dat pro AI asistenta nemocnice</h1>
+    <p style="margin: 0; font-size: 16px; line-height: 1.55; color: #2C3D44;">Lékař se zeptá ve svém asistentovi. Asistent volá nástroje serveru pacs-mcp. Nové okno ani nová aplikace nejsou potřeba.</p>
+    <ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 12px; font-size: 15px; line-height: 1.5;">
+      <li style="display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 10px;"><span style="width: 24px; height: 24px; border-radius: 50%; background: #E3F1EF; color: #0A4E4A; font-size: 12px; font-weight: 800; display: inline-flex; align-items: center; justify-content: center;">1</span><span><b>Stejné nástroje</b> jako koordinátor/ka v aplikaci: PACS, zprávy, hodnocení.</span></li>
+      <li style="display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 10px;"><span style="width: 24px; height: 24px; border-radius: 50%; background: #E3F1EF; color: #0A4E4A; font-size: 12px; font-weight: 800; display: inline-flex; align-items: center; justify-content: center;">2</span><span><b>Každá odpověď se zdrojem.</b> Odkaz vede na zprávu nebo studii v PACS.</span></li>
+      <li style="display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 10px;"><span style="width: 24px; height: 24px; border-radius: 50%; background: #E3F1EF; color: #0A4E4A; font-size: 12px; font-weight: 800; display: inline-flex; align-items: center; justify-content: center;">3</span><span><b>Přístup přes nemocniční přihlášení.</b> Každý dotaz se zapíše do auditu.</span></li>
+    </ul>
+    <div style="margin-top: auto; padding: 14px 16px; border-radius: 16px; background: #FFFFFF; border: 1px solid #DDE5E7;">
+      <div style="font-size: 12px; font-weight: 800; letter-spacing: .08em; color: #4E6066; margin-bottom: 8px;">NÁSTROJE PACS-MCP</div>
+      <div style="display: flex; flex-wrap: wrap; gap: 6px; font-family: 'JetBrains Mono', monospace; font-size: 12px;">
+        <span style="padding: 4px 8px; border-radius: 8px; background: #EEF2F3;">kompacs.find_patient</span>
+        <span style="padding: 4px 8px; border-radius: 8px; background: #EEF2F3;">kompacs.get_case</span>
+        <span style="padding: 4px 8px; border-radius: 8px; background: #EEF2F3;">pacs.search_studies</span>
+        <span style="padding: 4px 8px; border-radius: 8px; background: #EEF2F3;">reports.find_mentions</span>
+        <span style="padding: 4px 8px; border-radius: 8px; background: #EEF2F3;">reports.get_context</span>
+      </div>
+      <div style="font-size: 12px; color: #4E6066; margin-top: 8px;">Názvy nástrojů jsou zatím pracovní.</div>
+    </div>
+  </section>
+
+  <section aria-label="Ukázkový přepis externího asistenta" style="background: #FFFFFF; border: 1px solid #DDE5E7; border-radius: 22px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 28px rgba(16,40,44,.06);">
+    <div style="padding: 14px 20px; border-bottom: 1px solid #EEF2F3; display: flex; align-items: center; gap: 10px;">
+      <span style="width: 10px; height: 10px; border-radius: 50%; background: #7DBFB6;"></span>
+      <span style="font-weight: 700; font-size: 15px;">AI asistent nemocnice</span>
+      <span style="font-size: 13px; color: #4E6066;">· připojený server: pacs-mcp (KomPACS)</span>
+      <span style="margin-left: auto; padding: 3px 10px; border-radius: 999px; background: #FFF6DE; color: #6E4400; font-size: 12px; font-weight: 700;">ukázkový přepis</span>
+    </div>
+    <div style="flex: 1; min-height: 0; padding: 20px; display: flex; flex-direction: column; gap: 12px; font-size: 15px; line-height: 1.55;">
+      <div style="align-self: flex-end; max-width: 78%; padding: 12px 16px; border-radius: 16px 16px 4px 16px; background: #0F6B66; color: #FFFFFF;">Má pacientka Jana Nováková, RČ 685522/0141, nějaké CT hrudníku mimo náš PACS? Zítra ji hodnotíme na MDT.</div>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 12px; border: 1px solid #DDE5E7; border-radius: 10px; background: #F7FAFA; font-size: 13px;"><span style="font-family: 'JetBrains Mono', monospace; color: #0A4E4A;">kompacs.find_patient</span><span style="color: #4E6066;">1 pacientka, případ: Plánované CT 23. 10. 2026</span></div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 12px; border: 1px solid #DDE5E7; border-radius: 10px; background: #F7FAFA; font-size: 13px;"><span style="font-family: 'JetBrains Mono', monospace; color: #0A4E4A;">pacs.search_studies</span><span style="color: #4E6066;">modality CT, oblast hrudník: 2 studie v PACS Motol</span></div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 12px; border: 1px solid #DDE5E7; border-radius: 10px; background: #F7FAFA; font-size: 13px;"><span style="font-family: 'JetBrains Mono', monospace; color: #0A4E4A;">kompacs.get_case</span><span style="color: #4E6066;">1 CT hrudníku mimo PACS, žádost e-mailem schválena</span></div>
+      </div>
+      <div style="max-width: 88%; padding: 14px 16px; border-radius: 16px 16px 16px 4px; background: #F3F6F7;">
+        Ano, jedno. <b>CT hrudníku z 23. 5. 2026</b> ze Všeobecné fakultní nemocnice není v PACS FN Motol <a href="#" style="font-weight: 700;">[1]</a>. Zmínka je v propouštěcí zprávě z 2. 6. 2026 („Dále doloženo kontrolní CT hrudníku…“) <a href="#" style="font-weight: 700;">[2]</a>. Žádost o snímky schválila koordinátorka 20. 10. 2026, snímky zatím nedorazily.<br><br>V PACS Motol jsou CT hrudníku ze 4. 2. 2026 (vstupní) a z 24. 3. 2026 <a href="#" style="font-weight: 700;">[3]</a>.
+      </div>
+      <div style="font-size: 13px; color: #4E6066; display: flex; flex-direction: column; gap: 2px;">
+        <span>[1] KomPACS · případ Jana Nováková · CT hrudníku 23. 5. 2026</span>
+        <span>[2] NIS · propouštěcí zpráva, onkologie FN Motol, 2. 6. 2026</span>
+        <span>[3] PACS Motol · 2 studie</span>
+      </div>
+    </div>
+    <div style="padding: 12px 20px; border-top: 1px solid #EEF2F3; font-size: 12px; color: #4E6066;">Audit: dotaz 21. 10. 2026 09:02 · uživatel přihlášen přes SSO nemocnice · 3 volání nástrojů · fiktivní data</div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

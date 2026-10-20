@@ -389,3 +389,120 @@ Mode: `inline` (orchestrator edits, no dispatch), `dev` (one developer dispatch,
 - Q3: Real short quotes with real page numbers. The scenario developer downloads `https://www.linkos.cz/files/modra-kniha/26.pdf` to a gitignored `tmp/` folder, extracts the text (`pdftotext -layout`), and copies short quotes (1–2 sentences) with their page numbers. Do not commit the PDF.
 - Q4: Synthetic (a generated viewer image, fake patient "Rakathon Jan"). Keep them.
 - Q5: Change it in P1, in T9: `sourceLabel.insurer` = "Výpis pojištěnce (souhlas pacienta)".
+
+---
+
+# Plan: P2 — product concept UI from the design review
+
+## Goal
+The demo shows the reviewed design: intro with a POC offer, read-only phone, B2 evidence panel, reviewed requests, disputes, and an MCP integration page.
+
+## Context
+- **Spec:** `spec.md`, decisions from "Trust comes from checkable evidence" to "Intro offers a conversation".
+- **Design source:** `design/` (canvas boards). B2 = `Trace-B2.dc.html` and `Trace-B2-Phone.dc.html`. Intro = `Intro-B.dc.html`. Phone = `Phone-A.dc.html`. Integration = `Integration-MCP.dc.html`. Copy their text; build with the frontend tokens (`src/index.css`).
+- **Base:** `main` at `018ac1a`. P1 design rules for `src/mock/**` still apply.
+- **PRs (squash, never stacked):**
+  1. **P2a shell:** T16, T17, T18. UI only, no contract change.
+  2. **P2b data:** T19, T20, T21. Contract, mock, scenarios.
+  3. **P2c case:** T22, T23, T24. Open only after P2b merges.
+- **Not in P2:** the pipeline animation, the Přehled mock section, "Obnovit demo", deploy (P3), a doctor view.
+
+## Task Sequence
+
+### T16 — Intro screen
+- **Mode:** `inline`
+- **Depends on:** —
+- **Files:** `src/components/Intro.tsx` (create), `src/App.tsx` (show on first visit, `#/intro` route), `src/components/DemoTour.tsx` (start from the intro).
+- **Behavior:**
+  - First visit in a tab (`sessionStorage`, try/catch) → intro. Later visits → queue. `#/intro` always shows it.
+  - Left: eyebrow "KONCEPT VE VÝVOJI · FIKTIVNÍ DATA", wordmark (Kom mint, C coral), 3 steps, POC box with `mailto:info@kompacs.cz?subject=KomPACS`, kompacs.cz link, "není zdravotnický prostředek".
+  - Right: 6 story links (tour stops), "Provést ukázkou" (starts `DemoTour` at stop 1), "Prozkoumat sám" (queue).
+  - Below 768 px: one column.
+- **Acceptance:** spec acceptance line 1. No horizontal scroll at 390 px.
+- **Verification:** `npx -y pnpm@10 lint`; `node scripts/shots.mjs /intro`
+
+### T17 — Read-only phone with bottom tab bar
+- **Mode:** `dev`
+- **Depends on:** —
+- **Files:** `src/lib/readonly.ts` (create: `useReadOnly(): boolean`, true below 768 px via `matchMedia`), `src/components/MobileBar.tsx` (create), `src/components/Sidebar.tsx` (hide below 768 px), `src/App.tsx` (banner + bar), every component with a write action (`CaseDetail`, `RequestActions`, `RemoveDialog`, `ContactDialog`, `NewCheckDialog`, `AiLog` re-judge, `Timeline` actions).
+- **Behavior:**
+  - Banner under the header: the exact text from the spec.
+  - Read-only → each write control is `disabled` with `title="Jen na počítači"`. Links and tabs still work.
+  - Bottom bar: Fronta (count), Přehled, Prohlídka (opens the tour), O ukázce (`#/intro`).
+- **Acceptance:** at 390 px no enabled write control (check: `document.querySelectorAll('button:not([disabled])')` holds only navigation). Desktop unchanged.
+- **Test cases:** `useReadOnly` true at 390, false at 1024 (stub `matchMedia`).
+- **Verification:** `npx -y pnpm@10 test`; `npx -y pnpm@10 lint`; `node scripts/shots.mjs --widths 390,1440 / /case/s01-zpravy`
+
+### T18 — Integration page
+- **Mode:** `inline`
+- **Depends on:** —
+- **Files:** `src/components/Integration.tsx` (create), `src/App.tsx` (`#/integrace`), `src/components/Sidebar.tsx` and `MobileBar.tsx` (link "Integrace").
+- **Behavior:** static copy of `Integration-MCP.dc.html`: left text + tool list ("názvy jsou pracovní"), right transcript with numbered sources and the audit line. Data from scenario 1 names. No network.
+- **Verification:** `npx -y pnpm@10 lint`; `node scripts/shots.mjs /integrace`
+
+### T19 — Contract: evidence, steps, review state, dispute
+- **Mode:** `inline`
+- **Depends on:** —
+- **Files:** `contract/openapi.json`, `src/api.d.ts` (`P api`), `README.md` (Contract changes line).
+- **Changes (all optional or defaulted, so old data stays valid):**
+  - `Verdict`: `event_status` (`done`|`planned`|`recommended`|`unclear`), `event_word`, `context_before`, `context_after`, `source_doc` (`{type, department, date}`), `sources` (`string[]`, labels of independent sources), `steps` (`[{kind: 'lookup'|'llm', label, text, at?}]`). `kroky` stays for old traces.
+  - `Case`: `checked_at` (ISO).
+  - `RequestItem.state`: add `approved`. `RequestItem`: `call_attempts` (`string[]`, ISO).
+  - New routes: `POST /api/requests/{id}/send` (approved → sent), `PUT /api/requests/{id}/draft` (`{email_draft}` → sets `approved`), `POST /api/requests/{id}/call-again` (appends an attempt, stays `draft`).
+  - `POST /api/requests/{id}/approve`: now draft → `approved` (was → `sent`).
+  - `RejudgeRequest`: `category` (enum of the 7 spec categories). `VerdictVersion`: `category`, `new_evidence` (`string|null`).
+- **Acceptance:** `P api --check` exits 0. `P lint` exits 0.
+
+### T20 — Mock store for T19
+- **Mode:** `full`
+- **Depends on:** T19
+- **Files:** `src/mock/store.ts`, `src/mock/fetch.ts`, `test/store.test.ts`, `test/fetch.test.ts`.
+- **Behavior:**
+  - `approve`: draft → approved. `send`: approved → sent, sets `sent_at`. `saveDraft`: sets text, state approved. `callAgain`: appends `at` now. Wrong state → `Conflict`.
+  - `rejudge(note, category)`: a prepared next version is used if the scenario has one. Else v2 = v1 with `new_evidence: null`. Stores `category`.
+  - `getCase` returns `checked_at` from the scenario (default: trigger creation time).
+- **Test cases:** each transition and its conflict; rejudge with and without a prepared version; route table has the 3 new routes.
+- **Verification:** `npx -y pnpm@10 test`; `npx -y pnpm@10 lint`
+
+### T21 — Scenario data for evidence and reviewed requests
+- **Mode:** `dev`
+- **Depends on:** T19
+- **Files:** `src/mock/scenarios/*.ts`, `src/mock/store.ts` (draft builder), `test/seed.test.ts`.
+- **Behavior:**
+  - Every `report_text` prior: `context_before/after`, `event_status`, `event_word` (a word inside `source_sentence`), `source_doc`, `sources`, and 3–6 `steps`. `lookup` steps carry `at`.
+  - Scenario 1 gets the baseline CT (4. 2., `is_baseline`, available) and a prepared v2 for the CT břicha dispute (not relevant, `new_evidence` = the next sentence). Copy text from `Trace-B2.dc.html`.
+  - E-mail drafts: patient name + RČ, exam + date, "přes ePACS na FN v Motole", reason, sender block. One builder in the store for new drafts.
+  - Phone requests: a call script line per request (derived, not stored).
+- **Test cases (seed):** `event_word` occurs in `source_sentence`; `planned`/`recommended` never has `verdict.label === 'relevant'`; every e-mail draft contains the patient RČ and the prior date; every `lookup` step has `at`.
+- **Verification:** `npx -y pnpm@10 test`; `npx -y pnpm@10 lint`
+
+### T22 — Case screen B2: date-first tiles and evidence panel
+- **Mode:** `dev`
+- **Depends on:** T20, T21 (P2b merged)
+- **Files:** `src/components/CaseDetail.tsx` (tiles, ordering), `src/components/EvidencePanel.tsx` (create), `src/components/AiLog.tsx` (keep "Celý záznam AI" as a link from the panel), `src/lib/case.ts` (`sortPriors`).
+- **Behavior:**
+  - Tile: date column (large) + gap to the planned exam; exam, place, badges, reason on the right. Newest first; baseline pinned with "vstupní vyšetření".
+  - Click → panel (500 px, right). Header: date + exam + gap, run stamp from `checked_at`. Evidence block, event chip, sources chip, numbered tagged steps with times on `lookup`.
+  - Below 1024 px the panel is a full-screen sheet with a back arrow. Closed on load. `?focus=` opens it.
+- **Test cases:** `sortPriors` (newest first, baseline first, partial dates `YYYY` / `YYYY-MM` after full dates of the same period).
+- **Verification:** `npx -y pnpm@10 test`; `npx -y pnpm@10 lint`; `node scripts/shots.mjs --widths 1440,390 /case/s01-zpravy`
+
+### T23 — Request review in the panel and approved-only batch send
+- **Mode:** `dev`
+- **Depends on:** T22
+- **Files:** `src/components/EvidencePanel.tsx`, `src/components/RequestActions.tsx`, `src/components/CaseDetail.tsx` (header button), `src/lib/case.ts` (`sendable` = approved).
+- **Behavior:**
+  - E-mail: "Komu" line, full draft, Schválit / Upravit text (inline textarea, save = approved) / Vyřadit. Unverified contact → Schválit disabled with the reason.
+  - Phone: "Volat" line, script, Vyžádáno / Nedostupné / Zavolat znovu (shows attempt count).
+  - Header: "Odeslat schválené (N)". Click → confirm list (recipient, channel, exam, date) + "Neodešle se" list (phone, unverified). Confirm → `send` each.
+- **Verification:** `npx -y pnpm@10 lint`; manual: s01 approve → batch shows 1 → send → chip "odesláno".
+
+### T24 — Dispute thread
+- **Mode:** `dev`
+- **Depends on:** T23
+- **Files:** `src/components/Dispute.tsx` (create), `src/components/EvidencePanel.tsx`.
+- **Behavior:** "Nesouhlasím s hodnocením" → 7 category chips + evidence note (textarea, hint "Popište důkaz, ne závěr") → Přehodnotit (disabled until a category) → tool calls appear one by one (~700 ms) → v1 | v2 → keep buttons → "Uloží se: …" line. `new_evidence === null` → "beze změny · námitka bez opory v textu". Reuses `rejudge` and `restore`.
+- **Verification:** `npx -y pnpm@10 lint`; manual: s01 CT hrudníku 23. 5. → unchanged; CT břicha → changed with new evidence.
+
+## Gate checks
+- After P2a, P2b, P2c: `lean-sdd:code-reviewer` on the PR diff (G4, G5, G6).

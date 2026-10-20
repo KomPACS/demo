@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<title>Souhrn úvah B2 – boční panel v systému</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#0F6B66}a:hover{color:#0A4E4A}
+mark{background:#FFF6DE;color:#6E4400;border-radius:4px;padding:0 2px}
+</style>
+</helmet>
+<div style="position: relative; width: 1440px; height: 1100px; overflow: hidden; display: flex; background: #F3F6F7; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; color: #14232A;">
+  <nav aria-label="Hlavní menu" style="width: 264px; flex-shrink: 0; background: #FFFFFF; border-right: 1px solid #DDE5E7; padding: 22px 16px; box-sizing: border-box; display: flex; flex-direction: column; gap: 6px;">
+    <div style="display: flex; align-items: center; gap: 12px; padding: 0 4px 18px;">
+      <div style="width: 40px; height: 40px; border-radius: 50%; background: #0F6B66; display: flex; align-items: center; justify-content: center;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg>
+      </div>
+      <div>
+        <div style="font-size: 18px; font-weight: 800;">KomPACS</div>
+        <div style="font-size: 13px; color: #4E6066;"><b style="color: rgb(15, 107, 102)">Kom</b>parátor <b style="color: rgb(15, 107, 102)">PACS</b></div>
+      </div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 16px; background: #EEF2F3; margin-bottom: 12px;">
+      <div style="width: 40px; height: 40px; border-radius: 50%; background: #0F6B66; display: flex; align-items: center; justify-content: center;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>
+      </div>
+      <div><div style="font-weight: 700; font-size: 15px;">Demo účet</div><div style="font-size: 13px; color: #4E6066;">Koordinátor/ka</div></div>
+    </div>
+    <a href="#" style="min-height: 48px; padding: 0 14px; border-radius: 12px; background: #E3F1EF; color: #0A4E4A; font-weight: 700; font-size: 15px; text-decoration: none; display: flex; align-items: center; justify-content: space-between;">Fronta k vyřízení <span style="min-width: 26px; height: 22px; border-radius: 999px; background: #0F6B66; color: #FFFFFF; font-size: 12px; display: inline-flex; align-items: center; justify-content: center;">8</span></a>
+    <a href="#" style="min-height: 48px; padding: 0 14px; color: #2C3D44; font-weight: 600; font-size: 15px; text-decoration: none; display: flex; align-items: center;">Přehled</a>
+    <div style="margin-top: auto; display: flex; flex-direction: column; gap: 10px;">
+      <button type="button" style="height: 48px; border: 0; border-radius: 14px; background: #0F6B66; color: #FFFFFF; font: 600 16px 'Plus Jakarta Sans', sans-serif;">+ Spustit kontrolu</button>
+      <div style="font-size: 12px; color: #4E6066;">Fiktivní data · Prototyp, není zdravotnický prostředek</div>
+    </div>
+  </nav>
+
+  <div style="flex: 1; min-width: 0; display: flex; flex-direction: column;">
+    <header style="background: #0F4F4C; color: #FFFFFF; padding: 16px 32px 18px; display: flex; align-items: flex-end; gap: 32px;">
+      <div>
+        <a href="#" style="font-size: 14px; color: #A9D3CD; font-weight: 600; text-decoration: none;">‹ Fronta k vyřízení</a>
+        <div style="font-size: 26px; font-weight: 800; margin-top: 4px;">Jana Nováková</div>
+      </div>
+      <div><div style="font-size: 11px; font-weight: 700; letter-spacing: .08em; color: #A9D3CD;">RČ</div><div style="font-size: 15px; font-weight: 700;">685522/0141</div></div>
+      <div><div style="font-size: 11px; font-weight: 700; letter-spacing: .08em; color: #A9D3CD;">DIAGNÓZA</div><div style="font-size: 15px; font-weight: 700;">C34 Zhoubný novotvar průdušky a plíce</div></div>
+      <div><div style="font-size: 11px; font-weight: 700; letter-spacing: .08em; color: #A9D3CD;">SPOUŠTĚČ</div><div style="font-size: 15px; font-weight: 700;">Plánované CT · 23. 10. 2026</div></div>
+      <button type="button" onClick="{{openBatch}}" disabled="{{batchDisabled}}" style="{{batchStyle}}">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg>
+        {{batchLabel}}
+      </button>
+    </header>
+
+    <div style="flex: 1; min-height: 0; display: flex;">
+      <main style="flex: 1; min-width: 0; padding: 22px 24px; display: flex; flex-direction: column; gap: 12px; overflow: hidden;">
+        <sc-for list="{{sections}}" as="sec" hint-placeholder-count="2">
+          <h2 style="{{sec.headStyle}}">{{sec.title}}</h2>
+          <sc-for list="{{sec.tiles}}" as="tile" hint-placeholder-count="2">
+            <button type="button" onClick="{{tile.pick}}" aria-pressed="{{tile.pressed}}" style="{{tile.frame}}">
+              <span style="display: grid; grid-template-columns: 128px minmax(0, 1fr); gap: 16px; align-items: start;">
+                <span style="display: flex; flex-direction: column; gap: 2px; padding-right: 12px; border-right: 1px solid #DDE5E7;">
+                  <span style="font-size: 22px; font-weight: 800; line-height: 1.1; font-variant-numeric: tabular-nums;">{{tile.date}}</span>
+                  <span style="font-size: 13px; color: #4E6066;">{{tile.rel}}</span>
+                </span>
+                <span style="display: flex; flex-direction: column; gap: 5px; min-width: 0;">
+                  <span style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                    <span style="font-size: 17px; font-weight: 700;">{{tile.exam}}</span>
+                    <span style="display: flex; gap: 6px;">
+                      <span style="{{tile.badgeStyle}}">{{tile.status}}</span>
+                      <sc-if value="{{tile.hasReq}}" hint-placeholder-val="{{ false }}"><span style="{{tile.reqStyle}}">{{tile.reqLabel}}</span></sc-if>
+                      <sc-if value="{{tile.baseline}}" hint-placeholder-val="{{ false }}"><span style="{{tile.baseStyle}}">vstupní vyšetření</span></sc-if>
+                    </span>
+                  </span>
+                  <span style="font-size: 14px; color: #4E6066;">{{tile.place}}</span>
+                  <span style="font-size: 15px; line-height: 1.45; color: #2C3D44;"><b style="color: #14232A;">{{tile.lead}}</b> {{tile.reason}}</span>
+                </span>
+              </span>
+            </button>
+          </sc-for>
+        </sc-for>
+      </main>
+
+      <sc-if value="{{hasSel}}" hint-placeholder-val="{{ true }}">
+      <aside aria-label="Souhrn úvah" style="width: 500px; flex-shrink: 0; background: #FFFFFF; border-left: 1px solid #DDE5E7; padding: 20px 24px; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px; overflow-y: auto;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+          <div>
+            <div style="font-size: 12px; font-weight: 800; letter-spacing: .08em; color: #0F6B66;">SOUHRN ÚVAH</div>
+            <div style="display: flex; align-items: baseline; gap: 10px; margin-top: 2px;"><span style="font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums;">{{sel.date}}</span><span style="font-size: 17px; font-weight: 700;">{{sel.exam}}</span></div>
+            <div style="font-size: 13px; color: #2C3D44; font-weight: 600;">{{sel.rel}} (plánované CT 23. 10. 2026)</div>
+            <div style="font-size: 13px; color: #4E6066; margin-top: 2px;">Kontrola 20. 10. 2026 08:14 · automaticky z plánovaného CT</div>
+          </div>
+          <button type="button" onClick="{{closePanel}}" aria-label="Zavřít panel" style="width: 40px; height: 40px; border-radius: 12px; border: 1px solid #DDE5E7; background: #FFFFFF; display: flex; align-items: center; justify-content: center;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2C3D44" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+          </button>
+        </div>
+
+        <section aria-label="Důkaz" style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 13px; color: #4E6066;">
+            <span><b style="color: #2C3D44;">{{sel.docType}}</b> · {{sel.docMeta}}</span>
+            <a href="#" style="font-weight: 700; white-space: nowrap;">Otevřít na tomto místě</a>
+          </div>
+          <blockquote style="margin: 0; padding: 12px 14px; border-radius: 14px; background: #F3F6F7; font-size: 15px; line-height: 1.55; color: #4E6066;">{{sel.before}} <span style="color: #14232A;"><sc-for list="{{sel.quote}}" as="part" hint-placeholder-count="3"><sc-if value="{{part.hl}}" hint-placeholder-val="{{ false }}"><mark>{{part.t}}</mark></sc-if><sc-if value="{{part.word}}" hint-placeholder-val="{{ false }}"><b style="color: #0A4E4A; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px;">{{part.t}}</b></sc-if><sc-if value="{{part.plain}}" hint-placeholder-val="{{ true }}">{{part.t}}</sc-if></sc-for></span> {{sel.after}}</blockquote>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+            <span style="{{sel.eventStyle}}">{{sel.eventLabel}}</span>
+            <span style="{{sel.corrStyle}}">{{sel.corrLabel}}</span>
+          </div>
+        </section>
+
+        <section aria-label="Kroky" style="display: flex; flex-direction: column; gap: 6px;">
+          <div style="font-size: 12px; font-weight: 800; letter-spacing: .08em; color: #4E6066;">KROKY</div>
+          <ol style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px;">
+            <sc-for list="{{sel.steps}}" as="step" hint-placeholder-count="4">
+              <li style="display: grid; grid-template-columns: 24px 66px minmax(0, 1fr) 62px; gap: 8px; align-items: baseline; font-size: 14px; line-height: 1.45;">
+                <span style="width: 22px; height: 22px; border-radius: 50%; background: #EEF2F3; color: #2C3D44; font-size: 12px; font-weight: 800; display: inline-flex; align-items: center; justify-content: center;">{{step.n}}</span>
+                <span style="{{step.tagStyle}}">{{step.tag}}</span>
+                <span><b>{{step.label}}:</b> {{step.text}}</span>
+                <span style="font-size: 12px; color: #4E6066; text-align: right; font-variant-numeric: tabular-nums;">{{step.time}}</span>
+              </li>
+            </sc-for>
+          </ol>
+          <div style="font-size: 12px; color: #4E6066;"><b>Systém</b> = vyhledání v datech, opakovatelné. <b>AI</b> = výklad textu modelem. Čas u kroků Systém = kdy se data četla.</div>
+        </section>
+
+        <section aria-label="Námitka k hodnocení" style="display: flex; flex-direction: column; gap: 10px;">
+          <sc-if value="{{dispIdle}}" hint-placeholder-val="{{ true }}">
+            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+              <button type="button" onClick="{{openDispute}}" style="height: 40px; padding: 0 14px; border: 1px solid #C3CFD2; border-radius: 12px; background: #FFFFFF; color: #14232A; font: 600 14px 'Plus Jakarta Sans', sans-serif; cursor: pointer;">Nesouhlasím s hodnocením</button>
+              <span style="font-size: 12px; color: #4E6066; flex: 1; min-width: 180px;">Spustí nové hodnocení. Vaše volba se uloží jako zpětná vazba pro model.</span>
+            </div>
+          </sc-if>
+          <sc-if value="{{dispForm}}" hint-placeholder-val="{{ false }}">
+            <div style="border: 1px solid #C9BEF7; background: #FBFAFF; border-radius: 16px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px;">
+              <div style="font-size: 12px; font-weight: 800; letter-spacing: .08em; color: #4B33B5;">NÁMITKA · CO JE ŠPATNĚ?</div>
+              <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                <sc-for list="{{cats}}" as="cat" hint-placeholder-count="7">
+                  <button type="button" onClick="{{cat.pick}}" aria-pressed="{{cat.pressed}}" style="{{cat.style}}">{{cat.label}}</button>
+                </sc-for>
+              </div>
+              <label style="font-size: 13px; font-weight: 700; color: #2C3D44;">Důkaz: která věta, které slovo</label>
+              <div style="padding: 10px 12px; border-radius: 12px; border: 1px solid #C3CFD2; background: #FFFFFF; font-size: 14px; line-height: 1.45;">{{dispNote}}</div>
+              <div style="font-size: 12px; color: #4E6066;">Popište důkaz, ne závěr. Model pak přehodnotí text, ne váš názor.</div>
+              <div style="display: flex; gap: 8px;">
+                <button type="button" onClick="{{runDispute}}" disabled="{{runDisabled}}" style="{{runStyle}}">Přehodnotit</button>
+                <button type="button" onClick="{{cancelDispute}}" style="height: 44px; padding: 0 14px; border: 0; background: transparent; color: #2C3D44; font: 600 15px 'Plus Jakarta Sans', sans-serif; cursor: pointer;">Zrušit</button>
+              </div>
+            </div>
+          </sc-if>
+          <sc-if value="{{dispRun}}" hint-placeholder-val="{{ false }}">
+            <div style="border: 1px solid #DDE5E7; border-radius: 16px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; font-size: 13px;">
+              <div style="font-weight: 700; color: #2C3D44;">Přehodnocuji s vaší námitkou…</div>
+              <sc-for list="{{runTools}}" as="tool" hint-placeholder-count="2">
+                <div style="display: flex; gap: 8px; align-items: baseline;"><span style="font-family: ui-monospace, Menlo, monospace; font-size: 12px; color: #0A4E4A;">{{tool.name}}</span><span style="color: #4E6066;">{{tool.out}}</span></div>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{dispDone}}" hint-placeholder-val="{{ false }}">
+            <div style="border: 1px solid #DDE5E7; border-radius: 16px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+                <div style="font-size: 12px; font-weight: 800; letter-spacing: .08em; color: #4E6066;">VÝSLEDEK NÁMITKY</div>
+                <span style="{{resStyle}}">{{resLabel}}</span>
+              </div>
+              <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px;">
+                <div style="padding: 10px 12px; border-radius: 12px; background: #F3F6F7; font-size: 13.5px; line-height: 1.45;"><div style="font-size: 11px; font-weight: 800; color: #4E6066;">V1 · PŮVODNÍ</div><b>{{v1Label}}</b> {{v1Reason}}</div>
+                <div style="{{v2Box}}"><div style="font-size: 11px; font-weight: 800; color: #4E6066;">V2 · PO NÁMITCE</div><b>{{v2Label}}</b> {{v2Reason}}</div>
+              </div>
+              <div style="font-size: 13.5px; line-height: 1.45;"><b>Důkaz pro v2:</b> {{v2Evidence}}</div>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button type="button" onClick="{{keepA}}" style="height: 44px; padding: 0 16px; border: 0; border-radius: 14px; background: #0F6B66; color: #FFFFFF; font: 600 15px 'Plus Jakarta Sans', sans-serif; cursor: pointer;">{{keepALabel}}</button>
+                <button type="button" onClick="{{keepB}}" style="height: 44px; padding: 0 16px; border: 1px solid #C3CFD2; border-radius: 14px; background: #FFFFFF; color: #14232A; font: 600 15px 'Plus Jakarta Sans', sans-serif; cursor: pointer;">{{keepBLabel}}</button>
+              </div>
+              <sc-if value="{{hasKept}}" hint-placeholder-val="{{ false }}">
+                <div style="font-size: 12px; color: #155B4F; font-weight: 600;">{{keptNote}}</div>
+              </sc-if>
+              <div style="font-size: 12px; color: #4E6066;">Uloží se: kategorie · důkaz · volba v1/v2 · verze promptu a modelu · pseudonymizováno.</div>
+            </div>
+          </sc-if>
+        </section>
+
+        <sc-if value="{{sel.isDecide}}" hint-placeholder-val="{{ false }}">
+          <section style="border-top: 1px solid #DDE5E7; padding-top: 14px; display: flex; flex-direction: column; gap: 10px;">
+            <div style="font-size: 15px;">Žádost vznikne až po vašem rozhodnutí.</div>
+            <div style="display: flex; gap: 10px;">
+              <button type="button" style="height: 48px; padding: 0 20px; border: 0; border-radius: 14px; background: #4B33B5; color: #FFFFFF; font: 600 16px 'Plus Jakarta Sans', sans-serif;">Relevantní</button>
+              <button type="button" style="height: 48px; padding: 0 20px; border: 1px solid #C3CFD2; border-radius: 14px; background: #FFFFFF; color: #14232A; font: 600 16px 'Plus Jakarta Sans', sans-serif;">Nerelevantní</button>
+            </div>
+          </section>
+        </sc-if>
+
+        <sc-if value="{{sel.isEmail}}" hint-placeholder-val="{{ true }}">
+          <section aria-label="Žádost" style="border-top: 1px solid #DDE5E7; padding-top: 14px; display: flex; flex-direction: column; gap: 8px; font-size: 14px;">
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 15px;"><b>Žádost:</b> e-mail <span style="{{reqChipStyle}}">{{reqChip}}</span></div>
+            <div><b>Komu:</b> Radiodiagnostická klinika VFN · radiologie@vfn.example.com · <span style="color: #155B4F;">ověřený kontakt 20. 9. 2026</span></div>
+            <div style="padding: 12px 14px; border-radius: 14px; border: 1px solid #C3CFD2; background: #FFFFFF; font-size: 14px; line-height: 1.5; white-space: pre-line; color: #2C3D44;">{{sel.draft}}</div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <button type="button" onClick="{{toggleApprove}}" style="{{approveStyle}}">{{approveLabel}}</button>
+              <button type="button" style="height: 48px; padding: 0 16px; border: 1px solid #C3CFD2; border-radius: 14px; background: #FFFFFF; color: #14232A; font: 600 16px 'Plus Jakarta Sans', sans-serif;">Upravit text</button>
+              <button type="button" style="height: 48px; padding: 0 12px; border: 0; background: transparent; color: #2C3D44; font: 600 16px 'Plus Jakarta Sans', sans-serif;">Vyřadit</button>
+            </div>
+          </section>
+        </sc-if>
+
+        <sc-if value="{{sel.isPhone}}" hint-placeholder-val="{{ false }}">
+          <section aria-label="Žádost telefonem" style="border-top: 1px solid #DDE5E7; padding-top: 14px; display: flex; flex-direction: column; gap: 8px; font-size: 14px;">
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 15px;"><b>Žádost:</b> telefon <span style="border-radius: 999px; padding: 3px 10px; font-size: 13px; font-weight: 700; background: #EEF2F3; color: #2C3D44;">návrh</span></div>
+            <div><b>Volat:</b> Thomayerova nemocnice · Radiologické oddělení · <b>+420 000 123 456</b> · jméno neuvedeno · <span style="font-weight: 600; color: #6E4400;">kontakt neověřený</span></div>
+            <div style="padding: 12px 14px; border-radius: 14px; background: #F3F6F7; font-size: 14px; line-height: 1.5;"><div style="font-size: 12px; font-weight: 800; letter-spacing: .08em; color: #4E6066; margin-bottom: 4px;">CO ŘÍCT</div>Dobrý den, volám z Onkologické kliniky FN Motol. Žádáme o zprávu a snímky z RTG hrudníku ze dne 22. 7. 2026. Pacientka Jana Nováková, RČ 685522/0141. Prosíme o odeslání přes ePACS na FN Motol.</div>
+            <div style="font-size: 13px; color: #4E6066;">Po hovoru zapište výsledek:</div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <button type="button" style="height: 48px; padding: 0 16px; border: 0; border-radius: 14px; background: #0F6B66; color: #FFFFFF; font: 600 15px 'Plus Jakarta Sans', sans-serif;">Vyžádáno</button>
+              <button type="button" style="height: 48px; padding: 0 16px; border: 1px solid #C3CFD2; border-radius: 14px; background: #FFFFFF; color: #14232A; font: 600 15px 'Plus Jakarta Sans', sans-serif;">Nedostupné</button>
+              <button type="button" style="height: 48px; padding: 0 16px; border: 1px solid #C3CFD2; border-radius: 14px; background: #FFFFFF; color: #14232A; font: 600 15px 'Plus Jakarta Sans', sans-serif;">Zavolat znovu</button>
+              <button type="button" style="height: 48px; padding: 0 12px; border: 0; background: transparent; color: #0F6B66; font: 600 15px 'Plus Jakarta Sans', sans-serif;">Ověřit kontakt</button>
+            </div>
+          </section>
+        </sc-if>
+      </aside>
+      </sc-if>
+    </div>
+  </div>
+
+  <sc-if value="{{batchOpen}}" hint-placeholder-val="{{ false }}">
+    <div style="position: absolute; inset: 0; background: rgba(7,43,41,.45); display: flex; align-items: center; justify-content: center;">
+      <div role="dialog" aria-label="Odeslat schválené žádosti" style="width: 560px; background: #FFFFFF; border-radius: 22px; padding: 28px 30px; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 24px 60px rgba(7,43,41,.35);">
+        <h2 style="margin: 0; font-size: 22px; font-weight: 800;">Odeslat 1 schválenou žádost</h2>
+        <div style="padding: 12px 14px; border-radius: 14px; background: #F3F6F7; font-size: 15px;"><b>VFN · Radiodiagnostická klinika</b> · e-mail · CT hrudníku 23. 5. 2026</div>
+        <div style="font-size: 13px; font-weight: 800; letter-spacing: .08em; color: #4E6066;">NEODEŠLE SE</div>
+        <div style="font-size: 14px; color: #2C3D44;">Thomayerova nemocnice · RTG hrudníku 22. 7. 2026: žádost telefonem, zavolejte.</div>
+        <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 4px;">
+          <button type="button" onClick="{{closeBatch}}" style="height: 48px; padding: 0 18px; border: 1px solid #C3CFD2; border-radius: 14px; background: #FFFFFF; color: #14232A; font: 600 16px 'Plus Jakarta Sans', sans-serif;">Zpět</button>
+          <button type="button" onClick="{{sendBatch}}" style="height: 48px; padding: 0 20px; border: 0; border-radius: 14px; background: #0F6B66; color: #FFFFFF; font: 600 16px 'Plus Jakarta Sans', sans-serif;">Odeslat</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { picked: null, approved: false, sent: false, batchOpen: false, disp: 'idle', cat: null, step: 0, kept: null }; }
+  componentWillUnmount() { clearInterval(this.timer); }
+  renderVals() {
+    const chip = (bg, fg) => 'border-radius: 999px; padding: 3px 10px; font-size: 13px; font-weight: 700; background: ' + bg + '; color: ' + fg + ';';
+    const badge = { dostupné: chip('#DDF2EC', '#155B4F'), chybí: chip('#FCE3DA', '#8A2E0F') };
+    const { picked, approved, sent, batchOpen } = this.state;
+    const reqState = sent ? ['odesláno', chip('#E3F1EF', '#0A4E4A')] : approved ? ['schváleno', chip('#E3F1EF', '#0A4E4A')] : ['návrh', chip('#EEF2F3', '#2C3D44')];
+    const tag = (t) => t === 'AI'
+      ? 'justify-self: start; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 800; letter-spacing: .06em; background: #F1EEFC; color: #3F2A9E;'
+      : 'justify-self: start; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 800; letter-spacing: .06em; background: #E3F1EF; color: #0A4E4A;';
+    const items = {
+      abd: {
+        title: 'CT břicha · 1/2026', status: 'chybí', place: 'VFN v Praze · zmínka ve zprávě', lead: 'Hodnocení LLM: nejisté.', reason: 'Důvod vyšetření ve zprávě chybí.',
+        kind: 'decide', docType: 'Propouštěcí zpráva', docMeta: 'onkologie FN Motol · 2. 6. 2026',
+        before: 'Hospitalizace bez komplikací.', after: 'Pacientka udává bolesti břicha v 12/2025.',
+        quote: [{ t: 'V minulosti také ' }, { t: 'doplněno', k: 'word' }, { t: ' ' }, { t: 'CT břicha', k: 'hl' }, { t: ', ' }, { t: 'důvod indikace ve zprávě není jasný', k: 'hl' }, { t: '.' }],
+        event: 'proběhlo · rozhodlo slovo „doplněno“', corr: 1,
+        steps: [
+          ['Systém', 'Zprávy', '12 dokumentů z NIS, 2/2024 – 6/2026.'],
+          ['AI', 'Zmínka', 'CT břicha 1/2026 v propouštěcí zprávě.'],
+          ['Systém', 'PACS', 'Motol a VFN: studie z 1/2026 nenalezena.'],
+          ['Systém', 'Doporučení', 'Modrá kniha ČOS pro C34: samostatné CT břicha neuvedeno.'],
+          ['AI', 'Závěr', 'Nejisté. Může jít o vyšetření bolesti břicha, ne o sledování plic.']
+        ]
+      },
+      motol: {
+        title: 'CT hrudníku a břicha · 24. 3. 2026', status: 'dostupné', place: 'FN Motol · v PACS', lead: 'Proč:', reason: 'Poslední stagingové CT, přímo srovnatelné.',
+        kind: 'none', docType: 'Ambulantní zpráva', docMeta: 'pneumologie FN Motol · 28. 3. 2026',
+        before: 'Kontrola po 3. cyklu chemoterapie.', after: 'Pokračovat v zavedené léčbě.',
+        quote: [{ t: 'Kontrolní CT hrudníku a břicha', k: 'hl' }, { t: ' ' }, { t: 'provedeno', k: 'word' }, { t: ', beze změn oproti předchozímu nálezu.' }],
+        event: 'proběhlo · rozhodlo slovo „provedeno“', corr: 2,
+        steps: [
+          ['Systém', 'PACS', 'Studie nalezena: FN Motol, CT hrudníku a břicha, 24. 3. 2026.'],
+          ['AI', 'Zmínka', 'Ambulantní zpráva 28. 3. 2026 potvrzuje stejné vyšetření.'],
+          ['AI', 'Závěr', 'Relevantní. Snímky jsou dostupné, žádost není potřeba.']
+        ]
+      },
+      base: {
+        title: 'CT hrudníku · 4. 2. 2026', status: 'dostupné', place: 'FN Motol · v PACS', lead: 'Proč:', reason: 'Vstupní CT před léčbou, výchozí bod pro srovnání.',
+        kind: 'none', baseline: true, docType: 'Radiologický nález', docMeta: 'Radiologická klinika FN Motol · 4. 2. 2026',
+        before: 'Indikace: staging nově zjištěného tumoru plíce.', after: 'Doporučeno MDT.',
+        quote: [{ t: 'Vstupní ' }, { t: 'provedeno', k: 'word' }, { t: ' ' }, { t: 'CT hrudníku s kontrastem', k: 'hl' }, { t: ', tumor pravého horního laloku 34 mm.' }],
+        event: 'proběhlo · rozhodlo slovo „provedeno“', corr: 2,
+        steps: [
+          ['Systém', 'PACS', 'Studie nalezena: FN Motol, CT hrudníku, 4. 2. 2026.'],
+          ['Systém', 'Datum', 'Před zahájením léčby (2/2026): vstupní vyšetření.'],
+          ['AI', 'Závěr', 'Relevantní. Výchozí bod pro hodnocení odpovědi na léčbu.']
+        ]
+      },
+      vfn: {
+        title: 'CT hrudníku · 23. 5. 2026', status: 'chybí', place: 'VFN v Praze · zmínka ve zprávě', lead: 'Proč:', reason: 'Novější kontrolní CT po poslední linii léčby.',
+        kind: 'email', docType: 'Propouštěcí zpráva', docMeta: 'onkologie FN Motol · 2. 6. 2026',
+        before: 'Poslední podání chemoterapie 3/2026.', after: 'Nález dle sdělení pacientky stacionární.',
+        quote: [{ t: 'Dále ' }, { t: 'doloženo', k: 'word' }, { t: ' ' }, { t: 'kontrolní CT hrudníku', k: 'hl' }, { t: ' ze ' }, { t: 'Všeobecné fakultní nemocnice', k: 'hl' }, { t: ' v Praze, bez popisu v systému.' }],
+        event: 'proběhlo · rozhodlo slovo „doloženo“', corr: 1,
+        steps: [
+          ['Systém', 'Zprávy', '12 dokumentů z NIS, 2/2024 – 6/2026.'],
+          ['AI', 'Zmínka', 'CT hrudníku z VFN, doloženo, 5/2026.'],
+          ['Systém', 'PACS', 'Motol a VFN přes ePACS: studie z 5/2026 nenalezena.'],
+          ['Systém', 'Datum', '23. 5. 2026 je po poslední léčbě (3/2026) a před plánovaným CT.'],
+          ['AI', 'Doporučení', 'Modrá kniha ČOS, s. 106: kontrolní CT každých 6 měsíců.'],
+          ['AI', 'Závěr', 'Relevantní. Nejnovější srovnatelné CT, chybí v PACS.']
+        ],
+        draft: 'Dobrý den,\nžádáme o zaslání zprávy a snímků z CT hrudníku ze dne 23. 5. 2026.\nPacientka: Jana Nováková, RČ 685522/0141.\nSnímky prosím odešlete přes ePACS na FN Motol, Radiologická klinika.\nDůvod: srovnání s plánovaným CT 23. 10. 2026.\n\nDěkujeme,\nDemo účet, koordinátor/ka, Onkologická klinika FN Motol, tel. +420 000 000 000'
+      },
+      thom: {
+        title: 'RTG hrudníku · 22. 7. 2026', status: 'chybí', place: 'Thomayerova nemocnice · zmínka ve zprávě', lead: 'Proč:', reason: 'Kontrola krátce po poslední hospitalizaci.',
+        kind: 'phone', docType: 'Zpráva z plicního oddělení', docMeta: 'Thomayerova nemocnice · 25. 7. 2026',
+        before: 'Pacientka přijata pro dušnost.', after: 'Bez nových ložisek.',
+        quote: [{ t: 'Pacientka ' }, { t: 'byla kontrolována', k: 'word' }, { t: ' ' }, { t: 'RTG hrudníku', k: 'hl' }, { t: ' na plicním oddělení.' }],
+        event: 'proběhlo · rozhodlo „byla kontrolována“', corr: 1,
+        steps: [
+          ['AI', 'Zmínka', 'RTG hrudníku, Thomayerova nemocnice, 7/2026.'],
+          ['Systém', 'PACS', 'Studie nenalezena.'],
+          ['Systém', 'Kontakt', 'E-mail neznámý, jen telefon. Ověření chybí.'],
+          ['AI', 'Závěr', 'Relevantní. Ukazuje rozsah nálezu po hospitalizaci.']
+        ]
+      }
+    };
+const rel = { base: '8 měs. před CT', abd: '9 měs. před CT', vfn: '5 měs. před CT', thom: '3 měs. před CT', motol: '7 měs. před CT' };
+    const reqOf = (id) => id === 'vfn' ? reqState : id === 'thom' ? ['telefon · návrh', chip('#EEF2F3', '#2C3D44')] : null;
+    const tileOf = (id) => {
+      const it = items[id];
+      const on = id === picked;
+      const req = reqOf(id);
+      const border = it.kind === 'decide' ? '2px solid #C9BEF7' : '1px solid #DDE5E7';
+      const bg = it.kind === 'decide' ? '#FBFAFF' : '#FFFFFF';
+      return {
+        ...it,
+        exam: it.title.split(' · ')[0], date: it.title.split(' · ')[1], rel: rel[id],
+        baseline: !!it.baseline, baseStyle: chip('#E3F1EF', '#0A4E4A'),
+        pressed: on ? 'true' : 'false',
+        badgeStyle: badge[it.status],
+        hasReq: !!req, reqLabel: req ? req[0] : '', reqStyle: req ? req[1] : '',
+        frame: 'text-align: left; font-family: inherit; color: inherit; background: ' + bg + '; border-radius: 20px; padding: 16px 18px; display: flex; flex-direction: column; gap: 6px; cursor: pointer; border: ' + border + ';' + (on ? ' box-shadow: 0 0 0 3px #0F6B66;' : ''),
+        pick: () => { clearInterval(this.timer); this.setState({ picked: id, disp: 'idle', cat: null, step: 0, kept: null }); }
+      };
+    };
+    const sections = [
+      { title: '1. K rozhodnutí (1)', headStyle: 'margin: 0; font-size: 20px; font-weight: 800; color: #4B33B5;', tiles: [tileOf('abd')] },
+      { title: '2. Relevantní předchozí vyšetření (4)', headStyle: 'margin: 10px 0 0; font-size: 20px; font-weight: 800;', tiles: [tileOf('base'), tileOf('thom'), tileOf('vfn'), tileOf('motol')] }
+    ];
+    const s = items[picked || 'vfn'];
+    const corrWeak = s.corr < 2;
+    const sel = {
+      ...s,
+      exam: s.title.split(' · ')[0], date: s.title.split(' · ')[1], rel: rel[picked || 'vfn'],
+      quote: s.quote.map((p) => ({ t: p.t, hl: p.k === 'hl', word: p.k === 'word', plain: !p.k })),
+      steps: s.steps.map(([t, label, text], i) => ({ n: i + 1, tag: t, label, text, tagStyle: tag(t), time: t === 'Systém' ? '08:14:0' + (i + 1) : '' })),
+      eventLabel: s.event,
+      eventStyle: chip('#E3F1EF', '#0A4E4A'),
+      corrLabel: corrWeak ? '1 zdroj · jen zmínka ve zprávě' : '2 nezávislé zdroje · PACS + zpráva',
+      corrStyle: corrWeak ? chip('#FFF6DE', '#6E4400') : chip('#DDF2EC', '#155B4F'),
+      isDecide: s.kind === 'decide', isEmail: s.kind === 'email', isPhone: s.kind === 'phone',
+      draft: s.draft || ''
+    };
+    const disputes = {
+      vfn: {
+        note: '„doloženo“ tu podle mě znamená jen doporučení, CT neproběhlo.', changed: false,
+        v1: ['Relevantní.', 'Proběhlo, rozhodlo „doloženo“.'], v2: ['Relevantní.', 'Beze změny.'],
+        evidence: 'Věta: „Dále doloženo kontrolní CT hrudníku…“. „Doloženo“ znamená, že vyšetření proběhlo. Doporučení by znělo „doporučeno“. Námitka v textu nemá oporu.',
+        tools: [['reports.get_context', 'propouštěcí zpráva 2. 6. 2026, 3 věty kolem zmínky'], ['kompacs.rejudge', 'v2: relevantní, bez nového důkazu']]
+      },
+      abd: {
+        note: 'Následující věta: „Pacientka udává bolesti břicha v 12/2025.“ CT břicha bylo kvůli bolestem.', changed: true,
+        v1: ['Nejisté.', 'Důvod vyšetření ve zprávě chybí.'], v2: ['Nerelevantní.', 'CT pro bolesti břicha, ne sledování C34.'],
+        evidence: '„Pacientka udává bolesti břicha v 12/2025.“ Propouštěcí zpráva 2. 6. 2026, věta po zmínce. Časově odpovídá CT 1/2026.',
+        tools: [['reports.get_context', 'propouštěcí zpráva 2. 6. 2026, 3 věty kolem zmínky'], ['kompacs.rejudge', 'v2: nerelevantní, nový důkaz: věta 4']]
+      }
+    };
+    const generic = {
+      note: '[popište větu nebo slovo, které model vyložil špatně]', changed: false,
+      v1: ['Relevantní.', s.reason], v2: ['Relevantní.', 'Beze změny.'],
+      evidence: 'Námitka nepřinesla nový důkaz v textu. Hodnocení ponecháno.',
+      tools: [['reports.get_context', 'zdrojový dokument'], ['kompacs.rejudge', 'v2 bez nového důkazu']]
+    };
+    const d = disputes[picked] || generic;
+    const { disp, cat, step, kept } = this.state;
+    const catNames = ['Stav události', 'Datum', 'Modalita / oblast', 'Pracoviště', 'Relevance dle doporučení', 'Duplicita', 'Jiné'];
+    const cats = catNames.map((label) => ({
+      label,
+      pressed: cat === label ? 'true' : 'false',
+      pick: () => this.setState({ cat: label }),
+      style: 'min-height: 36px; padding: 0 12px; border-radius: 999px; font: 600 13px \'Plus Jakarta Sans\', sans-serif; cursor: pointer; ' + (cat === label ? 'border: 1px solid #4B33B5; background: #4B33B5; color: #FFFFFF;' : 'border: 1px solid #C9BEF7; background: #FFFFFF; color: #3F2A9E;')
+    }));
+    const runDispute = () => {
+      clearInterval(this.timer);
+      this.setState({ disp: 'run', step: 0 });
+      this.timer = setInterval(() => {
+        if (this.state.step >= d.tools.length) { clearInterval(this.timer); this.setState({ disp: 'done' }); return; }
+        this.setState({ step: this.state.step + 1 });
+      }, 700);
+    };
+    const dispVals = {
+      dispIdle: disp === 'idle', dispForm: disp === 'form', dispRun: disp === 'run', dispDone: disp === 'done',
+      openDispute: () => this.setState({ disp: 'form' }),
+      cancelDispute: () => this.setState({ disp: 'idle', cat: null }),
+      cats, dispNote: d.note,
+      runDispute, runDisabled: !cat,
+      runStyle: 'height: 44px; padding: 0 18px; border: 0; border-radius: 14px; font: 600 15px \'Plus Jakarta Sans\', sans-serif; ' + (cat ? 'background: #4B33B5; color: #FFFFFF; cursor: pointer;' : 'background: #E6ECEE; color: #6B7C82; cursor: not-allowed;'),
+      runTools: d.tools.slice(0, step).map(([name, out]) => ({ name, out })),
+      resLabel: d.changed ? 'změna s novým důkazem' : 'beze změny · námitka bez opory v textu',
+      resStyle: d.changed ? chip('#DDF2EC', '#155B4F') : chip('#FFF6DE', '#6E4400'),
+      v1Label: d.v1[0], v1Reason: d.v1[1], v2Label: d.v2[0], v2Reason: d.v2[1], v2Evidence: d.evidence,
+      v2Box: 'padding: 10px 12px; border-radius: 12px; font-size: 13.5px; line-height: 1.45; ' + (d.changed ? 'background: #E3F1EF; border: 1px solid #7DBFB6;' : 'background: #F3F6F7;'),
+      keepALabel: d.changed ? 'Ponechat v2' : 'Ponechat hodnocení',
+      keepBLabel: d.changed ? 'Vrátit v1' : 'Přesto rozhodnout ručně',
+      keepA: () => this.setState({ kept: 'a' }),
+      keepB: () => this.setState({ kept: 'b' }),
+      hasKept: !!kept,
+      keptNote: !kept ? '' : (d.changed ? (kept === 'a' ? 'Uloženo: v2 lepší než v1 · kategorie ' : 'Uloženo: v1 lepší než v2 · kategorie ') : (kept === 'a' ? 'Uloženo: námitka zamítnuta, hodnocení potvrzeno · kategorie ' : 'Uloženo: ruční rozhodnutí proti modelu · kategorie ')) + (cat || '')
+    };
+    const n = approved && !sent ? 1 : 0;
+    return {
+      ...dispVals,
+      sections, sel, batchOpen, hasSel: !!picked, closePanel: () => this.setState({ picked: null }),
+      reqChip: reqState[0], reqChipStyle: reqState[1],
+      approveLabel: sent ? 'Odesláno' : approved ? 'Schváleno · zrušit' : 'Schválit',
+      approveStyle: 'height: 48px; padding: 0 20px; border-radius: 14px; font: 600 16px \'Plus Jakarta Sans\', sans-serif; ' + (approved ? 'border: 1px solid #0F6B66; background: #E3F1EF; color: #0A4E4A;' : 'border: 0; background: #0F6B66; color: #FFFFFF;'),
+      toggleApprove: () => { if (!this.state.sent) this.setState({ approved: !this.state.approved }); },
+      batchLabel: 'Odeslat schválené (' + n + ')',
+      batchDisabled: n === 0,
+      batchStyle: 'margin-left: auto; height: 52px; padding: 0 20px; border: 0; border-radius: 14px; display: inline-flex; align-items: center; gap: 8px; font: 800 16px \'Plus Jakarta Sans\', sans-serif; ' + (n ? 'background: #7FE0C9; color: #0A3532; cursor: pointer;' : 'background: #2B6E6A; color: #A9D3CD; cursor: not-allowed;'),
+      openBatch: () => this.setState({ batchOpen: true }),
+      closeBatch: () => this.setState({ batchOpen: false }),
+      sendBatch: () => this.setState({ batchOpen: false, sent: true })
+    };
+  }
+}
+</script>
+</body>
+</html>

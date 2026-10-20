@@ -1,1 +1,171 @@
-{"v": 3, "createdOnFiles": {"v": 1, "at": "2026-10-20T05:13:16Z"}, "title": "KOMPACS demo design run", "launch": {"view": "canvas"}, "pages": [], "boards": {"Now-Queue.dc.html": {"x": 0, "y": 0, "w": 720, "h": 1536, "title": "Dnes · Fronta (1440 px, zmenšeno)"}, "Now-Case.dc.html": {"x": 800, "y": 0, "w": 720, "h": 1036, "title": "Dnes · Případ (1440 px, zmenšeno)"}, "Now-Phone.dc.html": {"x": 1600, "y": 0, "w": 390, "h": 1600, "title": "Dnes · Případ na telefonu"}, "Main.dc.html": {"x": 0, "y": 1900, "w": 1280, "h": 800, "title": "Intro A · Dialog nad frontou", "is_interactive": true}, "Intro-B.dc.html": {"x": 1360, "y": 1900, "w": 1280, "h": 800, "title": "Intro B · Uvítací obrazovka"}, "Trace-A.dc.html": {"x": 0, "y": 3000, "w": 760, "h": 1000, "title": "Souhrn úvah A · Kroky v kartě", "is_interactive": true}}, "order": ["Now-Queue.dc.html", "Now-Case.dc.html", "Now-Phone.dc.html", "Main.dc.html", "Intro-B.dc.html", "Trace-A.dc.html"], "notes": {"t0": {"x": 0, "y": -300, "text": "0 · Dnes (P1, mock běží)", "kind": "title1", "maxW": 1990}, "t1": {"x": 0, "y": 1600, "text": "1 · První dojem: intro + prohlídka", "kind": "title1", "maxW": 2640}, "t2": {"x": 0, "y": 2700, "text": "2 · Souhrn úvah AI u předchozího vyšetření", "kind": "title1", "maxW": 760}}, "designSystems": []}
+{
+  "v": 3,
+  "attachments": {},
+  "boards": {
+    "Intro-B.dc.html": {
+      "h": 800,
+      "title": "Intro B · Uvítací obrazovka",
+      "w": 1280,
+      "x": 1360,
+      "y": 1900
+    },
+    "Main.dc.html": {
+      "h": 800,
+      "is_interactive": true,
+      "title": "Intro A · Dialog nad frontou",
+      "w": 1280,
+      "x": 0,
+      "y": 1900
+    },
+    "Now-Case.dc.html": {
+      "h": 1024,
+      "title": "Dnes · Případ (1440 px, zmenšeno)",
+      "w": 720,
+      "x": 800,
+      "y": 0
+    },
+    "Now-Phone.dc.html": {
+      "h": 1600,
+      "title": "Dnes · Případ na telefonu",
+      "w": 390,
+      "x": 1600,
+      "y": 0
+    },
+    "Now-Queue.dc.html": {
+      "h": 1536,
+      "title": "Dnes · Fronta (1440 px, zmenšeno)",
+      "w": 720,
+      "x": 0,
+      "y": 0
+    },
+    "Phone-A.dc.html": {
+      "h": 844,
+      "title": "Telefon A · Spodní lišta",
+      "w": 390,
+      "x": 0,
+      "y": 6000
+    },
+    "Phone-B.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "title": "Telefon B · Menu v hlavičce",
+      "w": 390,
+      "x": 470,
+      "y": 6000
+    },
+    "Trace-A.dc.html": {
+      "h": 1000,
+      "is_interactive": true,
+      "title": "Souhrn úvah A · Kroky v kartě",
+      "w": 760,
+      "x": 0,
+      "y": 3000
+    },
+    "Trace-B.dc.html": {
+      "h": 1000,
+      "is_interactive": true,
+      "title": "Souhrn úvah B · Boční panel",
+      "w": 1280,
+      "x": 840,
+      "y": 3000
+    },
+    "Trace-B2.dc.html": {
+      "h": 1100,
+      "is_interactive": true,
+      "title": "Souhrn úvah B2 · Boční panel v systému",
+      "w": 1440,
+      "x": 3040,
+      "y": 3000
+    },
+    "Trace-C.dc.html": {
+      "h": 1000,
+      "is_interactive": true,
+      "title": "Souhrn úvah C · Nejdřív důkaz",
+      "w": 760,
+      "x": 2200,
+      "y": 3000
+    },
+    "Trace-B2-Phone.dc.html": {
+      "x": 4560,
+      "y": 3000,
+      "w": 390,
+      "h": 844,
+      "title": "Souhrn úvah B2 · Telefon (celá obrazovka)",
+      "is_interactive": true
+    },
+    "Integration-MCP.dc.html": {
+      "x": 0,
+      "y": 4600,
+      "w": 1280,
+      "h": 800,
+      "title": "Integrace · Externí AI klient (MCP)"
+    }
+  },
+  "createdOnFiles": {
+    "at": "2026-10-20T05:36:48Z",
+    "v": 1
+  },
+  "designSystems": [],
+  "launch": {
+    "view": "canvas"
+  },
+  "notes": {
+    "t0": {
+      "kind": "title1",
+      "maxW": 1990,
+      "text": "0 · Dnes (P1, mock běží)",
+      "w": 240,
+      "x": 0,
+      "y": -300
+    },
+    "t1": {
+      "kind": "title1",
+      "maxW": 2640,
+      "text": "1 · První dojem: intro + prohlídka",
+      "w": 240,
+      "x": 0,
+      "y": 1600
+    },
+    "t2": {
+      "kind": "title1",
+      "maxW": 4950,
+      "text": "2 · Souhrn úvah AI u předchozího vyšetření",
+      "w": 240,
+      "x": 0,
+      "y": 2700
+    },
+    "t3": {
+      "kind": "title1",
+      "maxW": 1280,
+      "text": "3 · AI: námitka k hodnocení je v B2, integrace MCP zde",
+      "w": 240,
+      "x": 0,
+      "y": 4300
+    },
+    "t4": {
+      "kind": "title1",
+      "maxW": 860,
+      "text": "4 · Telefon: navigace",
+      "w": 240,
+      "x": 0,
+      "y": 5700
+    }
+  },
+  "order": [
+    "Now-Queue.dc.html",
+    "Now-Case.dc.html",
+    "Now-Phone.dc.html",
+    "Main.dc.html",
+    "Intro-B.dc.html",
+    "Trace-A.dc.html",
+    "Trace-B.dc.html",
+    "Trace-C.dc.html",
+    "Phone-A.dc.html",
+    "Phone-B.dc.html",
+    "Trace-B2.dc.html",
+    "Trace-B2-Phone.dc.html",
+    "Integration-MCP.dc.html"
+  ],
+  "pages": [],
+  "title": "KomPACS demo design run"
+}
