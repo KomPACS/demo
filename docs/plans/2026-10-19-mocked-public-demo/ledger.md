@@ -40,7 +40,7 @@
 ## Reviews
 - G1: PASS.
 - G2: FAIL (plan refs in comments), fixed inline 18afeaf. Non-blocking: the default verdict-version literal repeats 3x in `src/mock/store.ts`.
-- G3: dispatched at 87838de. Result not recorded. Re-run it first on resume.
+- G3: FAIL (Plzeň and Hradec under two org ids, Motol under two ids and names, literal UTC times in scenario 9, two Pardubice spellings). Fixed on `fix/g3-seed-data`, plus a seed test for one id per hospital and one contact per id. P1 done.
 
 ## Warnings & Blockers
 - Browser findings for the design phase: on a phone the sidebar stacks above the content; the duplicate alert says "Pacient měl" for a woman.
@@ -52,7 +52,7 @@ P1 is done: T1–T15 COMPLETED, 70 tests green, lint and build clean, all pushed
 Resume steps:
 1. `npx -y pnpm@10 install`, then `npx -y pnpm@10 exec playwright install chromium` (for `scripts/shots.mjs`).
 2. `curl -fsSL https://www.linkos.cz/files/modra-kniha/26.pdf -o tmp/modra-kniha-26.pdf`, then extract the text to `tmp/modra-kniha-26.txt` (pdftotext or pdfminer). Printed page = PDF page index + 1.
-3. Re-run the G3 review (`lean-sdd:code-reviewer`, base c2f738d, head 87838de). Fix, then set the ledger status for P1.
+3. Done: G3 re-run and fixed.
 4. Design run with the user. Canvas source: `design/` next to this ledger.
    - Done: row 0 "Dnes" (3 screenshots), Intro A (dialog + tour coach, interactive), Intro B (welcome screen with a story picker), Souhrn úvah A (step trace in the prior card, interactive).
    - To do: Souhrn úvah B (side panel) and C (evidence first), AI agent A (right panel) and B (question box in the case), Telefon A (bottom bar) and B (header menu). Then the user picks per row.

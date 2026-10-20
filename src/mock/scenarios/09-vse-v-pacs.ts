@@ -3,7 +3,7 @@
  * Zastávka prohlídky: 6.
  */
 import { birthNumber } from '../rc.ts'
-import { day, workingDaysAhead } from '../dates.ts'
+import { day, at, workingDaysAhead } from '../dates.ts'
 import { verdict } from '../trace.ts'
 import type { Scenario } from '../types.ts'
 
@@ -134,7 +134,7 @@ const scenario: Scenario = {
   timeline: [
     {
       id: 'evt-s09-dx',
-      date: `${day(-650)}T09:00:00.000Z`,
+      date: at(-650, '09:00'),
       type: 'condition',
       title: 'Stanovena diagnóza C64',
       detail: 'Zhoubný novotvar ledviny, kromě pánvičky ledvinné',
@@ -143,7 +143,7 @@ const scenario: Scenario = {
     },
     {
       id: 'evt-s09-imaging-1',
-      date: `${day(-620)}T10:00:00.000Z`,
+      date: at(-620, '10:00'),
       type: 'imaging',
       title: 'CT břicha a pánve – vstupní staging',
       detail: null,
@@ -152,7 +152,7 @@ const scenario: Scenario = {
     },
     {
       id: 'evt-s09-imaging-2',
-      date: `${day(-600)}T11:00:00.000Z`,
+      date: at(-600, '11:00'),
       type: 'imaging',
       title: 'CT hrudníku',
       detail: null,
@@ -161,7 +161,7 @@ const scenario: Scenario = {
     },
     {
       id: 'evt-s09-imaging-3',
-      date: `${day(-300)}T09:30:00.000Z`,
+      date: at(-300, '09:30'),
       type: 'imaging',
       title: 'CT břicha a pánve – kontrola po nefrektomii',
       detail: null,
@@ -170,7 +170,7 @@ const scenario: Scenario = {
     },
     {
       id: 'evt-s09-imaging-4',
-      date: `${day(-40)}T08:45:00.000Z`,
+      date: at(-40, '08:45'),
       type: 'imaging',
       title: 'USG břicha',
       detail: null,

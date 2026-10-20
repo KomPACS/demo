@@ -154,12 +154,22 @@ test('seed scenarios: global coverage', async () => {
   assert.ok(candidates.some((c) => c.decision === 'removed'))
   assert.ok(all.some((t) => Object.values(t.verdicts ?? {}).some((v) => v.length >= 2)))
 
-  const orgNames = new Map<string, string>()
-  for (const s of scenarios) {
-    for (const c of Object.values(s.contacts)) {
-      const seen = orgNames.get(c.organization_id)
-      assert.ok(!seen || seen === c.organization_name, `${c.organization_id} is both ${seen} and ${c.organization_name}`)
-      orgNames.set(c.organization_id, c.organization_name)
-    }
+  const contactIds = scenarios.flatMap((s) => Object.keys(s.contacts))
+  assert.equal(new Set(contactIds).size, contactIds.length, `contact defined twice: ${contactIds.join(', ')}`)
+
+  const liveCandidates = scenarios.flatMap((s) => s.live?.candidates ?? [])
+  const orgs: (readonly [string | null | undefined, string | null | undefined])[] = [
+    ...[...candidates, ...liveCandidates].map((c) => [c.organization_id, c.place] as const),
+    ...requests.map((r) => [r.organization_id, r.place] as const),
+    ...scenarios.flatMap((s) => Object.values(s.contacts).map((c) => [c.organization_id, c.organization_name] as const)),
+  ]
+  const nameOf = new Map<string, string>()
+  const idOf = new Map<string, string>()
+  for (const [id, name] of orgs) {
+    if (!id || !name) continue
+    assert.equal(nameOf.get(id) ?? name, name, `${id} is both ${nameOf.get(id)} and ${name}`)
+    assert.equal(idOf.get(name) ?? id, id, `${name} is both ${idOf.get(name)} and ${id}`)
+    nameOf.set(id, name)
+    idOf.set(name, id)
   }
 })
