@@ -69,7 +69,7 @@ export function RequestActions({
 
       {r.channel === 'email' && editing && (
         <div className="flex flex-col gap-2">
-          <Textarea className="text-[15px]" rows={8} value={draft} onChange={(e) => setDraft(e.target.value)} />
+          <Textarea aria-label="Text žádosti" className="text-[15px]" rows={8} value={draft} onChange={(e) => setDraft(e.target.value)} />
           <div className="flex gap-2.5">
             <Button disabled={pending !== null} loading={pending === `draft-${r.id}`} onClick={save}>
               Uložit

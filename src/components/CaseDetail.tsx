@@ -244,9 +244,11 @@ export function CaseDetail({
             <Button variant="outline" disabled={pending !== null} onClick={() => setBatchOpen(false)}>
               Zpět
             </Button>
-            <Button disabled={pending !== null || toSend.length === 0} loading={isPending('send-all')} onClick={sendApproved}>
-              Odeslat
-            </Button>
+            <WriteGroup>
+              <Button disabled={pending !== null || toSend.length === 0} loading={isPending('send-all')} onClick={sendApproved}>
+                Odeslat
+              </Button>
+            </WriteGroup>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -457,6 +459,7 @@ export function CaseDetail({
           </div>
           {focusId && kase.candidates.find((c) => c.id === focusId) && (
             <EvidencePanel
+              key={focusId}
               candidate={kase.candidates.find((c) => c.id === focusId)!}
               trigger={kase.trigger}
               patient={kase.patient}

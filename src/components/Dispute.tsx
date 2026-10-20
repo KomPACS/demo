@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { WriteGroup } from '@/components/common'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -8,7 +8,6 @@ import { cn } from '@/lib/utils'
 
 type DisputeCategory = Schemas['DisputeCategory']
 type VerdictVersion = Schemas['VerdictVersion']
-type VerdictLabel = Schemas['Verdict']['label']
 type Stage = 'idle' | 'form' | 'run' | 'done'
 
 const categoryLabel: Record<DisputeCategory, string> = {
@@ -24,7 +23,6 @@ const categories = Object.keys(categoryLabel) as DisputeCategory[]
 
 const chip = 'h-auto rounded-full px-3 py-1 text-sm font-bold'
 const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms))
-const opposite = (label: VerdictLabel): 'relevant' | 'not_relevant' => (label === 'not_relevant' ? 'relevant' : 'not_relevant')
 
 function contextLine(v: Candidate['verdict']): string {
   const sd = v.source_doc
@@ -52,17 +50,6 @@ export function Dispute({
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const path = { trigger_id: triggerId, candidate_id: candidate.id }
-
-  useEffect(() => {
-    setStage('idle')
-    setCategory(null)
-    setNote('')
-    setRunStep(0)
-    setV1(null)
-    setV2(null)
-    setKept(null)
-    setError(null)
-  }, [candidate.id])
 
   const cancel = () => {
     setStage('idle')
@@ -204,8 +191,8 @@ export function Dispute({
     }
   }
   const keepCurrent = () => setKept('a')
-  const manualOverride = () => {
-    onDecide(opposite(v2.verdict.label), note.trim() || null)
+  const manualOverride = (decision: 'relevant' | 'not_relevant') => {
+    onDecide(decision, note.trim() || null)
     setKept('b')
   }
 
@@ -253,9 +240,20 @@ export function Dispute({
           <Button disabled={busy} onClick={changed ? keepV2 : keepCurrent}>
             {changed ? 'Ponechat v2' : 'Ponechat hodnocení'}
           </Button>
-          <Button variant="outline" disabled={busy} loading={busy} onClick={changed ? restoreV1 : manualOverride}>
-            {changed ? 'Vrátit v1' : 'Přesto rozhodnout ručně'}
-          </Button>
+          {changed ? (
+            <Button variant="outline" disabled={busy} loading={busy} onClick={restoreV1}>
+              Vrátit v1
+            </Button>
+          ) : (
+            <>
+              <Button variant="outline" disabled={busy} onClick={() => manualOverride('relevant')}>
+                Ručně: relevantní
+              </Button>
+              <Button variant="outline" disabled={busy} onClick={() => manualOverride('not_relevant')}>
+                Ručně: nerelevantní
+              </Button>
+            </>
+          )}
         </div>
         {keptNote && <p className="text-sm font-semibold text-ok-ink">{keptNote}</p>}
         <div className="text-xs text-muted-foreground">

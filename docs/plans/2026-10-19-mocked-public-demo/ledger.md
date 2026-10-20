@@ -49,6 +49,7 @@
 ## Reviews
 - G1: PASS.
 - G2: FAIL (plan refs in comments), fixed inline 18afeaf. Non-blocking: the default verdict-version literal repeats 3x in `src/mock/store.ts`.
+- G6: FAIL (draft edit state leaked across priors; manual override guessed the label; unlabeled draft textarea; batch dialog send outside `WriteGroup`). Panel keyed by prior, explicit Ručně: relevantní / nerelevantní, `aria-label`, send wrapped. P2 T16–T24 done.
 - G5: FAIL (invented evidence context in scenarios 1 and 5; other hospitals' PACS shown as ours). Context now verbatim from the report (seed test); spec decision "One home hospital"; other sites arrive via ePACS (seed test).
 - G4: FAIL (open add-prior form stayed writable after a resize below 768 px; planned hook test not written). Form wrapped in `WriteGroup`; test deviation accepted (T17 note).
 - G3: FAIL (Plzeň and Hradec under two org ids, Motol under two ids and names, literal UTC times in scenario 9, two Pardubice spellings). Fixed on `fix/g3-seed-data`, plus a seed test for one id per hospital and one contact per id. P1 done.
