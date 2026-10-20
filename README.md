@@ -14,6 +14,10 @@ pnpm build
 
 `pnpm test` runs the mock tests (`node --test`).
 
+Deploy: every push to `main` runs lint, tests and build, then publishes `dist` to GitHub Pages (`.github/workflows/deploy.yml`, CNAME `demo.kompacs.cz`).
+
+- Decisions: `docs/decisions/`. Design boards (product concept, 2026-10-20): `docs/design/`.
+
 ## Contract changes
 
 - 2026-10-19: `Patient.name`, `Patient.rc` (optional).
