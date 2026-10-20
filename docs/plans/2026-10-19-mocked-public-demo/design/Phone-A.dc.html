@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<title>Telefon A – spodní lišta</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#0F6B66}a:hover{color:#0A4E4A}
+</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; overflow: hidden; background: #F3F6F7; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; color: #14232A; display: flex; flex-direction: column;">
+  <header style="background: #0F4D49; color: #FFFFFF; padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 8px;">
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <a href="#" aria-label="Zpět na frontu" style="width: 44px; height: 44px; margin-left: -10px; display: flex; align-items: center; justify-content: center; color: #FFFFFF;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+      </a>
+      <div style="font-size: 20px; font-weight: 800; flex: 1;">Jana Nováková</div>
+      <span style="padding: 4px 9px; border-radius: 999px; border: 1px dashed #7FE0C9; font-size: 11px; font-weight: 700; color: #BDEFE3;">DEMO</span>
+    </div>
+    <div style="font-size: 13px; color: #BDEFE3;">C34 plíce · Plánované CT 23. 10. · připraveno 1 z 3</div>
+  </header>
+  <div role="note" style="background: #FFF6DE; color: #5E3A00; padding: 10px 16px; font-size: 13px; line-height: 1.4; border-bottom: 1px solid #F1D48A;"><b>Na mobilu jen prohlížení.</b> Mobilní aplikaci neplánujeme. Žádosti a rozhodnutí dělejte na počítači.</div>
+  <main style="flex: 1; min-height: 0; overflow: hidden; padding: 14px 16px; display: flex; flex-direction: column; gap: 12px;">
+    <div style="background: #FFFFFF; border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px;">
+      <div style="font-size: 11px; font-weight: 800; letter-spacing: .08em; color: #4E6066;">CO ZBÝVÁ UDĚLAT</div>
+      <div style="display: flex; gap: 10px; flex-wrap: wrap; font-size: 14px;">
+        <span style="display: inline-flex; gap: 6px; align-items: center; color: #3F2A9E; font-weight: 700;"><span style="width: 22px; height: 22px; border-radius: 50%; background: #4B32C3; color: #FFFFFF; font-size: 12px; display: inline-flex; align-items: center; justify-content: center;">1</span>rozhodnout nejisté</span>
+        <span style="display: inline-flex; gap: 6px; align-items: center; font-weight: 700;"><span style="width: 22px; height: 22px; border-radius: 50%; background: #0F6B66; color: #FFFFFF; font-size: 12px; display: inline-flex; align-items: center; justify-content: center;">1</span>e-mail k odeslání</span>
+      </div>
+    </div>
+    <article style="background: #FFFFFF; border: 1px solid #DDE5E7; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 10px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+        <h3 style="margin: 0; font-size: 16px; font-weight: 800;">CT hrudníku · 23. 5. 2026</h3>
+        <span style="padding: 3px 9px; border-radius: 999px; background: #FCE3DA; color: #8A2E0F; font-size: 12px; font-weight: 700;">chybí</span>
+      </div>
+      <div style="font-size: 13px; color: #4E6066;">VFN v Praze · zmínka ve zprávě</div>
+      <div style="font-size: 14px; line-height: 1.45;"><b>Proč:</b> Novější kontrolní CT po poslední linii léčby, zatím není v PACS.</div>
+      <a href="#" style="font-size: 13px; font-weight: 700;">Souhrn úvah</a>
+      <button type="button" disabled style="opacity: .45; cursor: not-allowed; min-height: 46px; border: 0; border-radius: 12px; background: #0F6B66; color: #FFFFFF; font: 700 15px 'Plus Jakarta Sans', sans-serif;">Odeslat žádost e-mailem</button>
+    </article>
+    <article style="background: #FFFFFF; border: 2px solid #C9BFF3; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 10px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+        <h3 style="margin: 0; font-size: 16px; font-weight: 800;">CT břicha · 1/2026</h3>
+        <span style="padding: 3px 9px; border-radius: 999px; background: #ECE8FB; color: #3F2A9E; font-size: 12px; font-weight: 700;">nejisté</span>
+      </div>
+      <div style="font-size: 14px; line-height: 1.45;">Zmínka je nejasná. Rozhodněte, zda ji lékař potřebuje.</div>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px;">
+        <button type="button" disabled style="opacity: .45; cursor: not-allowed; min-height: 44px; border: 0; border-radius: 12px; background: #4B32C3; color: #FFFFFF; font: 700 14px 'Plus Jakarta Sans', sans-serif;">Relevantní</button>
+        <button type="button" disabled style="opacity: .45; cursor: not-allowed; min-height: 44px; border-radius: 12px; border: 1px solid #DDE5E7; background: #FFFFFF; color: #14232A; font: 700 14px 'Plus Jakarta Sans', sans-serif;">Nerelevantní</button>
+      </div>
+    </article>
+  </main>
+  <nav aria-label="Hlavní menu" style="background: #FFFFFF; border-top: 1px solid #DDE5E7; padding: 6px 8px 22px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px;">
+    <a href="#" aria-current="page" style="min-height: 56px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; text-decoration: none; color: #0A4E4A; font-size: 11.5px; font-weight: 800; position: relative;">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg>
+      Fronta
+      <span style="position: absolute; top: 4px; left: 54%; min-width: 18px; height: 18px; padding: 0 5px; box-sizing: border-box; border-radius: 999px; background: #0F6B66; color: #FFFFFF; font-size: 11px; display: flex; align-items: center; justify-content: center;">8</span>
+    </a>
+    <a href="#" style="min-height: 56px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; text-decoration: none; color: #4E6066; font-size: 11.5px; font-weight: 700;">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>
+      Přehled
+    </a>
+    <a href="#" style="min-height: 56px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; text-decoration: none; color: #4E6066; font-size: 11.5px; font-weight: 700;">
+      <span style="width: 34px; height: 26px; border-radius: 9px; background: #0F6B66; display: flex; align-items: center; justify-content: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="#FFFFFF" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></span>
+      Prohlídka
+    </a>
+    <a href="#" style="min-height: 56px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; text-decoration: none; color: #4E6066; font-size: 11.5px; font-weight: 700;">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/></svg>
+      O ukázce
+    </a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
