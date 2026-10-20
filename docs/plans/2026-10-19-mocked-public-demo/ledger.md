@@ -28,7 +28,7 @@
 | T16 | Intro screen | inline | COMPLETED | 0 | - |
 | T17 | Read-only phone, bottom bar | dev | COMPLETED | 0 | hook test replaced by a pure `readOnlyStore` test: a hook test needs a React renderer dependency |
 | T18 | Integration page | inline | COMPLETED | 0 | - |
-| T19 | Contract: evidence, steps, review, dispute | inline | PENDING | 0 | - |
+| T19 | Contract: evidence, steps, review, dispute | inline | COMPLETED | 0 | - |
 | T20 | Mock store for T19 | full | PENDING | 0 | - |
 | T21 | Scenario data: evidence, drafts | dev | PENDING | 0 | - |
 | T22 | Case B2: tiles + evidence panel | dev | PENDING | 0 | - |

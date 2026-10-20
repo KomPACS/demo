@@ -633,7 +633,8 @@
               }
             }
           }
-        }
+        },
+        "description": "Marks a draft as reviewed: draft → approved. Sending is /send."
       }
     },
     "/api/requests/{request_id}/requested": {
@@ -886,6 +887,133 @@
           }
         }
       }
+    },
+    "/api/requests/{request_id}/send": {
+      "post": {
+        "summary": "Send",
+        "operationId": "send_api_requests__request_id__send_post",
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Request Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequestItem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/requests/{request_id}/draft": {
+      "put": {
+        "summary": "Save Draft",
+        "operationId": "save_draft_api_requests__request_id__draft_put",
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Request Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequestItem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DraftUpdate"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/api/requests/{request_id}/call-again": {
+      "post": {
+        "summary": "Call Again",
+        "operationId": "call_again_api_requests__request_id__call_again_post",
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Request Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequestItem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1031,6 +1159,7 @@
                 "type": "string",
                 "enum": [
                   "draft",
+                  "approved",
                   "sent",
                   "requested",
                   "not_delivered",
@@ -1163,6 +1292,18 @@
                 "type": "null"
               }
             ]
+          },
+          "checked_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Checked At"
           }
         },
         "type": "object",
@@ -1779,6 +1920,16 @@
               }
             ],
             "title": "Note"
+          },
+          "category": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DisputeCategory"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -1861,6 +2012,7 @@
             "type": "string",
             "enum": [
               "draft",
+              "approved",
               "sent",
               "requested",
               "not_delivered",
@@ -1931,6 +2083,14 @@
             ],
             "title": "Fhir Task",
             "description": "The stored FHIR Task. Channel fhir only."
+          },
+          "call_attempts": {
+            "items": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "type": "array",
+            "title": "Call Attempts"
           }
         },
         "type": "object",
@@ -2270,6 +2430,81 @@
             "type": "array",
             "title": "Kroky",
             "default": []
+          },
+          "event_status": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "done",
+                  "planned",
+                  "recommended",
+                  "unclear"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Event Status"
+          },
+          "event_word": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Event Word"
+          },
+          "context_before": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Context Before"
+          },
+          "context_after": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Context After"
+          },
+          "source_doc": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceDoc"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Sources",
+            "description": "Labels of independent sources."
+          },
+          "steps": {
+            "items": {
+              "$ref": "#/components/schemas/VerdictStep"
+            },
+            "type": "array",
+            "title": "Steps"
           }
         },
         "type": "object",
@@ -2336,6 +2571,27 @@
                 "type": "null"
               }
             ]
+          },
+          "category": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DisputeCategory"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "new_evidence": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "New Evidence"
           }
         },
         "type": "object",
@@ -2344,6 +2600,96 @@
           "verdict"
         ],
         "title": "VerdictVersion"
+      },
+      "SourceDoc": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "title": "Type"
+          },
+          "department": {
+            "type": "string",
+            "title": "Department"
+          },
+          "date": {
+            "type": "string",
+            "title": "Date"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "department",
+          "date"
+        ],
+        "title": "SourceDoc"
+      },
+      "VerdictStep": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "lookup",
+              "llm"
+            ],
+            "title": "Kind"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "label",
+          "text"
+        ],
+        "title": "VerdictStep",
+        "description": "lookup = repeatable data lookup; llm = the model's reading."
+      },
+      "DisputeCategory": {
+        "type": "string",
+        "enum": [
+          "event_status",
+          "date",
+          "modality_region",
+          "place",
+          "guideline_relevance",
+          "duplicate",
+          "other"
+        ],
+        "title": "DisputeCategory"
+      },
+      "DraftUpdate": {
+        "properties": {
+          "email_draft": {
+            "type": "string",
+            "maxLength": 4000,
+            "title": "Email Draft"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email_draft"
+        ],
+        "title": "DraftUpdate"
       }
     }
   }

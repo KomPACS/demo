@@ -84,6 +84,21 @@ function buildRouteTable(store: Store): RouteTable {
     '/api/requests/{request_id}/requested': {
       post: (ctx) => store.requested(str(ctx.params, 'request_id')),
     },
+    '/api/requests/{request_id}/send': {
+      post: () => {
+        throw new Conflict('not implemented')
+      },
+    },
+    '/api/requests/{request_id}/draft': {
+      put: () => {
+        throw new Conflict('not implemented')
+      },
+    },
+    '/api/requests/{request_id}/call-again': {
+      post: () => {
+        throw new Conflict('not implemented')
+      },
+    },
     '/api/requests/{request_id}/not-found': {
       post: (ctx) => store.notFound(str(ctx.params, 'request_id')),
     },
