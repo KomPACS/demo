@@ -1,7 +1,7 @@
 # SDD Execution Ledger
 
 ## Metadata
-- **Branch:** `feat/mock-demo`
+- **Branch:** P1 `feat/mock-demo` (#2, #4). P2: one branch per PR (P2a, P2b, P2c), see plan.
 - **Plan:** `docs/plans/2026-10-19-mocked-public-demo/plan.md`
 - **Started:** `2026-10-19T16:20:06Z`
 - **Status:** `IN_PROGRESS`
@@ -25,6 +25,15 @@
 | T13 | Scenarios 9–10 and filler 11 | dev | COMPLETED | 0 | - |
 | T14 | Fillers 12–14 | dev | COMPLETED | 0 | - |
 | T15 | Tour stops and global seed checks | inline | COMPLETED | 0 | + unique names, one contact per hospital (VFN e-mail, Bulovka FHIR) |
+| T16 | Intro screen | inline | PENDING | 0 | - |
+| T17 | Read-only phone, bottom bar | dev | PENDING | 0 | - |
+| T18 | Integration page | inline | PENDING | 0 | - |
+| T19 | Contract: evidence, steps, review, dispute | inline | PENDING | 0 | - |
+| T20 | Mock store for T19 | full | PENDING | 0 | - |
+| T21 | Scenario data: evidence, drafts | dev | PENDING | 0 | - |
+| T22 | Case B2: tiles + evidence panel | dev | PENDING | 0 | - |
+| T23 | Request review + approved batch | dev | PENDING | 0 | - |
+| T24 | Dispute thread | dev | PENDING | 0 | - |
 
 ## Cost
 - **Estimate:** `13 dispatches, ~8.3M input tokens`
@@ -53,10 +62,8 @@ Resume steps:
 1. `npx -y pnpm@10 install`, then `npx -y pnpm@10 exec playwright install chromium` (for `scripts/shots.mjs`).
 2. `curl -fsSL https://www.linkos.cz/files/modra-kniha/26.pdf -o tmp/modra-kniha-26.pdf`, then extract the text to `tmp/modra-kniha-26.txt` (pdftotext or pdfminer). Printed page = PDF page index + 1.
 3. Done: G3 re-run and fixed.
-4. Design run with the user. Canvas source: `design/` next to this ledger.
-   - Done: row 0 "Dnes" (3 screenshots), Intro A (dialog + tour coach, interactive), Intro B (welcome screen with a story picker), Souhrn úvah A (step trace in the prior card, interactive).
-   - To do: Souhrn úvah B (side panel) and C (evidence first), AI agent A (right panel) and B (question box in the case), Telefon A (bottom bar) and B (header menu). Then the user picks per row.
-5. Write plan P2 (polish + intro/tour + reasoning trace + MCP panel + pipeline animation) from the picks. Then P3: GitHub Pages deploy, CNAME `demo.kompacs.cz`.
+4. Done 2026-10-20: design run. Picks are in `spec.md` decisions; boards in `design/`.
+5. Done 2026-10-20: plan P2 (T16–T24). Next: P2a on a branch from `main`. P3: GitHub Pages deploy, CNAME `demo.kompacs.cz`.
 
 Open items for the user:
 - Forpsi DNS: `docs CNAME kompacs.github.io.`; `demo` still points to the deleted Azure app (takeover risk).
