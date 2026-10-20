@@ -1,7 +1,9 @@
 import { Loader2 } from 'lucide-react'
+import type { ReactNode } from 'react'
 import { Badge } from '@/components/ui/badge'
 import type { Candidate, RequestItem } from '@/lib/api'
 import { priorStatus, requestState } from '@/lib/labels'
+import { useReadOnly } from '@/lib/readonly'
 import { cn } from '@/lib/utils'
 
 const statusColor: Record<Candidate['status'], string> = {
@@ -44,4 +46,13 @@ export function Loading({ label, hint, className }: { label: string; hint?: stri
 
 export function Skeleton({ className }: { className?: string }) {
   return <div aria-hidden="true" className={cn('animate-pulse rounded-[20px] bg-[#E6ECEE]', className)} />
+}
+
+export function WriteGroup({ children }: { children: ReactNode }) {
+  const readOnly = useReadOnly()
+  return (
+    <fieldset disabled={readOnly} title={readOnly ? 'Jen na počítači' : undefined} className="contents">
+      {children}
+    </fieldset>
+  )
 }

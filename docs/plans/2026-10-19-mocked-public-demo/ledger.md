@@ -25,9 +25,9 @@
 | T13 | Scenarios 9–10 and filler 11 | dev | COMPLETED | 0 | - |
 | T14 | Fillers 12–14 | dev | COMPLETED | 0 | - |
 | T15 | Tour stops and global seed checks | inline | COMPLETED | 0 | + unique names, one contact per hospital (VFN e-mail, Bulovka FHIR) |
-| T16 | Intro screen | inline | PENDING | 0 | - |
-| T17 | Read-only phone, bottom bar | dev | PENDING | 0 | - |
-| T18 | Integration page | inline | PENDING | 0 | - |
+| T16 | Intro screen | inline | COMPLETED | 0 | - |
+| T17 | Read-only phone, bottom bar | dev | COMPLETED | 0 | - |
+| T18 | Integration page | inline | COMPLETED | 0 | - |
 | T19 | Contract: evidence, steps, review, dispute | inline | PENDING | 0 | - |
 | T20 | Mock store for T19 | full | PENDING | 0 | - |
 | T21 | Scenario data: evidence, drafts | dev | PENDING | 0 | - |

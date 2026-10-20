@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react'
 import { CaseDetail } from '@/components/CaseDetail'
 import { DemoTour } from '@/components/DemoTour'
+import { Integration } from '@/components/Integration'
+import { Intro } from '@/components/Intro'
+import { MobileBar, ReadOnlyBanner } from '@/components/MobileBar'
 import { Loading, Skeleton } from '@/components/common'
 import { Queue } from '@/components/Queue'
 import { NewCheckDialog } from '@/components/NewCheckDialog'
@@ -8,13 +11,16 @@ import { Sidebar, type Role } from '@/components/Sidebar'
 import { Stats } from '@/components/Stats'
 import { TimelinePage } from '@/components/Timeline'
 import { api, data, type TriggerSummary } from '@/lib/api'
+import { STOPS } from '@/lib/tour'
 
-type Screen = { name: 'list' } | { name: 'stats' } | { name: 'detail'; triggerId: string; focus?: string } | { name: 'timeline'; triggerId: string }
+type Screen = { name: 'list' } | { name: 'stats' } | { name: 'intro' } | { name: 'integrace' } | { name: 'detail'; triggerId: string; focus?: string } | { name: 'timeline'; triggerId: string }
 
 function parse(hash: string): Screen {
   const [path, query] = hash.replace(/^#/, '').split('?')
   const [, kind, id, sub] = path.split('/')
   if (kind === 'stats') return { name: 'stats' }
+  if (kind === 'intro') return { name: 'intro' }
+  if (kind === 'integrace') return { name: 'integrace' }
   if (kind !== 'case' || !id) return { name: 'list' }
   const triggerId = decodeURIComponent(id)
   if (sub === 'timeline') return { name: 'timeline', triggerId }
@@ -24,15 +30,38 @@ function parse(hash: string): Screen {
 function format(s: Screen): string {
   if (s.name === 'list') return '#/'
   if (s.name === 'stats') return '#/stats'
+  if (s.name === 'intro') return '#/intro'
+  if (s.name === 'integrace') return '#/integrace'
   const base = `#/case/${encodeURIComponent(s.triggerId)}`
   if (s.name === 'timeline') return `${base}/timeline`
   return s.focus ? `${base}?focus=${encodeURIComponent(s.focus)}` : base
 }
 
+const INTRO_SEEN = 'kompacs-intro-seen'
+
+function introSeen(): boolean {
+  try {
+    return sessionStorage.getItem(INTRO_SEEN) === '1'
+  } catch {
+    return true
+  }
+}
+
+function markIntroSeen() {
+  try {
+    sessionStorage.setItem(INTRO_SEEN, '1')
+  } catch {
+    // Storage blocked: the intro shows again on the next visit.
+  }
+}
+
 export default function App() {
   const [triggers, setTriggers] = useState<TriggerSummary[] | null>(null)
   const role: Role = 'collector'
-  const [screen, setRouteScreen] = useState<Screen>(() => parse(window.location.hash))
+  const [screen, setRouteScreen] = useState<Screen>(() =>
+    !window.location.hash && !introSeen() ? { name: 'intro' } : parse(window.location.hash),
+  )
+  const [tourOpen, setTourOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -66,9 +95,27 @@ export default function App() {
   }
   const actionable = (triggers ?? []).filter((t) => t.to_decide > 0 || t.open_requests > 0).length
 
+  const startTour = () => {
+    markIntroSeen()
+    setTourOpen(true)
+    window.location.hash = STOPS[0].href
+  }
+
+  if (screen.name === 'intro')
+    return (
+      <Intro
+        onTour={startTour}
+        onPick={markIntroSeen}
+        onExplore={() => {
+          markIntroSeen()
+          setScreen({ name: 'list' })
+        }}
+      />
+    )
+
   return (
-    <div className="flex min-h-screen flex-col md:flex-row">
-      <DemoTour />
+    <div className="flex min-h-screen flex-col pb-24 md:flex-row md:pb-0">
+      <DemoTour open={tourOpen} onOpenChange={setTourOpen} />
       <Sidebar
         count={actionable}
         screen={screen.name}
@@ -77,6 +124,8 @@ export default function App() {
         newCheck={<NewCheckDialog onCreated={created} />}
       />
       <div className="min-w-0 flex-1">
+        <ReadOnlyBanner />
+        {screen.name === 'integrace' && <Integration />}
         {error && <p className="p-8 text-destructive">{error}</p>}
         {screen.name === 'list' &&
           (triggers ? (
@@ -111,6 +160,13 @@ export default function App() {
           />
         )}
       </div>
+      <MobileBar
+        count={actionable}
+        screen={screen.name}
+        onHome={() => setScreen({ name: 'list' })}
+        onStats={() => setScreen({ name: 'stats' })}
+        onTour={startTour}
+      />
     </div>
   )
 }

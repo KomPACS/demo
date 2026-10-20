@@ -1,4 +1,4 @@
-import { ChartColumn, ExternalLink, List, UserRound } from 'lucide-react'
+import { ChartColumn, ExternalLink, List, Plug, UserRound } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
@@ -21,7 +21,7 @@ export function Sidebar({
   return (
     <nav
       aria-label="Hlavní menu"
-      className="flex flex-col gap-2 border-b bg-card px-4 py-5 md:sticky md:top-0 md:h-screen md:w-72 md:shrink-0 md:border-r md:border-b-0"
+      className="hidden flex-col gap-2 border-b bg-card px-4 py-5 md:sticky md:flex md:top-0 md:h-screen md:w-72 md:shrink-0 md:border-r md:border-b-0"
     >
       <div className="flex items-center gap-3 px-1.5 pb-5">
         <div className="flex size-10 items-center justify-center rounded-xl bg-primary">
@@ -34,7 +34,7 @@ export function Sidebar({
         <div className="leading-tight">
           <div className="text-lg font-extrabold tracking-wide">KomPACS</div>
           <div className="text-sm text-muted-foreground">
-            <b className="text-primary">KOM</b>parátor <b className="text-primary">PACS</b>
+            <b className="text-primary">Kom</b>parátor <b className="text-primary">PACS</b>
           </div>
         </div>
       </div>
@@ -74,6 +74,17 @@ export function Sidebar({
         <ChartColumn className="size-6 shrink-0" />
         Přehled
       </button>
+      <a
+        href="#/integrace"
+        aria-current={screen === 'integrace' ? 'page' : undefined}
+        className={cn(
+          'flex min-h-13 items-center gap-3.5 rounded-[14px] px-4 text-base font-semibold text-text',
+          screen === 'integrace' ? 'bg-primary-soft text-primary-hover' : 'hover:bg-background',
+        )}
+      >
+        <Plug className="size-6 shrink-0" />
+        Integrace (MCP)
+      </a>
       <div className="px-4 pt-4.5 pb-1 text-[13px] font-bold tracking-wider text-subtle uppercase">Odkazy</div>
       {['ePACS', 'NIS'].map((name) => (
         <span
