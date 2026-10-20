@@ -20,8 +20,7 @@ export const isReady = (c: Candidate, r?: RequestItem) =>
 export const pacsViewerUrl = (candidateId: string) =>
   `/pacs/study-${([...candidateId].reduce((n, ch) => n + ch.charCodeAt(0), 0) % 2) + 1}.jpg`
 
-export const sendable = (r: RequestItem) =>
-  r.state === 'draft' && ((r.channel === 'email' && Boolean(r.contact?.email)) || r.channel === 'fhir')
+export const sendable = (r: RequestItem) => r.state === 'approved'
 
 export function progress(kase: Case, requests: RequestItem[]) {
   const { relevant } = classify(kase.candidates)

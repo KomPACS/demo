@@ -1,9 +1,12 @@
 import { ArrowLeft, X } from 'lucide-react'
-import { AiLog } from '@/components/AiLog'
+import { AiLog, Raw } from '@/components/AiLog'
+import { RequestBadge, WriteGroup } from '@/components/common'
+import { RemoveDialog } from '@/components/RemoveDialog'
+import { RequestActions } from '@/components/RequestActions'
 import { Button } from '@/components/ui/button'
-import type { Candidate, Case, Schemas } from '@/lib/api'
+import type { Action, Candidate, Case, Contact, Patient, RequestItem, Schemas } from '@/lib/api'
 import { gapLabel } from '@/lib/case'
-import { formatDate, triggerTitle } from '@/lib/labels'
+import { channelLabel, formatDate, triggerTitle } from '@/lib/labels'
 import { cn } from '@/lib/utils'
 
 type Trigger = Schemas['Trigger']
@@ -83,15 +86,31 @@ function Steps({ steps }: { steps: VerdictStep[] }) {
 export function EvidencePanel({
   candidate,
   trigger,
+  patient,
+  request,
   checkedAt,
   triggerId,
+  collector,
+  pending,
+  onAct,
+  onContact,
+  onSaveDraft,
+  onRemove,
   onCase,
   onClose,
 }: {
   candidate: Candidate
   trigger: Trigger
+  patient: Patient
+  request?: RequestItem
   checkedAt?: string | null
   triggerId: string
+  collector: boolean
+  pending: string | null
+  onAct: (id: string, a: Action) => void
+  onContact: (c: Contact) => void
+  onSaveDraft: (id: string, text: string) => void
+  onRemove: (reason: string | null) => void
   onCase: (c: Case) => void
   onClose: () => void
 }) {
@@ -165,6 +184,30 @@ export function EvidencePanel({
           <p className="text-xs text-muted-foreground">
             <b>Systém</b> = vyhledání v datech, opakovatelné. <b>AI</b> = výklad textu modelem. Čas u kroků Systém = kdy se data četla.
           </p>
+        </section>
+      )}
+
+      {request && (
+        <section aria-label="Žádost" className="flex flex-col gap-2.5 border-t pt-4">
+          <div className="flex flex-wrap items-center gap-2 text-[15px]">
+            <b>Žádost:</b> {channelLabel[request.channel]} <RequestBadge state={request.state} />
+            {request.sent_at && <span className="text-muted-foreground">odesláno {formatDate(request.sent_at)}</span>}
+          </div>
+          {request.state === 'not_delivered' && (
+            <p className="text-[15px] font-semibold text-[#A1271D]">Nedoručeno do 2 pracovních dnů. Urgujte.</p>
+          )}
+          {request.channel === 'fhir' && request.fhir_task && (
+            <details className="text-[15px]">
+              <summary className="cursor-pointer font-semibold">Zobrazit FHIR</summary>
+              <Raw text={JSON.stringify(request.fhir_task)} />
+            </details>
+          )}
+          {collector && (
+            <WriteGroup>
+              <RequestActions r={request} patient={patient} pending={pending} onAct={onAct} onContact={onContact} onSaveDraft={onSaveDraft} />
+              <RemoveDialog disabled={pending !== null} loading={pending === `removed-${candidate.id}`} onRemove={onRemove} />
+            </WriteGroup>
+          )}
         </section>
       )}
 
