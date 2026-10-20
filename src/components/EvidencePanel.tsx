@@ -1,6 +1,7 @@
 import { ArrowLeft, X } from 'lucide-react'
 import { AiLog, Raw } from '@/components/AiLog'
 import { RequestBadge, WriteGroup } from '@/components/common'
+import { Dispute } from '@/components/Dispute'
 import { RemoveDialog } from '@/components/RemoveDialog'
 import { RequestActions } from '@/components/RequestActions'
 import { Button } from '@/components/ui/button'
@@ -96,6 +97,7 @@ export function EvidencePanel({
   onContact,
   onSaveDraft,
   onRemove,
+  onDecide,
   onCase,
   onClose,
 }: {
@@ -111,6 +113,7 @@ export function EvidencePanel({
   onContact: (c: Contact) => void
   onSaveDraft: (id: string, text: string) => void
   onRemove: (reason: string | null) => void
+  onDecide: (decision: 'relevant' | 'not_relevant', reason: string | null) => void
   onCase: (c: Case) => void
   onClose: () => void
 }) {
@@ -185,6 +188,12 @@ export function EvidencePanel({
             <b>Systém</b> = vyhledání v datech, opakovatelné. <b>AI</b> = výklad textu modelem. Čas u kroků Systém = kdy se data četla.
           </p>
         </section>
+      )}
+
+      {candidate.source !== 'collector' && (
+        <div className="border-t pt-4">
+          <Dispute triggerId={triggerId} candidate={candidate} onCase={onCase} onDecide={onDecide} />
+        </div>
       )}
 
       {request && (

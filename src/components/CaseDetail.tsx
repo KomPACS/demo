@@ -469,6 +469,7 @@ export function CaseDetail({
               onContact={saveContact}
               onSaveDraft={saveRequestDraft}
               onRemove={(reason) => setDecision(focusId, 'removed', reason)}
+              onDecide={(decision, reason) => setDecision(focusId, decision, reason)}
               onCase={updateCase}
               onClose={() => setFocusId(undefined)}
             />

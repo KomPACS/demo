@@ -33,7 +33,7 @@
 | T21 | Scenario data: evidence, drafts | dev | COMPLETED | 0 | - |
 | T22 | Case B2: tiles + evidence panel | dev | COMPLETED | 1 | sticky panel, one column, phone step layout (round 1) |
 | T23 | Request review + approved batch | dev | COMPLETED | 0 | batch dialog title without count declension; contact has no person name ("jméno neuvedeno") |
-| T24 | Dispute thread | dev | PENDING | 0 | - |
+| T24 | Dispute thread | dev | COMPLETED | 0 | manual override = decide with the opposite label, note as reason |
 
 ## Cost
 - **Estimate:** `13 dispatches, ~8.3M input tokens`
