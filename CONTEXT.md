@@ -36,10 +36,24 @@ Shared terms for humans and agents. One meaning per term. Add a term when the te
 | Duplicate alert | Warning that the scheduled exam repeats the same exam within 6 weeks. | upozornění na duplicitu |
 | Verified contact | An e-mail or phone of another hospital that the Collector confirmed, with the date. | ověřený kontakt |
 | Insurer | Any health insurer. Knows where and when each billed exam was done. | zdravotní pojišťovna |
+| Approved request | A request whose channel, recipient and text the Collector reviewed. Only approved requests are sent. | schváleno |
+| Home hospital | The hospital that runs KomPACS. Its PACS is "our PACS"; priors from elsewhere arrive via ePACS. | domovská nemocnice |
+| Read-only view | The phone layout: walkthrough only, every write action disabled. | jen prohlížení |
 | Not delivered | A request whose prior is not in PACS 2 working days after it was sent. | nedoručeno |
 | Not found | A place-unknown request the Collector closed without finding the place. | nedohledáno |
 | Timeline | All events of one patient in date order. | časová osa |
 
+
+## AI evidence
+
+| Term | Meaning | Czech (UI) |
+|---|---|---|
+| Evidence panel | The side panel that shows why the AI judged a prior: source sentence in context, event status, sources and steps. | souhrn úvah |
+| Event status | Whether a mentioned exam happened, is planned, is recommended or is unclear. Only a done exam can be a prior. | proběhlo / plánováno / doporučeno / nejasné |
+| Deciding word | The word in the source sentence that sets the event status. | rozhodlo slovo |
+| Lookup step | A repeatable data lookup (PACS, reports, dates), shown with the time it read the data. | krok Systém |
+| AI step | A step where the model reads and interprets text. | krok AI |
+| Dispute | The Collector's objection to a verdict: an error category, an evidence note, a re-judge and a choice between v1 and v2. | námitka |
 ## Imaging
 
 | Term | Meaning |
