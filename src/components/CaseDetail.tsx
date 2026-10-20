@@ -3,12 +3,13 @@ import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'rea
 import { Loading, RequestBadge, Skeleton, StatusBadge, WriteGroup } from '@/components/common'
 import { AiLog, Raw } from '@/components/AiLog'
 import { BodyMap } from '@/components/BodyMap'
+import { EvidencePanel } from '@/components/EvidencePanel'
 import { PatientBar } from '@/components/PatientBar'
-import { RemoveDialog } from '@/components/RemoveDialog'
-import { RequestActions } from '@/components/RequestActions'
 import type { Role } from '@/components/Sidebar'
 import { TimelineFull } from '@/components/Timeline'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -16,13 +17,14 @@ import {
   api,
   data,
   decide,
+  saveDraft,
   type Action,
   type Candidate,
   type Case,
   type Contact,
   type RequestItem,
 } from '@/lib/api'
-import { classify, isReady, pacsViewerUrl, priorAnchor, progress, sendable, useCase } from '@/lib/case'
+import { classify, gapLabel, isReady, pacsViewerUrl, priorAnchor, progress, sendable, sortPriors, useCase } from '@/lib/case'
 import { channelLabel, decisionLabel, formatDate, sourceLabel } from '@/lib/labels'
 import { cn, panel } from '@/lib/utils'
 
@@ -46,13 +48,17 @@ export function CaseDetail({
   const [pending, setPending] = useState<string | null>(null)
   const locked = useRef(false)
   const [sent, setSent] = useState(0)
+  const [batchOpen, setBatchOpen] = useState(false)
   const [adding, setAdding] = useState(false)
   const [tab, setTab] = useState<'checks' | 'timeline' | 'body'>('checks')
+  const [focusId, setFocusId] = useState<string | undefined>(undefined)
   const collector = role === 'collector'
   const loaded = Boolean(kase)
 
   useEffect(() => {
-    if (loaded && focus) document.getElementById(priorAnchor(focus))?.scrollIntoView({ block: 'center' })
+    if (!loaded || !focus) return
+    document.getElementById(priorAnchor(focus))?.scrollIntoView({ block: 'center' })
+    setFocusId(focus)
   }, [loaded, focus])
 
   if (error) return <p className="p-8 text-destructive">{error}</p>
@@ -77,6 +83,13 @@ export function CaseDetail({
   const { toDecide, removed, relevant, notRelevant } = classify(kase.candidates)
   const { ready, total } = progress(kase, requests)
   const toSend = requests.filter(sendable)
+  const notSendReason = (r: RequestItem): string | null => {
+    if (r.state === 'approved' || r.state === 'sent' || r.state === 'received' || r.state === 'not_found') return null
+    if (r.channel === 'phone') return 'žádost telefonem, zavolejte'
+    if (!r.contact?.verified_at || r.contact.needs_reverify) return 'kontakt neověřený'
+    return 'zatím jen návrh, neschváleno'
+  }
+  const notSend = requests.filter((r) => notSendReason(r) !== null)
   const open = (r?: RequestItem) => r && r.state !== 'received' && r.state !== 'not_found'
   const placeUnknown = relevant.filter((c) => c.status === 'place_unknown' && open(byCandidate.get(c.id)))
   const notDelivered = relevant.filter((c) => byCandidate.get(c.id)?.state === 'not_delivered')
@@ -118,32 +131,41 @@ export function CaseDetail({
   const replaceRequest = (r: RequestItem) => setRequests((rs) => rs.map((x) => (x.id === r.id ? r : x)))
 
   const runAction = (id: string, a: Action) =>
-    lock(`${a}-${id}`, () =>
-      act(id, a)
-        .then(replaceRequest)
-        .catch(() => setActionError('Akci se nepodařilo provést. Zkuste to znovu.')),
-    )
+    lock(`${a}-${id}`, () => {
+      const r = requests.find((x) => x.id === id)
+      const call = a === 'approve' && r?.channel === 'fhir' ? act(id, 'approve').then((x) => act(x.id, 'send')) : act(id, a)
+      return call.then(replaceRequest).catch(() => setActionError('Akci se nepodařilo provést. Zkuste to znovu.'))
+    })
 
   const saveContact = (c: Contact) =>
     setRequests((rs) => rs.map((r) => (r.organization_id === c.organization_id ? { ...r, contact: c } : r)))
 
-  const sendAll = () =>
+  const saveRequestDraft = (id: string, text: string) =>
+    lock(`draft-${id}`, () =>
+      saveDraft(id, text)
+        .then(replaceRequest)
+        .catch(() => setActionError('Text žádosti se nepodařilo uložit. Zkuste to znovu.')),
+    )
+
+  const sendApproved = () =>
     lock('send-all', async () => {
       setSent(0)
       for (const r of toSend) {
         try {
-          replaceRequest(await act(r.id, 'approve'))
+          replaceRequest(await act(r.id, 'send'))
           setSent((n) => n + 1)
         } catch {
-          setActionError('Některé e-maily se nepodařilo odeslat. Zkuste to znovu.')
+          setActionError('Některé žádosti se nepodařilo odeslat. Zkuste to znovu.')
           return
         }
       }
+      setBatchOpen(false)
     })
   const isPending = (key: string) => pending === key
 
   const jump = (candidateId: string) => {
     setTab('checks')
+    setFocusId(candidateId)
     setTimeout(() => document.getElementById(priorAnchor(candidateId))?.scrollIntoView({ behavior: 'smooth', block: 'center' }))
   }
 
@@ -152,7 +174,7 @@ export function CaseDetail({
         { n: toDecide.length, label: 'rozhodnout nejisté', target: toDecide[0], tone: 'text-decide', num: 'bg-decide text-white' },
         {
           n: toSend.length,
-          label: 'e-mail připraven k odeslání',
+          label: 'žádost schválená, čeká na odeslání',
           target: kase.candidates.find((c) => c.id === toSend[0]?.candidate_id),
           tone: 'text-foreground',
           num: 'bg-primary text-white',
@@ -168,61 +190,6 @@ export function CaseDetail({
       ]
   const shownTodos = todos.filter((t) => t.n > 0)
 
-  const requestBlock = (c: Candidate) => {
-    const r = byCandidate.get(c.id)
-    if (!r) return null
-    const contact = r.contact
-    const isFhir = r.channel === 'fhir'
-    return (
-      <div className="flex flex-col gap-2.5 border-t pt-3.5">
-        <div className="flex flex-wrap items-center gap-2 text-[15px]">
-          <b>Žádost:</b> {channelLabel[r.channel]} <RequestBadge state={r.state} />
-          {r.sent_at && <span className="text-muted-foreground">odesláno {formatDate(r.sent_at)}</span>}
-        </div>
-        {collector && isFhir && (
-          <div className="text-[15px]">
-            <b>Endpoint:</b> {contact?.fhir_endpoint ?? 'neuveden'}
-          </div>
-        )}
-        {collector && !isFhir && contact && (
-          <div className="text-[15px]">
-            <b>Kontakt:</b> {[contact.email, contact.phone].filter(Boolean).join(' · ') || 'bez údajů'} ·{' '}
-            {contact.verified_at ? (
-              <span className="text-ok-ink">ověřený kontakt {formatDate(contact.verified_at)}</span>
-            ) : (
-              <span className="font-semibold text-warn-ink">kontakt neověřený</span>
-            )}
-            {contact.needs_reverify && <span className="font-semibold text-warn-ink"> · ověřte znovu (starší 12 měsíců)</span>}
-          </div>
-        )}
-        {isFhir && r.fhir_task && (
-          <details className="text-[15px]">
-            <summary className="cursor-pointer font-semibold">Zobrazit FHIR</summary>
-            <Raw text={JSON.stringify(r.fhir_task)} />
-          </details>
-        )}
-        {r.state === 'not_delivered' && (
-          <p className="text-[15px] font-semibold text-[#A1271D]">Nedoručeno do 2 pracovních dnů. Urgujte.</p>
-        )}
-        {collector && r.email_draft && r.state === 'draft' && (
-          <blockquote className="rounded-xl bg-background px-3.5 py-3 text-[15px] whitespace-pre-wrap text-text">{r.email_draft}</blockquote>
-        )}
-        {collector && (
-          <div className="flex flex-wrap gap-2.5">
-            <WriteGroup>
-            <RequestActions r={r} pending={pending} onAct={runAction} onContact={saveContact} />
-            <RemoveDialog
-              disabled={pending !== null}
-              loading={isPending(`removed-${c.id}`)}
-              onRemove={(reason) => setDecision(c.id, 'removed', reason)}
-            />
-            </WriteGroup>
-          </div>
-        )}
-      </div>
-    )
-  }
-
   return (
     <div className="flex flex-col">
       <PatientBar
@@ -236,19 +203,55 @@ export function CaseDetail({
             <WriteGroup>
             <Button
               disabled={pending !== null || toSend.length === 0}
-              loading={isPending('send-all')}
-              onClick={sendAll}
+              onClick={() => setBatchOpen(true)}
               className="min-h-13 bg-bar-accent font-extrabold text-bar-accent-ink hover:bg-white"
             >
-              {!isPending('send-all') && <Send className="size-5.5" />}
-              {isPending('send-all')
-                ? `Odesílám ${Math.min(sent + 1, sent + toSend.length)} z ${sent + toSend.length}…`
-                : `Odeslat všechny připravené (${toSend.length})`}
+              <Send className="size-5.5" />
+              {`Odeslat schválené (${toSend.length})`}
             </Button>
             </WriteGroup>
           )
         }
       />
+
+      <Dialog open={batchOpen} onOpenChange={setBatchOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {isPending('send-all') ? `Odesílám ${Math.min(sent + 1, sent + toSend.length)} z ${sent + toSend.length}…` : `Odeslat schválené žádosti (${toSend.length})`}
+            </DialogTitle>
+          </DialogHeader>
+          <ul className="flex flex-col gap-1.5 text-[15px]">
+            {toSend.map((r) => (
+              <li key={r.id} className="rounded-xl bg-background px-3.5 py-2.5">
+                <b>{r.place ?? 'místo neznámé'}</b> · {channelLabel[r.channel]} · {r.prior_description} {formatDate(r.prior_date)}
+              </li>
+            ))}
+          </ul>
+          {notSend.length > 0 && (
+            <>
+              <div className="text-xs font-extrabold tracking-widest text-muted-foreground uppercase">Neodešle se</div>
+              <ul className="flex flex-col gap-1 text-[14px] text-muted-foreground">
+                {notSend.map((r) => (
+                  <li key={r.id}>
+                    {r.place ?? 'místo neznámé'} · {r.prior_description} {formatDate(r.prior_date)}: {notSendReason(r)}.
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+          <DialogFooter>
+            <Button variant="outline" disabled={pending !== null} onClick={() => setBatchOpen(false)}>
+              Zpět
+            </Button>
+            <WriteGroup>
+              <Button disabled={pending !== null || toSend.length === 0} loading={isPending('send-all')} onClick={sendApproved}>
+                Odeslat
+              </Button>
+            </WriteGroup>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <div className="flex flex-col gap-5.5 px-4 pt-6.5 pb-12 md:px-9">
         {actionError && (
@@ -323,7 +326,8 @@ export function CaseDetail({
         {tab === 'timeline' && <TimelineFull kase={kase} requests={requests} role={role} onOpenPrior={jump} onCaseChanged={loadCase} />}
         {tab === 'body' && <BodyMap priors={[...toDecide, ...relevant]} triggerPart={kase.trigger.body_part} />}
         {tab === 'checks' && (
-          <>
+          <div className="flex items-start gap-5.5">
+          <div className="flex min-w-0 flex-1 flex-col gap-5.5">
             {kase.insurer_request && <InsurerCard insurer={kase.insurer_request} />}
 
         {toDecide.length > 0 && (
@@ -333,8 +337,16 @@ export function CaseDetail({
                 ? 'Systém si není jistý. Rozhodněte, zda vyšetření lékař potřebuje. Žádost vznikne až potom.'
                 : 'Systém si není jistý. Rozhoduje koordinátor/ka.'}
             </p>
-            {toDecide.map((c) => (
-              <PriorTile key={c.id} c={c} triggerId={triggerId} onCase={updateCase} className="border-2 border-decide-border bg-decide-bg" verdictPrefix>
+            {sortPriors(toDecide).map((c) => (
+              <PriorTile
+                key={c.id}
+                c={c}
+                triggerDate={kase.trigger.date}
+                selected={focusId === c.id}
+                onOpen={setFocusId}
+                className="border-2 border-decide-border bg-decide-bg"
+                verdictPrefix
+              >
                 {collector && (
                   <div className="mt-1 flex flex-wrap gap-3">
                     <WriteGroup>
@@ -364,11 +376,16 @@ export function CaseDetail({
 
         <Section title={`${toDecide.length ? 2 : 1}. Relevantní předchozí vyšetření (${relevant.length})`}>
           {relevant.length === 0 && <p className="text-base text-muted-foreground">Žádné relevantní předchozí vyšetření.</p>}
-          <div className="grid gap-3.5 lg:grid-cols-2">
-            {relevant.map((c) => (
-              <PriorTile key={c.id} c={c} triggerId={triggerId} onCase={updateCase} request={byCandidate.get(c.id)}>
-                {requestBlock(c)}
-              </PriorTile>
+          <div className="flex flex-col gap-3.5">
+            {sortPriors(relevant).map((c) => (
+              <PriorTile
+                key={c.id}
+                c={c}
+                triggerDate={kase.trigger.date}
+                selected={focusId === c.id}
+                onOpen={setFocusId}
+                request={byCandidate.get(c.id)}
+              />
             ))}
           </div>
         </Section>
@@ -439,7 +456,28 @@ export function CaseDetail({
           )}
           </WriteGroup>
         )}
-          </>
+          </div>
+          {focusId && kase.candidates.find((c) => c.id === focusId) && (
+            <EvidencePanel
+              key={focusId}
+              candidate={kase.candidates.find((c) => c.id === focusId)!}
+              trigger={kase.trigger}
+              patient={kase.patient}
+              request={byCandidate.get(focusId)}
+              checkedAt={kase.checked_at}
+              triggerId={triggerId}
+              collector={collector}
+              pending={pending}
+              onAct={runAction}
+              onContact={saveContact}
+              onSaveDraft={saveRequestDraft}
+              onRemove={(reason) => setDecision(focusId, 'removed', reason)}
+              onDecide={(decision, reason) => setDecision(focusId, decision, reason)}
+              onCase={updateCase}
+              onClose={() => setFocusId(undefined)}
+            />
+          )}
+          </div>
         )}
       </div>
     </div>
@@ -480,70 +518,64 @@ function Section({ title, className, children }: { title: string; className?: st
 
 function PriorTile({
   c,
-  triggerId,
-  onCase,
+  triggerDate,
+  selected,
+  onOpen,
   request,
   className,
   verdictPrefix,
   children,
 }: {
   c: Candidate
-  triggerId: string
-  onCase: (c: Case) => void
+  triggerDate: string
+  selected: boolean
+  onOpen: (id: string) => void
   request?: RequestItem
   className?: string
   verdictPrefix?: boolean
   children?: ReactNode
 }) {
-  const quote = c.verdict.source_sentence
+  const gap = gapLabel(c.date, triggerDate)
   return (
-    <div id={priorAnchor(c.id)} className={cn(tile, 'scroll-mt-40', className)}>
-      <div className="flex flex-wrap justify-between gap-2">
-        <div className="text-[19px] font-bold">
-          {c.description} · {formatDate(c.date)}
+    <div id={priorAnchor(c.id)} className={cn(tile, 'scroll-mt-40', className, selected && 'ring-2 ring-primary')}>
+      <button type="button" onClick={() => onOpen(c.id)} aria-pressed={selected} className="grid grid-cols-[88px_minmax(0,1fr)] gap-4 text-left">
+        <div className="flex flex-col gap-0.5 border-r pr-3">
+          <span className="text-xl leading-tight font-extrabold tabular-nums">{formatDate(c.date)}</span>
+          {gap && <span className="text-[13px] text-muted-foreground">{gap}</span>}
         </div>
-        <div className="flex flex-wrap gap-1.5">
-          <StatusBadge status={c.status} />
-          {!request && c.request_state && <RequestBadge state={c.request_state} />}
+        <div className="flex min-w-0 flex-col gap-1.5">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <span className="text-[17px] font-bold">{c.description}</span>
+            <span className="flex flex-wrap gap-1.5">
+              <StatusBadge status={c.status} />
+              {request ? (
+                <span className="inline-flex items-center gap-1 text-xs font-bold text-muted-foreground">
+                  {channelLabel[request.channel]} <RequestBadge state={request.state} />
+                </span>
+              ) : (
+                c.request_state && <RequestBadge state={c.request_state} />
+              )}
+              {c.is_baseline && <Badge className="h-auto rounded-full bg-primary-soft px-3 py-1 text-sm font-bold text-primary-hover">vstupní vyšetření</Badge>}
+            </span>
+          </div>
+          <div className="text-[14px] text-muted-foreground">
+            {c.place ?? 'místo neznámé'} · {sourceLabel[c.source]}
+            {c.pacs_source && <> · PACS: {c.pacs_source}</>}
+          </div>
+          <div className="text-[15px]">
+            {c.decision === 'relevant' || c.decision === 'not_relevant' ? (
+              <>
+                <b>Rozhodnutí koordinátora/ky: {decisionLabel[c.decision]}.</b>{' '}
+                <span className="text-muted-foreground">Původní hodnocení LLM: {c.verdict.reason}</span>
+              </>
+            ) : (
+              <>
+                {verdictPrefix ? <b>Hodnocení LLM: nejisté.</b> : <b>Proč:</b>} {c.verdict.reason}
+              </>
+            )}
+          </div>
         </div>
-      </div>
-      <div className="text-[15px] text-muted-foreground">
-        {c.place ?? 'místo neznámé'} · {sourceLabel[c.source]}
-        {c.pacs_source && <> · PACS: {c.pacs_source}</>}
-        {c.is_baseline && (
-          <>
-            {' '}
-            · <b className="text-foreground">vstupní vyšetření</b> před léčbou
-          </>
-        )}
-      </div>
-      {quote && <blockquote className="rounded-xl bg-background px-3.5 py-3 text-[15px] text-text">„{quote}“</blockquote>}
-      <div className="text-base">
-        {c.decision === 'relevant' || c.decision === 'not_relevant' ? (
-          <>
-            <b>Rozhodnutí koordinátora/ky: {decisionLabel[c.decision]}.</b>{' '}
-            <span className="text-muted-foreground">Původní hodnocení LLM: {c.verdict.reason}</span>
-          </>
-        ) : (
-          <>
-            {verdictPrefix ? <b>Hodnocení LLM: nejisté.</b> : <b>Proč:</b>} {c.verdict.reason}
-          </>
-        )}
-      </div>
-      {c.verdict.guideline && (
-        <div className="text-[15px] text-muted-foreground">
-          <a
-            className="font-bold text-primary underline"
-            href={`https://www.linkos.cz/files/modra-kniha/26.pdf#page=${c.verdict.guideline.page}`}
-            target="_blank"
-            rel="noreferrer"
-          >
-            Modrá kniha ČOS, s. {c.verdict.guideline.page}
-          </a>
-          : „{c.verdict.guideline.quote}“
-        </div>
-      )}
-      {c.source !== 'collector' && <AiLog triggerId={triggerId} candidate={c} onCase={onCase} />}
+      </button>
       {isReady(c, request) && (
         <Button asChild variant="outline" className="self-start">
           <a href={pacsViewerUrl(c.id)} target="_blank" rel="noreferrer">

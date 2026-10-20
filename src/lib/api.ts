@@ -35,14 +35,19 @@ export async function decide(
   )
 }
 
-export type Action = 'approve' | 'requested' | 'not-found' | 'deliver'
+export type Action = 'approve' | 'requested' | 'not-found' | 'deliver' | 'send' | 'call-again'
 
 const actionPath = {
   approve: '/api/requests/{request_id}/approve',
   requested: '/api/requests/{request_id}/requested',
   'not-found': '/api/requests/{request_id}/not-found',
   deliver: '/api/demo/deliver/{request_id}',
+  send: '/api/requests/{request_id}/send',
+  'call-again': '/api/requests/{request_id}/call-again',
 } as const
 
 export const act = (id: string, action: Action) =>
   data(api.POST(actionPath[action], { params: { path: { request_id: id } } }))
+
+export const saveDraft = (id: string, email_draft: string) =>
+  data(api.PUT('/api/requests/{request_id}/draft', { params: { path: { request_id: id } }, body: { email_draft } }))
