@@ -37,7 +37,28 @@
 - Decision: PACS viewer images are synthetic, keep - Q4
 - Decision: insurer label changed in P1 (T9) - Q5
 
-- G2 review: FAIL (plan refs in comments), fixed inline 18afeaf. Non-blocking: default verdict-version literal repeated 3x in store.ts.
+## Reviews
+- G1: PASS.
+- G2: FAIL (plan refs in comments), fixed inline 18afeaf. Non-blocking: the default verdict-version literal repeats 3x in `src/mock/store.ts`.
+- G3: dispatched at 87838de. Result not recorded. Re-run it first on resume.
 
 ## Warnings & Blockers
-- None.
+- Browser findings for the design phase: on a phone the sidebar stacks above the content; the duplicate alert says "Pacient měl" for a woman.
+- Scenario 7 (child, C71) cites the adult high-grade glioma follow-up row (s. 242). Ask the team medic before the demo goes public.
+
+## Handover (2026-10-20)
+P1 is done: T1–T15 COMPLETED, 70 tests green, lint and build clean, all pushed on `feat/mock-demo`.
+
+Resume steps:
+1. `npx -y pnpm@10 install`, then `npx -y pnpm@10 exec playwright install chromium` (for `scripts/shots.mjs`).
+2. `curl -fsSL https://www.linkos.cz/files/modra-kniha/26.pdf -o tmp/modra-kniha-26.pdf`, then extract the text to `tmp/modra-kniha-26.txt` (pdftotext or pdfminer). Printed page = PDF page index + 1.
+3. Re-run the G3 review (`lean-sdd:code-reviewer`, base c2f738d, head 87838de). Fix, then set the ledger status for P1.
+4. Design run with the user. Canvas: https://claude.ai/artifact/Y5FyPeQAS5vj7xA1ZwvwzX (private, owner only). Source copy: `design/` next to this ledger.
+   - Done: row 0 "Dnes" (3 screenshots), Intro A (dialog + tour coach, interactive), Intro B (welcome screen with a story picker), Souhrn úvah A (step trace in the prior card, interactive).
+   - To do: Souhrn úvah B (side panel) and C (evidence first), AI agent A (right panel) and B (question box in the case), Telefon A (bottom bar) and B (header menu). Then the user picks per row.
+5. Write plan P2 (polish + intro/tour + reasoning trace + MCP panel + pipeline animation) from the picks. Then P3: GitHub Pages deploy, CNAME `demo.kompacs.cz`.
+
+Open items for the user:
+- Forpsi DNS: `docs CNAME kompacs.github.io.`; `demo` still points to the deleted Azure app (takeover risk).
+- After DNS resolves: enable HTTPS enforcement on KomPACS/docs Pages.
+- `pacs-mcp`: publish as a public repo, or reword the docs MCP how-to to "available on request".
