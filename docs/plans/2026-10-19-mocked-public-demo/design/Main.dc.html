@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<title>Intro A – dialog nad frontou</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#0F6B66}a:hover{color:#0A4E4A}
+</style>
+</helmet>
+<div style="position: relative; width: 1280px; height: 800px; overflow: hidden; background: #F3F6F7; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; color: #14232A;">
+  <div style="display: flex; height: 800px;">
+    <nav aria-label="Hlavní menu" style="width: 248px; flex-shrink: 0; background: #FFFFFF; border-right: 1px solid #DDE5E7; padding: 20px 16px; box-sizing: border-box; display: flex; flex-direction: column; gap: 8px;">
+      <div style="display: flex; align-items: center; gap: 10px; padding-bottom: 16px;">
+        <div style="width: 36px; height: 36px; border-radius: 10px; background: #0F6B66;"></div>
+        <div style="font-weight: 800; font-size: 17px; letter-spacing: .02em;"><span style="color: #0F6B66;">KOM</span>PACS</div>
+      </div>
+      <div style="padding: 12px 14px; border-radius: 12px; background: #E3F1EF; color: #0A4E4A; font-weight: 700; font-size: 15px;">Fronta k vyřízení</div>
+      <div style="padding: 12px 14px; font-weight: 600; font-size: 15px; color: #2C3D44;">Přehled</div>
+      <div style="margin-top: auto;">
+        <sc-if value="{{touring}}" hint-placeholder-val="{{ false }}">
+          <div style="border-radius: 14px; box-shadow: 0 0 0 4px #7FE0C9;">
+            <button type="button" style="width: 100%; min-height: 48px; border: 0; border-radius: 12px; background: #0F6B66; color: #FFFFFF; font: 700 15px 'Plus Jakarta Sans', sans-serif;">+ Spustit kontrolu</button>
+          </div>
+        </sc-if>
+        <sc-if value="{{notTouring}}" hint-placeholder-val="{{ true }}">
+          <button type="button" style="width: 100%; min-height: 48px; border: 0; border-radius: 12px; background: #0F6B66; color: #FFFFFF; font: 700 15px 'Plus Jakarta Sans', sans-serif;">+ Spustit kontrolu</button>
+        </sc-if>
+        <p style="margin: 12px 4px 0; font-size: 12px; color: #4E6066;">Prototyp, není zdravotnický prostředek</p>
+      </div>
+    </nav>
+    <main style="flex: 1; padding: 28px 36px; display: flex; flex-direction: column; gap: 14px;">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h1 style="margin: 0; font-size: 30px; font-weight: 800;">Fronta k vyřízení</h1>
+        <button type="button" onClick="{{openIntro}}" style="border: 1px dashed #0F6B66; background: #FFFFFF; color: #0A4E4A; border-radius: 999px; padding: 8px 14px; font: 700 13px 'Plus Jakarta Sans', sans-serif; min-height: 36px;">DEMO · fiktivní data</button>
+      </div>
+      <sc-for list="{{rows}}" as="row" hint-placeholder-count="4">
+        <div style="background: #FFFFFF; border: 1px solid #DDE5E7; border-radius: 14px; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-weight: 800; font-size: 18px;">{{row.name}}</div>
+            <div style="font-size: 13px; color: #4E6066;">{{row.meta}}</div>
+          </div>
+          <div style="font-size: 13px; font-weight: 700; color: #0F6B66;">Otevřít ›</div>
+        </div>
+      </sc-for>
+    </main>
+  </div>
+
+  <sc-if value="{{introOpen}}" hint-placeholder-val="{{ true }}">
+    <div style="position: absolute; inset: 0; background: rgba(7,43,41,.55); display: flex; align-items: center; justify-content: center;">
+      <div role="dialog" aria-label="Vítejte v ukázce KOMPACS" style="width: 600px; background: #FFFFFF; border-radius: 20px; padding: 36px 40px; box-sizing: border-box; display: flex; flex-direction: column; gap: 18px; box-shadow: 0 24px 60px rgba(7,43,41,.35);">
+        <div style="font-size: 12px; font-weight: 800; letter-spacing: .1em; color: #0F6B66;">UKÁZKA · FIKTIVNÍ DATA</div>
+        <h2 style="margin: 0; font-size: 28px; line-height: 1.15; font-weight: 800;">KOMPACS najde předchozí snímky, které lékař potřebuje</h2>
+        <ul style="margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; font-size: 15px; line-height: 1.5; color: #2C3D44;">
+          <li>Před CT, MR, PET nebo MDT zkontroluje předchozí vyšetření.</li>
+          <li>Najde i vyšetření zmíněná jen ve zprávách.</li>
+          <li>Připraví žádost do nemocnice, kde vyšetření proběhlo.</li>
+        </ul>
+        <div style="background: #F3F6F7; border-radius: 12px; padding: 12px 14px; font-size: 13.5px; line-height: 1.5; color: #2C3D44;">Všichni pacienti jsou smyšlení. Bez sledování a bez cookies. Po obnovení stránky začnete znovu.</div>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+          <button type="button" onClick="{{startTour}}" style="min-height: 48px; padding: 0 22px; border: 0; border-radius: 12px; background: #0F6B66; color: #FFFFFF; font: 700 15px 'Plus Jakarta Sans', sans-serif;">Provést ukázkou · 6 kroků</button>
+          <button type="button" onClick="{{explore}}" style="min-height: 48px; padding: 0 22px; border: 1px solid #DDE5E7; border-radius: 12px; background: #FFFFFF; color: #14232A; font: 700 15px 'Plus Jakarta Sans', sans-serif;">Prozkoumat sám</button>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 13px; color: #4E6066;">
+          <a href="https://kompacs.cz">Více o projektu na kompacs.cz</a>
+          <span>Prototyp, není zdravotnický prostředek</span>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{touring}}" hint-placeholder-val="{{ false }}">
+    <div role="status" style="position: absolute; left: 272px; bottom: 28px; width: 360px; background: #072B29; color: #FFFFFF; border-radius: 16px; padding: 18px 20px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 16px 40px rgba(7,43,41,.35);">
+      <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: #7FE0C9; letter-spacing: .06em;"><span>KROK 1 Z 6</span><button type="button" onClick="{{explore}}" aria-label="Ukončit prohlídku" style="border: 0; background: transparent; color: #A9D3CD; font: 700 12px 'Plus Jakarta Sans', sans-serif;">Ukončit</button></div>
+      <div style="font-size: 17px; font-weight: 800;">Spusťte kontrolu</div>
+      <div style="font-size: 14px; line-height: 1.5; color: #DDF2EC;">Klikněte na „Spustit kontrolu“ a vyberte Lenku Pokornou. Uvidíte, co KOMPACS dělá po přijetí objednávky CT.</div>
+      <div style="display: flex; gap: 6px;">
+        <span style="width: 22px; height: 4px; border-radius: 2px; background: #7FE0C9;"></span>
+        <span style="width: 22px; height: 4px; border-radius: 2px; background: #2E5F5B;"></span>
+        <span style="width: 22px; height: 4px; border-radius: 2px; background: #2E5F5B;"></span>
+        <span style="width: 22px; height: 4px; border-radius: 2px; background: #2E5F5B;"></span>
+        <span style="width: 22px; height: 4px; border-radius: 2px; background: #2E5F5B;"></span>
+        <span style="width: 22px; height: 4px; border-radius: 2px; background: #2E5F5B;"></span>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { mode: 'intro' }; }
+  renderVals() {
+    const mode = this.state.mode;
+    return {
+      introOpen: mode === 'intro',
+      touring: mode === 'tour',
+      notTouring: mode !== 'tour',
+      startTour: () => this.setState({ mode: 'tour' }),
+      explore: () => this.setState({ mode: 'free' }),
+      openIntro: () => this.setState({ mode: 'intro' }),
+      rows: [
+        { name: 'Petr Dvořák', meta: 'Plánované CT · čt 22. 10. · C18' },
+        { name: 'Jana Nováková', meta: 'Plánované CT · pá 23. 10. · C34 · 1 k rozhodnutí' },
+        { name: 'Tomáš Svoboda', meta: 'MDT · pá 23. 10. · C20 · 1 žádost nedoručena' },
+        { name: 'Hana Veselá', meta: 'Plánované CT · po 26. 10. · upozornění na duplicitu' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

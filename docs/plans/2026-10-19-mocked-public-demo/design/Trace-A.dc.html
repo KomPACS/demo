@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<title>Souhrn úvah A – kroky v kartě</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#0F6B66}a:hover{color:#0A4E4A}
+mark{background:#FFF6DE;color:#6E4400;border-radius:4px;padding:0 2px}
+</style>
+</helmet>
+<div style="width: 760px; height: 1000px; box-sizing: border-box; padding: 40px; background: #F3F6F7; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; color: #14232A;">
+  <article style="background: #FFFFFF; border: 1px solid #DDE5E7; border-radius: 18px; padding: 24px 26px; display: flex; flex-direction: column; gap: 14px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px;">
+      <h3 style="margin: 0; font-size: 20px; font-weight: 800;">CT hrudníku · 23. 5. 2026</h3>
+      <span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; background: #FCE3DA; color: #8A2E0F; font-size: 13px; font-weight: 700;"><span style="width: 9px; height: 9px; border-radius: 50%; border: 2px dashed #C9372C;"></span>chybí</span>
+    </div>
+    <div style="font-size: 14px; color: #4E6066;">Všeobecná fakultní nemocnice v Praze · zmínka ve zprávě</div>
+    <div style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 12px; background: #E3F1EF;">
+      <span style="padding: 3px 9px; border-radius: 999px; background: #0F6B66; color: #FFFFFF; font-size: 12px; font-weight: 800;">RELEVANTNÍ</span>
+      <span style="font-size: 14.5px; line-height: 1.45; color: #14232A;">Novější kontrolní CT po poslední linii léčby. Lékař ho potřebuje ke srovnání.</span>
+    </div>
+    <button type="button" onClick="{{toggle}}" aria-expanded="{{openStr}}" style="align-self: flex-start; border: 0; background: transparent; padding: 6px 0; min-height: 36px; display: inline-flex; align-items: center; gap: 8px; font: 700 14px 'Plus Jakarta Sans', sans-serif; color: #0F6B66;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/><circle cx="12" cy="12" r="4"/></svg>
+      {{toggleLabel}}
+    </button>
+    <sc-if value="{{open}}" hint-placeholder-val="{{ true }}">
+      <ol style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column;">
+        <li style="display: grid; grid-template-columns: 36px 1fr; column-gap: 12px;">
+          <div style="display: flex; flex-direction: column; align-items: center;"><span style="width: 28px; height: 28px; border-radius: 50%; background: #E3F1EF; color: #0A4E4A; font-weight: 800; font-size: 13px; display: flex; align-items: center; justify-content: center;">1</span><span style="flex: 1; width: 2px; background: #DDE5E7; margin: 4px 0;"></span></div>
+          <div style="padding-bottom: 18px;">
+            <div style="font-size: 12px; font-weight: 800; letter-spacing: .08em; color: #4E6066;">CO JSEM HLEDAL</div>
+            <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px;">
+              <span style="padding: 4px 10px; border-radius: 999px; border: 1px solid #DDE5E7; font-size: 13px;">CT hrudníku</span>
+              <span style="padding: 4px 10px; border-radius: 999px; border: 1px solid #DDE5E7; font-size: 13px;">po léčbě</span>
+              <span style="padding: 4px 10px; border-radius: 999px; border: 1px solid #DDE5E7; font-size: 13px;">jiná nemocnice</span>
+            </div>
+            <div style="margin-top: 6px; font-size: 13px; color: #4E6066;">Prošlo 12 zpráv, 3 shody.</div>
+          </div>
+        </li>
+        <li style="display: grid; grid-template-columns: 36px 1fr; column-gap: 12px;">
+          <div style="display: flex; flex-direction: column; align-items: center;"><span style="width: 28px; height: 28px; border-radius: 50%; background: #E3F1EF; color: #0A4E4A; font-weight: 800; font-size: 13px; display: flex; align-items: center; justify-content: center;">2</span><span style="flex: 1; width: 2px; background: #DDE5E7; margin: 4px 0;"></span></div>
+          <div style="padding-bottom: 18px;">
+            <div style="font-size: 12px; font-weight: 800; letter-spacing: .08em; color: #4E6066;">DŮKAZ VE ZPRÁVĚ</div>
+            <blockquote style="margin: 8px 0 0; padding: 12px 14px; border-radius: 12px; background: #F3F6F7; font-size: 14.5px; line-height: 1.5;">„Dále doloženo <mark>kontrolní CT hrudníku</mark> ze <mark>Všeobecné fakultní nemocnice</mark> v Praze, <mark>bez popisu v systému</mark>.“</blockquote>
+            <div style="margin-top: 6px; font-size: 13px; color: #4E6066;">Propouštěcí zpráva, onkologie · 2. 6. 2026</div>
+          </div>
+        </li>
+        <li style="display: grid; grid-template-columns: 36px 1fr; column-gap: 12px;">
+          <div style="display: flex; flex-direction: column; align-items: center;"><span style="width: 28px; height: 28px; border-radius: 50%; background: #E3F1EF; color: #0A4E4A; font-weight: 800; font-size: 13px; display: flex; align-items: center; justify-content: center;">3</span><span style="flex: 1; width: 2px; background: #DDE5E7; margin: 4px 0;"></span></div>
+          <div style="padding-bottom: 18px;">
+            <div style="font-size: 12px; font-weight: 800; letter-spacing: .08em; color: #4E6066;">DOPORUČENÍ</div>
+            <div style="margin-top: 8px; font-size: 14.5px; line-height: 1.5;">„Po radikální léčbě karcinomu plic je v prvních dvou letech od jejího ukončení doporučeno provádět kontroly po 3–6 měsících s CT vyšetřením každých 6 měsíců.“</div>
+            <a href="#" style="display: inline-block; margin-top: 6px; font-size: 13px; font-weight: 700;">Modrá kniha ČOS, s. 106</a>
+          </div>
+        </li>
+        <li style="display: grid; grid-template-columns: 36px 1fr; column-gap: 12px;">
+          <div style="display: flex; flex-direction: column; align-items: center;"><span style="width: 28px; height: 28px; border-radius: 50%; background: #0F6B66; color: #FFFFFF; font-weight: 800; font-size: 13px; display: flex; align-items: center; justify-content: center;">✓</span></div>
+          <div>
+            <div style="font-size: 12px; font-weight: 800; letter-spacing: .08em; color: #4E6066;">ZÁVĚR</div>
+            <div style="margin-top: 8px; font-size: 14.5px; line-height: 1.5;">Relevantní. Jde o poslední CT před plánovaným vyšetřením. Snímky nejsou v PACS, proto navrhuji žádost.</div>
+            <div style="display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;">
+              <button type="button" style="min-height: 40px; padding: 0 14px; border-radius: 10px; border: 1px solid #DDE5E7; background: #FFFFFF; font: 700 13px 'Plus Jakarta Sans', sans-serif; color: #14232A;">Přehodnotit s poznámkou</button>
+              <button type="button" style="min-height: 40px; padding: 0 14px; border-radius: 10px; border: 0; background: transparent; font: 700 13px 'Plus Jakarta Sans', sans-serif; color: #0F6B66;">Celý záznam AI</button>
+            </div>
+          </div>
+        </li>
+      </ol>
+    </sc-if>
+    <div style="border-top: 1px solid #EEF2F3; padding-top: 14px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+      <span style="font-size: 14px;"><b>Žádost:</b> e-mail · návrh</span>
+      <button type="button" style="margin-left: auto; min-height: 44px; padding: 0 20px; border: 0; border-radius: 12px; background: #0F6B66; color: #FFFFFF; font: 700 14px 'Plus Jakarta Sans', sans-serif;">Odeslat žádost</button>
+    </div>
+  </article>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":760,"height":1000}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { open: true }; }
+  renderVals() {
+    const open = this.state.open;
+    return {
+      open,
+      openStr: open ? 'true' : 'false',
+      toggleLabel: open ? 'Skrýt souhrn úvah' : 'Proč relevantní? Souhrn úvah',
+      toggle: () => this.setState({ open: !open })
+    };
+  }
+}
+</script>
+</body>
+</html>
